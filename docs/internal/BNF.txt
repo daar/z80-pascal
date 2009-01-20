@@ -1,0 +1,79 @@
+Backus-Naur form description for compiler V 0.1:
+
+<target>:
+	<pascal-program>
+
+<pascal-program>:
+	PROGRAM <identifier> ';' <block> '.'
+
+<block>:
+	<block1>
+
+<block1>:
+	<block2>
+
+<block2>:
+	<block3>
+
+<block3>:
+	<block4>
+
+<block4>:
+	<block5>
+
+<block5>:
+	BEGIN <statement-list> END
+
+<constant>:
+	<integer>
+
+<statement-list>:
+	<statement>
+	<statement-list> ';' <statement>
+
+<statement>:
+	<empty>
+	BEGIN <statement-list> END
+	<asm-block>
+
+<asm-block>
+	BEGIN <asm-list> END
+
+<asm-list>:
+	<asm-statment>
+	<asm-list> '\n' <asm-statment>
+
+<asm-statment>:
+	<asm-mnemonic>
+	<asm-mnemonic> <asm-value>
+	<asm-mnemonic> <asm-value>, <asm-value>
+
+<asm-value>:
+	<asm-register>
+	<asm-register> '+' <expression>
+	<asm-register> '-' <expression>
+	<asm-constant>
+	<expression>
+	'(' <asm-value> ')'
+
+<expression>:
+	<additive-expression>
+
+<additive-expression>:
+	<multiplicative-expression>
+
+<multiplicative-expression>:
+	<unary-expression>
+
+<unary-expression>:
+	<primary-expression>
+	<unary-op unary-expression>
+
+<unary-op>:
+	'+'
+	'-'
+
+<primary-expression':
+	<unsigned-integer>
+
+<empty>:

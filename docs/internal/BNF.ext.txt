@@ -1,0 +1,326 @@
+Complete and ideal Backus-Naur form description for Pascal
+(from http://www.enseignement.polytechnique.fr/profs/informatique/Jean-Jacques.Levy/poly/mainA/node22.html):
+
+<target>:
+	<pascal-program>
+	<pascal-unit>
+
+<pascal-program>:
+	PROGRAM <identifier> <program-heading> ';' <block> '.'
+
+<pascal-unit>:
+	UNIT <identifier> ';' INTERFACE <block> '.'
+	UNIT <identifier> ';' INTERFACE <block> IMPLEMENTATION <block> '.'
+
+<program-heading>:
+	'(' <identifier-list> ')'
+
+<identifier-list>:
+	<identifier>
+	<identifier-list> ',' <identifier>
+
+<block>:
+	<block1>
+	<uses-declaration> ';' <block1>
+
+<block1>:
+	<block2>
+	<constant-declaration> ';' <block2>
+
+<block2>:
+	<block3>
+	<type-declaration> ';' <block3>
+
+<block3>:
+	<block4>
+	<variable-declaration> ';' <block4>
+
+<block4>:
+	<block5>
+	<proc-and-func-declaration> ';' <block5>
+
+<block5>:
+	BEGIN <statement-list> END
+
+<uses-declaration>:
+	USES <unitid-list>
+
+<unitid-list>:
+	<identifier>
+	<unitid-list> ',' <identifier>
+
+<constant-declaration>:
+	CONST <identifier> '=' <constant>
+	<constant-declaration> ';'  <identifier> '=' <constant>
+
+<type-declaration>:
+	TYPE <identifier> '=' <type>
+	<type-declaration> ';' <identifier> '=' <type>
+
+<variable-declaration>:
+	VAR <variableid-list> ':' <type>
+	<variable-declaration> ';' <variableid-list> ':' <type>
+
+<variableid-list>:
+	<identifier>
+	<variableid-list> ','  <identifier>
+
+<constant>:
+	<integer>
+	<real>
+	<string>
+	<constid>
+	'+' <constid>
+	TADD- <constid>
+
+<type>:
+	<simple-type>
+	<structured-type>
+	'^' <typeid>
+
+<simple-type>:
+	'('  <identifier-list> ')'
+	<constant> '..' <constant>
+	<typeid>
+
+<structured-type>:
+	ARRAY '[' <index-list> ']' OF <type>
+	RECORD <field-list> END
+	SET OF <simple-type>
+	FILE OF <type>
+	PACKED <structured-type>
+
+<index-list>:
+	<simple-type>
+	<index-list> ',' <simple-type>
+
+<field-list>:
+	<fixed-part>
+	<fixed-part> ';' <variant-part>
+	<variant-part>
+
+
+<fixed-part>:
+	<record-field>
+	<fixed-part> ; <record-field>
+
+<record-field>:
+	<empty>
+	<fieldid-list> ':' <type>
+
+<fieldid-list>:
+	<identifier>
+	<fieldid-list> ','  <identifier>
+
+<variant-part>:
+	CASE <tag-field> OF <variant-list>
+
+<tag-field>:
+	<typeid>
+	<identifier> ':' <typeid>
+
+<variant-list>:
+	<variant>
+	<variant-list> ';' <variant>
+
+<variant>:
+	<empty>
+	<case-label-list> ':' '(' <field-list> ')'
+
+<case-label-list>:
+	<constant>
+	<case-label-list> ',' <constant>
+
+<proc-and-func-declaration>:
+	<proc-or-func>
+	<proc-and-func-declaration> ';' <proc-or-func>
+
+<proc-or-func>:
+	PROCEDURE <identifier> <parametersopt> ';' <block-or-forward>
+	FUNCTION  <identifier> <parametersopt> ':' <typeid> ';' <block-or-forward>
+
+<block-or-forward>:
+	<block1>
+	<forward>
+
+<parameters>:
+	'(' <formal-parameter-list> ')'
+
+<formal-parameter-list>:
+	<formal-parameter-section>
+	<formal-parameter-list> ';' <formal-parameter-section>
+
+<formal-parameter-section>:
+	<parameterid-list> ':' <typeid>
+	VAR <parameterid-list> ':' <typeid>
+	PROCEDURE <identifier> <parametersopt>
+	FUNCTION <identifier> <parametersopt> ':' <typeid>
+
+<parameterid-list>:
+	<identifier>
+	<parameterid-list> ',' <identifier>
+
+<statement-list>:
+	<statement>
+	<statement-list> ';' <statement>
+
+<statement>:
+	<empty>
+	<variable> ':=' <expression>
+	BEGIN <statement-list> END
+	<control-statment>
+	<loop-statment>
+	<procid>
+	<procid> '(' <expression-list> ')'
+	WITH <record-variable-list> DO <statement>
+	<asm-block>
+
+<control-statment>:
+	IF <expression> THEN <statement>
+	IF <expression> THEN <statement> ELSE <statement>
+	CASE <expression> OF <case-list> END
+	CASE <expression> OF <case-list> ELSE <statement> END
+
+<loop-statment>:
+	WHILE <expression> DO <statement>
+	REPEAT <statement-list> UNTIL <expression>
+	FOR <varid> ':=' <for-list> DO <statement>
+
+<asm-block>
+	BEGIN <asm-list> END
+
+<asm-list>:
+	<asm-statment>
+	<asm-list> '\n' <asm-statment>
+
+<asm-statment>:
+	<asm-mnemonic>
+	<asm-mnemonic> <asm-value>
+	<asm-mnemonic> <asm-value>, <asm-value>
+
+<asm-value>:
+	<asm-register>
+	<asm-register> '+' <expression>
+	<asm-register> '-' <expression>
+	<asm-constant>
+	<expression>
+	'(' <asm-value> ')'
+
+<variable>:
+	<identifier>
+	<variable> '[' <subscript-list> ']'
+	<variable> '.' <fieldid>
+	<variable> '^'
+
+<subscript-list>:
+	<expression>
+	<subscript-list> ',' <expression>
+
+<case-list>:
+	<case-label-list> ':' <statement>
+	<case-list> ';' <case-label-list> ':' <statement>
+
+<for-list>:
+	<expression> TO <expression>
+	<expression> DOWNTO <expression>
+
+<expression-list>:
+	<expression>
+	<expression-list> ',' <expression>
+
+<record-variable-list>:
+	<variable>
+	<record-variable-list> ',' <variable>
+
+<expression>:
+	<additive-expression>
+	<expression> <relational-op> <additive-expression>
+
+<relational-op>:
+	'<'
+	'<='
+	'='
+	'<>'
+	'=>'
+	'>'
+
+<additive-expression>:
+	<multiplicative-expression>
+	<additive-expression> <additive-op> <multiplicative-expression>
+
+<additive-op>:
+	'+'
+	'-'
+	OR
+
+<multiplicative-expression>:
+	<unary-expression>
+	<multiplicative-expression> <multiplicative-op> <unary-expression>
+
+<multiplicative-op>:
+	'*'
+	'/'
+	DIV
+	MOD
+	AND
+	IN
+
+<unary-expression>:
+	<primary-expression>
+	<unary-op unary-expression>
+
+<unary-op>:
+	'+'
+	'-'
+	'@'
+	NOT
+
+<primary-expression>:
+	<variable>
+	<unsigned-integer>
+	<unsigned-real
+	<string>
+	NIL
+	<funcid> '(' <expression-list> ')'
+	'[' <element-list> ']'
+	'(' <expression> ')'
+
+<element-list>:
+	<empty>
+	<element>
+	<element-list> ',' <element>
+
+<element>:
+	<expression>
+	<expression> '..' <expression>
+
+<constid>:
+	<identifier>
+
+<typeid>:
+	<identifier>
+	CHAR
+	BYTE
+	INTEGER
+	WORD
+	REAL
+	DOUBLE
+	STRING
+	STRING '[' <constant> ']'
+
+<funcid>:
+	<identifier>
+
+<procid>:
+	<identifier>
+
+<fieldid>:
+	<identifier>
+
+<varid>:
+	<identifier>
+
+<forward>:
+	<empty>
+
+<empty>:
