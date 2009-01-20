@@ -1,0 +1,67 @@
+{ Este es un archivo de recurso de Lazarus generado automáticamente }
+
+LazarusResources.Add('TMainWindow','FORMDATA',[
+  'TPF0'#11'TMainWindow'#10'MainWindow'#4'Left'#3'"'#1#6'Height'#3','#1#3'Top'#3
+  +#213#0#5'Width'#3#144#1#7'Caption'#6#20'Z80-Pascal IDE 0.1.0'#12'ClientHeigh'
+  +'t'#3#16#1#11'ClientWidth'#3#144#1#4'Menu'#7#8'MainMenu'#10'ParentFont'#8#10
+  +'LCLVersion'#6#6'0.9.26'#0#8'TSynEdit'#7'SynEdit'#6'Height'#3#16#1#5'Width'#3
+  +#144#1#5'Align'#7#8'alClient'#11'Font.Height'#2#14#9'Font.Name'#6'7-adobe-co'
+  +'urier-medium-r-normal-*-*-*-*-*-*-*-iso10646-1'#10'Font.Pitch'#7#7'fpFixed'
+  +#11'ParentColor'#8#10'ParentFont'#8#8'TabOrder'#2#0#24'BookMarkOptions.OnCha'
+  +'nge'#13#11'Highlighter'#7#12'SynPascalSyn'#10'Keystrokes'#14#1#7'Command'#2
+  +#3#8'ShortCut'#2'&'#0#1#7'Command'#2'g'#8'ShortCut'#3'& '#0#1#7'Command'#3
+  +#211#0#8'ShortCut'#3'&@'#0#1#7'Command'#2#4#8'ShortCut'#2'('#0#1#7'Command'#2
+  +'h'#8'ShortCut'#3'( '#0#1#7'Command'#3#212#0#8'ShortCut'#3'(@'#0#1#7'Command'
+  +#2#1#8'ShortCut'#2'%'#0#1#7'Command'#2'e'#8'ShortCut'#3'% '#0#1#7'Command'#2
+  +#5#8'ShortCut'#3'%@'#0#1#7'Command'#2'i'#8'ShortCut'#3'%`'#0#1#7'Command'#2#2
+  +#8'ShortCut'#2''''#0#1#7'Command'#2'f'#8'ShortCut'#3''' '#0#1#7'Command'#2#6
+  +#8'ShortCut'#3'''@'#0#1#7'Command'#2'j'#8'ShortCut'#3'''`'#0#1#7'Command'#2
+  +#10#8'ShortCut'#2'"'#0#1#7'Command'#2'n'#8'ShortCut'#3'" '#0#1#7'Command'#2
+  +#14#8'ShortCut'#3'"@'#0#1#7'Command'#2'r'#8'ShortCut'#3'"`'#0#1#7'Command'#2
+  +#9#8'ShortCut'#2'!'#0#1#7'Command'#2'm'#8'ShortCut'#3'! '#0#1#7'Command'#2#13
+  +#8'ShortCut'#3'!@'#0#1#7'Command'#2'q'#8'ShortCut'#3'!`'#0#1#7'Command'#2#7#8
+  +'ShortCut'#2'$'#0#1#7'Command'#2'k'#8'ShortCut'#3'$ '#0#1#7'Command'#2#15#8
+  +'ShortCut'#3'$@'#0#1#7'Command'#2's'#8'ShortCut'#3'$`'#0#1#7'Command'#2#8#8
+  +'ShortCut'#2'#'#0#1#7'Command'#2'l'#8'ShortCut'#3'# '#0#1#7'Command'#2#16#8
+  +'ShortCut'#3'#@'#0#1#7'Command'#2't'#8'ShortCut'#3'#`'#0#1#7'Command'#3#223#0
+  +#8'ShortCut'#2'-'#0#1#7'Command'#3#201#0#8'ShortCut'#3'-@'#0#1#7'Command'#3
+  +'\'#2#8'ShortCut'#3'- '#0#1#7'Command'#3#246#1#8'ShortCut'#2'.'#0#1#7'Comman'
+  +'d'#3'['#2#8'ShortCut'#3'. '#0#1#7'Command'#3#245#1#8'ShortCut'#2#8#0#1#7'Co'
+  +'mmand'#3#245#1#8'ShortCut'#3#8' '#0#1#7'Command'#3#248#1#8'ShortCut'#3#8'@'
+  +#0#1#7'Command'#3'Y'#2#8'ShortCut'#4#8#128#0#0#0#1#7'Command'#3'Z'#2#8'Short'
+  +'Cut'#4#8#160#0#0#0#1#7'Command'#3#253#1#8'ShortCut'#2#13#0#1#7'Command'#3
+  +#199#0#8'ShortCut'#3'A@'#0#1#7'Command'#3#201#0#8'ShortCut'#3'C@'#0#1#7'Comm'
+  +'and'#3'b'#2#8'ShortCut'#3'I`'#0#1#7'Command'#3#253#1#8'ShortCut'#3'M@'#0#1#7
+  +'Command'#3#254#1#8'ShortCut'#3'N@'#0#1#7'Command'#3#247#1#8'ShortCut'#3'T@'
+  +#0#1#7'Command'#3'c'#2#8'ShortCut'#3'U`'#0#1#7'Command'#3'\'#2#8'ShortCut'#3
+  +'V@'#0#1#7'Command'#3'['#2#8'ShortCut'#3'X@'#0#1#7'Command'#3#251#1#8'ShortC'
+  +'ut'#3'Y@'#0#1#7'Command'#3#250#1#8'ShortCut'#3'Y`'#0#1#7'Command'#3'Y'#2#8
+  +'ShortCut'#3'Z@'#0#1#7'Command'#3'Z'#2#8'ShortCut'#3'Z`'#0#1#7'Command'#3'-'
+  +#1#8'ShortCut'#3'0@'#0#1#7'Command'#3'.'#1#8'ShortCut'#3'1@'#0#1#7'Command'#3
+  +'/'#1#8'ShortCut'#3'2@'#0#1#7'Command'#3'0'#1#8'ShortCut'#3'3@'#0#1#7'Comman'
+  +'d'#3'1'#1#8'ShortCut'#3'4@'#0#1#7'Command'#3'2'#1#8'ShortCut'#3'5@'#0#1#7'C'
+  +'ommand'#3'3'#1#8'ShortCut'#3'6@'#0#1#7'Command'#3'4'#1#8'ShortCut'#3'7@'#0#1
+  +#7'Command'#3'5'#1#8'ShortCut'#3'8@'#0#1#7'Command'#3'6'#1#8'ShortCut'#3'9@'
+  +#0#1#7'Command'#3'_'#1#8'ShortCut'#3'0`'#0#1#7'Command'#3'`'#1#8'ShortCut'#3
+  +'1`'#0#1#7'Command'#3'a'#1#8'ShortCut'#3'2`'#0#1#7'Command'#3'b'#1#8'ShortCu'
+  +'t'#3'3`'#0#1#7'Command'#3'c'#1#8'ShortCut'#3'4`'#0#1#7'Command'#3'd'#1#8'Sh'
+  +'ortCut'#3'5`'#0#1#7'Command'#3'e'#1#8'ShortCut'#3'6`'#0#1#7'Command'#3'f'#1
+  +#8'ShortCut'#3'7`'#0#1#7'Command'#3'g'#1#8'ShortCut'#3'8`'#0#1#7'Command'#3
+  +'h'#1#8'ShortCut'#3'9`'#0#1#7'Command'#3#231#0#8'ShortCut'#3'N`'#0#1#7'Comma'
+  +'nd'#3#232#0#8'ShortCut'#3'C`'#0#1#7'Command'#3#233#0#8'ShortCut'#3'L`'#0#1#7
+  +'Command'#3'd'#2#8'ShortCut'#2#9#0#1#7'Command'#3'e'#2#8'ShortCut'#3#9' '#0#1
+  +#7'Command'#3#250#0#8'ShortCut'#3'B`'#0#0#13'Lines.Strings'#1#6#0#0#22'Selec'
+  +'tedColor.OnChange'#13#0#0#9'TMainMenu'#8'MainMenu'#4'left'#2#8#3'top'#2#8#0
+  +#9'TMenuItem'#12'MenuItemFile'#7'Caption'#6#4'File'#0#9'TMenuItem'#11'MenuIt'
+  +'emNew'#7'Caption'#6#3'New'#7'OnClick'#7#16'MenuItemNewClick'#0#0#9'TMenuIte'
+  +'m'#12'MenuItemOpen'#7'Caption'#6#7'Open...'#7'OnClick'#7#17'MenuItemOpenCli'
+  +'ck'#0#0#9'TMenuItem'#14'MenuItemSaveAs'#7'Caption'#6#10'Save as...'#7'OnCli'
+  +'ck'#7#19'MenuItemSaveAsClick'#0#0#9'TMenuItem'#12'MenuItemSave'#7'Caption'#6
+  +#4'Save'#7'OnClick'#7#19'MenuItemSaveAsClick'#0#0#0#9'TMenuItem'#13'MenuItem'
+  +'About'#7'Caption'#6#8'About...'#7'OnClick'#7#18'MenuItemAboutClick'#0#0#0#10
+  +'TSynPasSyn'#12'SynPascalSyn'#7'Enabled'#8#12'CompilerMode'#7#9'pcmDelphi'#4
+  +'left'#2'('#3'top'#2#8#0#0#11'TOpenDialog'#10'OpenDialog'#6'Filter'#6#30'Pas'
+  +'cal files|*.pas|All files|*'#4'left'#2#8#3'top'#2'0'#0#0#11'TSaveDialog'#10
+  +'SaveDialog'#6'Filter'#6#30'Pascal files|*.pas|All files|*'#4'left'#2'*'#3't'
+  +'op'#2'0'#0#0#0
+]);

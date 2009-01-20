@@ -1,4 +1,5 @@
-program z80pide;
+(* A complete IDE for the Z80-Pascal compiler. *)
+PROGRAM z80pide;
 
 {$mode objfpc}{$H+}
 
@@ -8,11 +9,11 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms
-  { you can add units after this }, UnitPpalWindow;
+  { you can add units after this }, UnitMainWindow;
 
 begin
   Application.Initialize;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TMainWindow, MainWindow);
   Application.Run;
 end.
 
