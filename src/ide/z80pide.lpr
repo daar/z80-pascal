@@ -1,9 +1,9 @@
-(* A complete IDE for the Z80-Pascal compiler. *)
+(* An uncomplete IDE for the Z80-Pascal compiler. *)
 PROGRAM z80pide;
 
 {$mode objfpc}{$H+}
 
-uses
+USES
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
@@ -11,9 +11,9 @@ uses
   Forms
   { you can add units after this }, UnitMainWindow;
 
-begin
+BEGIN
   Application.Initialize;
   Application.CreateForm(TMainWindow, MainWindow);
   Application.Run;
-end.
+END.
 
