@@ -1,0 +1,290 @@
+COMPILER Z80Pascal
+(* Z80-Pascal compiler description.  This file MUST be synchronized with the
+   one in the src/compiler directory and vice versa.
+
+   This grammar is not LL(1).
+
+   Pascal keywords in uppercase to easy identification.
+
+   Note that this Pascal description is an adaptation, not strict Pascal.  Some
+   of the differences are:
+
+   - Not input/output files at "PROGRAM".
+   - Not label and "goto" allowed.
+   - ASM..END for Z80 assembler added.
+
+ *)
+
+IGNORE CASE
+
+CHARACTERS
+  eol      = CHR(13) .
+  letter   = 'A' .. 'Z' + 'a' .. 'z' .
+  digit    = '0' .. '9' .
+  hexdigit = digit + 'A' .. 'F' .
+  alfanum  = letter + digit.
+  noQuote1 = ANY - "'" - eol .
+
+IGNORE CHR(9) .. CHR(13)
+
+COMMENTS FROM "(*" TO "*)"
+COMMENTS FROM "{" TO "}"
+
+TOKENS
+  identifier  =  letter { alfanum } .
+  integer     =  digit { digit } | digit { digit }  CONTEXT ("..") .
+  hexinteger  =  "$" hexdigit { hexdigit }
+  real        =  digit { digit } "." digit { digit }
+                 [ "E" ["+" | "-"] digit { digit } ]
+                 |  digit { digit } "E" ["+" | "-"] digit { digit }  .
+  string      = "'" { noQuote1 | "''" } "'" .
+
+PRODUCTIONS
+
+(* Target can be either a program or an unit.  Current version parses only
+   programs. *)
+  Target            = PascalProgram
+
+  PascalProgram     = "PROGRAM"  NewIdent ";"
+                      Block "." .
+
+  Block             =  DeclarationPart StatementPart .
+
+  DeclarationPart   = ConstDefinitions
+                      TypeDefinitions VarDeclarations
+                      { ProcDeclarations } .
+
+(* -------------------------------------------------------------------- *)
+
+  ConstDefinitions  = [ "CONST" ConstDef { ConstDef } ] .
+
+  ConstDef          = NewIdent "=" Constant ";" .
+
+  Constant          = [ "+" | "-" ] ( UnsignedNumber | ConstIdent ) | String .
+
+  UnsignedNumber    = UnsignedInt | UnsignedReal .
+
+  ConstIdent        = identifier .
+
+(* -------------------------------------------------------------------- *)
+
+  TypeDefinitions   = [ "TYPE" TypeDef { TypeDef } ] .
+
+  TypeDef           = NewIdent "=" Type ";" .
+
+  Type              = SimpleType | [ "PACKED" ] StructType | "^" TypeIdent .
+
+  SimpleType        = TypeIdent | EnumerationType | SubrangeType .
+
+  TypeIdent         = identifier .
+
+  EnumerationType   = "(" NewIdentList ")" .
+
+  SubrangeType      = Constant ".." Constant .
+
+  StructType        = ArrayType | RecordType | SetType | FileType .
+
+  ArrayType         = "ARRAY" "[" IndexList "]" "OF" Type .
+
+  IndexList         = SimpleType { "," SimpleType } .
+
+  RecordType        = "RECORD" FieldList "END" .
+
+  SetType           = "SET" "OF" SimpleType .
+
+  FileType          = "FILE" "OF" Type .
+
+  FieldList         = [ ( fixedPart [ ";" VariantPart ] | VariantPart ) [ ";" ] ] .
+
+  fixedPart         = RecordSection { ";" RecordSection } .
+
+  RecordSection     = NewIdentList ":" Type .
+
+  VariantPart       = "CASE" VariantSelector "OF" Variant { ";" Variant } .
+
+  VariantSelector   = [ NewIdent ":" ] TypeIdent .
+
+  Variant           = CaseLabelList ":" "(" FieldList ")" .
+
+(* -------------------------------------------------------------------- *)
+
+  VarDeclarations   = [ "VAR" VarDecl { VarDecl } ] .
+
+  VarDecl           = NewIdentList ":" Type ";" .
+
+(* -------------------------------------------------------------------- *)
+
+  ProcDeclarations  = ( ProcHeading | FuncHeading ) ";" Body ";" .
+
+  ProcHeading       = "PROCEDURE" NewIdent [ FormalParams ] .
+
+  FuncHeading       = "FUNCTION" NewIdent [ FormalParams ] ReturnType .
+
+  ReturnType        = [ (* empty if forward referenced *) ":" TypeIdent ] .
+
+  Body              = Block | "FORWARD" .
+
+  FormalParams      = "(" FormalSection { ";" FormalSection } ")"  .
+
+  FormalSection     = [ "VAR" ] ParamGroup | ProcHeading | FuncHeading .
+
+  ParamGroup        = NewIdentList ":" ParamType .
+
+  ParamType         =   TypeIdent
+                      | "ARRAY" "[" IndexSpecList "]" "OF" ParamType
+                      | "PACKED" "ARRAY" "[" IndexSpec "]" "OF" TypeIdent .
+
+  IndexSpecList     = IndexSpec { ";" IndexSpec } .
+
+  IndexSpec         = NewIdent ".." NewIdent ":" TypeIdent .
+
+(* -------------------------------------------------------------------- *)
+
+  StatementPart     = CompoundStatement | Z80CompoundStatement .
+
+  CompoundStatement = "BEGIN" StatementSequence "END" .
+
+  StatementSequence = Statement { ";" Statement } .
+
+  Statement         = [   AssignmentOrCall
+                        | CompoundStatement
+                        | ASMCompoundStatement
+                        | WhileStatement
+                        | RepeatStatement
+                        | IfStatement
+                        | CaseStatement
+                        | ForStatement
+                        | WithStatement ] .
+
+  AssignmentOrCall  = Designator ( ":=" Value | [ ActualParams ] ) .
+
+  Value             = ( "@" Designator ) | Expression .
+
+  ActualParams      = "(" ActualParameter { "," ActualParameter } ")" .
+
+  ActualParameter   = Value [ FieldWidth (* only in i/o *) ] .
+
+  FieldWidth        = ":" IntegerExpression [ ":" IntegerExpression ] .
+
+  WhileStatement    = "WHILE" BooleanExpression "DO" Statement .
+
+  RepeatStatement   = "REPEAT" StatementSequence "UNTIL" BooleanExpression .
+
+  IfStatement       = "IF" BooleanExpression "THEN" Statement
+                      [ "ELSE" Statement ] .
+
+  CaseStatement     = "CASE" OrdinalExpression "OF" CaseList "END" .
+
+  CaseList          = OneCase { ";" OneCase } [ ";" ] .
+
+  OneCase           = CaseLabelList ":" Statement .
+
+  CaseLabelList     = CaseLabel { "," CaseLabel } .
+
+  CaseLabel         = Constant .
+
+  ForStatement      = "FOR" ControlVariable ":=" OrdinalExpression
+                      ( "TO" | "DOWNTO" ) OrdinalExpression "DO" Statement .
+
+  ControlVariable   = identifier .
+
+  WithStatement     = "WITH" RecVarList "DO" Statement .
+
+  RecVarList        = Designator { "," Designator } .
+
+(* -------------------------------------------------------------------- *)
+
+  IntegerExpression = Expression .
+
+  BooleanExpression = Expression .
+
+  OrdinalExpression = Expression .
+
+  Expression        = SimpleExpression [ RelOp SimpleExpression ] .
+
+  RelOp             = "=" | "<" | ">" | "<=" | ">=" | "<>" | "IN" .
+
+  SimpleExpression  = ( "+" Term | "-" Term | Term ) { AddOp Term } .
+
+  AddOp             = "+" | "-" | "OR" .
+
+  Term              = Factor { MulOp Factor } .
+
+  MulOp             = "*" | "/" | "DIV" | "MOD" | "AND" .
+
+  Factor            =   Designator [ ActualParams ]
+                      | UnsignedLiteral
+                      | SetConstructor
+                      | "(" Expression ")"
+                      | "NOT" Factor .
+
+  Designator        = identifier { "." identifier | "[" ExpList "]" | "^" } .
+
+  ExpList           = Expression { "," Expression } .
+
+  UnsignedLiteral   = UnsignedNumber | "NIL" | String .
+
+  SetConstructor    = "[" Member { "," Member } "]" .
+
+  Member            = Expression [ ".." Expression ] .
+
+(* -------------------------------------------------------------------- *)
+
+(* This is a Z80 Assembler parser.  Note that it would allow illegal assembler
+   constructions! *)
+
+  ASMCompoundStatement = "ASM" Z80StatementSequence "END" .
+
+  Z80StatementSequence = Z80Statement { ";" Z80Statement } .
+
+  Z80Statement         = [   Z80Load
+                           | Z80Stack ] .
+
+  Z80Load              = "LD" Z80Parameter "," Z80Parameter .
+
+  Z80Stack             = ( "PUSH" | "POP" ) Z80Register16bit .
+
+  Z80Parameter         =   Z80Integer
+                         | Z80Indirection
+                         | Z80Register .
+
+  Z80Integer           =   UnsignedInt
+                         | ["@"] identifier .
+
+  Z80Indirection       = "(" ( Z80Integer | Z80Register16bit | Z80Indexed ) ")" .
+
+  Z80Indexed           = ( "XI" | "YI" ) "+" Z80Integer .
+
+  Z80Register          =   Z80Register8bit
+                         | Z80Register16bit .
+
+  Z80Register8bit      =   "A"
+                         | "H"
+                         | "L"
+                         | "B"
+                         | "C"
+                         | "D"
+                         | "E" .
+
+  Z80Register16bit     =   "AF"
+                         | "HL"
+                         | "BC"
+                         | "DE"
+                         | "XI"
+                         | "YI"
+                         | "SP"
+                         | "PC" .
+
+(* -------------------------------------------------------------------- *)
+
+  NewIdentList      = NewIdent { "," NewIdent } .
+
+  NewIdent          = identifier .
+
+  UnsignedInt       = integer | hexinteger .
+
+  UnsignedReal      = real .
+
+  String            = string .
+
+END Z80Pascal.
