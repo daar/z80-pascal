@@ -1,23 +1,31 @@
-Complete and ideal Backus-Naur form description for Pascal
-(from http://www.enseignement.polytechnique.fr/profs/informatique/Jean-Jacques.Levy/poly/mainA/node22.html):
+Complete and ideal Backus-Naur form description for Pascal.
+
+This file was created from a description at
+http://www.enseignement.polytechnique.fr/profs/informatique/Jean-Jacques.Levy/poly/mainA/node22.html
+Then it was fixed to get the better one possible.  Other reference file is the
+"pascal.atg".
+
+Note that this Pascal description is an adaptation, not strict Pascal.  Some
+differences are:
+
+- Not input/output files at "PROGRAM".
+- Not label and "goto" allowed.
+- ASM..END blocks allowed.
+
+NOTE: Current BNF description would be different than ATG description.
+      Final version should be equivalent.
+__________________________________
 
 <target>:
 	<pascal-program>
 	<pascal-unit>
 
 <pascal-program>:
-	PROGRAM <identifier> <program-heading> ';' <block> '.'
+	PROGRAM <identifier> ';' <block> '.'
 
 <pascal-unit>:
 	UNIT <identifier> ';' INTERFACE <block> '.'
 	UNIT <identifier> ';' INTERFACE <block> IMPLEMENTATION <block> '.'
-
-<program-heading>:
-	'(' <identifier-list> ')'
-
-<identifier-list>:
-	<identifier>
-	<identifier-list> ',' <identifier>
 
 <block>:
 	<block1>
@@ -82,6 +90,10 @@ Complete and ideal Backus-Naur form description for Pascal
 	'('  <identifier-list> ')'
 	<constant> '..' <constant>
 	<typeid>
+
+<identifier-list>:
+	<identifier>
+	<identifier-list> ',' <identifier>
 
 <structured-type>:
 	ARRAY '[' <index-list> ']' OF <type>
