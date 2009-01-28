@@ -237,12 +237,67 @@ PRODUCTIONS
 
   Z80StatementSequence = Z80Statement { ";" Z80Statement } .
 
-  Z80Statement         = [   Z80Load
-                           | Z80Stack ] .
+  Z80Statement         = [   Z80Sum
+                           | Z80Bin
+			   | Z80Bit
+			   | Z80Call
+			   | Z80Test
+			   | Z80Inc
+			   | Z80Operation
+			   | Z80Exchange
+			   | Z80Loop
+			   | Z80Port
+			   | Z80Jump
+			   | Z80RelativeJump
+                           | Z80Load
+			   | Z80Memory
+                           | Z80Stack
+			   | Z80Return
+			   | Z80Sub ] .
+
+  Z80Sum               = ( "ADC" | "ADD" ) Z80Register "," Z80Parameter .
+
+  Z80Bin               = ( "AND" | "OR" | "XOR" ) Z80Register8bit .
+
+  Z80Bit               = "BIT" ( "0" .. "7" ) "," ( Z80Indirection | Z80Register8bit ) .
+
+  Z80Call              = "CALL" [ Z80Condition "," ] Z80Integer .
+
+  Z80Test              = "CP" ( Z80Register8bit | Z80Integer ) .
+
+  Z80Inc               = ( "DEC" | "INC" ) Z80Register .
+
+  Z80Operation         = "DI" | "EI" | "HALT" | "NOP" .
+
+  Z80Loop              = "DJNZ," Z80Integer .
+
+  Z80Exchange          = "EX" ( "(SP), HL" | "(SP), IX" | "(XP), IY" | "AF, AF'" | "DE, HL" ) .
+
+  Z80Port              =   ( "IN" Z80Register8bit "," "(" Z80Integer ")")
+                         | ( "OUT" "(" Z80Integer ")" "," Z80Register8bit )
+			 | "OUTD"
+			 | "OUTI" .
+
+  Z80Jump              = "JP" [ Z80Condition "," ] Z80Integer .
+
+  Z80RelativeJump      = "JR" [ Z80Condition "," ] Z80Integer .
 
   Z80Load              = "LD" Z80Parameter "," Z80Parameter .
 
+  Z80Memory            = "LDD" | "LDDR" | "LDI" | "LDIR" .
+
   Z80Stack             = ( "PUSH" | "POP" ) Z80Register16bit .
+
+  Z80Return            =   ( "RET" [ Z80Condition ] )
+                         | "RETI"
+			 | "RETN"
+
+  Z80Sub               = "SUB" Z80Integer .
+
+  Z80Condition         =   "z"
+                         | "nz"
+			 | "c"
+			 | "nc" .
 
   Z80Parameter         =   Z80Integer
                          | Z80Indirection
