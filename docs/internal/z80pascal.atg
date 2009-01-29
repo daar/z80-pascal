@@ -21,6 +21,7 @@ CHARACTERS
   eol      = CHR(13) .
   letter   = 'A' .. 'Z' + 'a' .. 'z' .
   digit    = '0' .. '9' .
+  bit      = '0' .. '7' .
   hexdigit = digit + 'A' .. 'F' .
   alfanum  = letter + digit.
   noQuote1 = ANY - "'" - eol .
@@ -43,7 +44,7 @@ PRODUCTIONS
 
 (* Target can be either a program or an unit.  Current version parses only
    programs. *)
-  Target            = PascalProgram
+  Target            = PascalProgram .
 
   PascalProgram     = "PROGRAM"  NewIdent ";"
                       Block "." .
@@ -245,59 +246,73 @@ PRODUCTIONS
 			   | Z80Inc
 			   | Z80Operation
 			   | Z80Exchange
+			   | Z80InterruptMode
 			   | Z80Loop
 			   | Z80Port
 			   | Z80Jump
 			   | Z80RelativeJump
                            | Z80Load
-			   | Z80Memory
                            | Z80Stack
 			   | Z80Return
+			   | Z80Rotate
+			   | Z80Restart
 			   | Z80Sub ] .
 
   Z80Sum               = ( "ADC" | "ADD" ) Z80Register "," Z80Parameter .
 
-  Z80Bin               = ( "AND" | "OR" | "XOR" ) Z80Register8bit .
+  Z80Bin               = ( "AND" | "OR" | "XOR" ) Z80Parameter8bit .
 
-  Z80Bit               = "BIT" ( "0" .. "7" ) "," ( Z80Indirection | Z80Register8bit ) .
+  Z80Bit               = ( "BIT" | "RES" | "SET" ) bit "," ( Z80Indirection | Z80Register8bit ) .
 
   Z80Call              = "CALL" [ Z80Condition "," ] Z80Integer .
 
-  Z80Test              = "CP" ( Z80Register8bit | Z80Integer ) .
+  Z80Test              = "CP" Z80Parameter8bit .
 
-  Z80Inc               = ( "DEC" | "INC" ) Z80Register .
+  Z80Inc               =   "DEC" Z80Register
+                         | "INC" ( Z80Register | Z80Idirection ).
 
-  Z80Operation         = "DI" | "EI" | "HALT" | "NOP" .
+  Z80Operation         =   "CCF" | "CPD" | "CPDR" | "CPI" | "CPIR" | "CPL"
+                         | "DAA" | "DI"  | "EI" | "EXX" | "HALT" | "IND"
+			 | "INDR" | "INI" | "INIR" | "LDD" | "LDDR" | "LDI"
+			 | "LDIR" | "NEG" | "NOP" | "OTDR" | "OTIR" | "OUTD"
+			 | "OUTI" | "RETI" | "RETN" |"RLA" | "RLCA" | "RLD"
+			 | "RRA" | "RRD" | "SCF" .
 
   Z80Loop              = "DJNZ," Z80Integer .
 
-  Z80Exchange          = "EX" ( "(SP), HL" | "(SP), IX" | "(XP), IY" | "AF, AF'" | "DE, HL" ) .
+  Z80Exchange          =   "EX" ( "[SP], HL" | "[SP], IX" | "[SP], IY"
+                         | "AF, AF'" | "DE, HL" ) .
 
-  Z80Port              =   ( "IN" Z80Register8bit "," "(" Z80Integer ")")
-                         | ( "OUT" "(" Z80Integer ")" "," Z80Register8bit )
-			 | "OUTD"
-			 | "OUTI" .
+  Z80InterruptMode     = "IM" digit .
 
-  Z80Jump              = "JP" [ Z80Condition "," ] Z80Integer .
+  Z80Port              =   ( "IN" Z80Register8bit "," "[" Z80Integer "]")
+                         | ( "OUT" "[" ( Z80Integer | "C" ) "]" "," Z80Register8bit ) .
+
+  Z80Jump              = "JP" [ Z80Condition "," ] Z80Parameter .
 
   Z80RelativeJump      = "JR" [ Z80Condition "," ] Z80Integer .
 
   Z80Load              = "LD" Z80Parameter "," Z80Parameter .
 
-  Z80Memory            = "LDD" | "LDDR" | "LDI" | "LDIR" .
-
   Z80Stack             = ( "PUSH" | "POP" ) Z80Register16bit .
 
-  Z80Return            =   ( "RET" [ Z80Condition ] )
-                         | "RETI"
-			 | "RETN"
+  Z80Return            = ( "RET" [ Z80Condition ] ) .
 
-  Z80Sub               = "SUB" Z80Integer .
+  Z80Rotate            = ( "RL" | "RLC" | "RR" | "RRC" | "SLA" | "SRA" ) Z80Parameter8bit .
+
+  Z80Restart           = "RST" UnsignedInt .
+
+  Z80Sub               =   "SBC" ( "A" | "HL" ) Z80Parameter
+                         | "SUB" Z80Integer .
 
   Z80Condition         =   "z"
                          | "nz"
 			 | "c"
 			 | "nc" .
+
+  Z80Parameter8bit     =   Z80Integer
+                         | Z80Indirection
+                         | Z80Register8bit .
 
   Z80Parameter         =   Z80Integer
                          | Z80Indirection
@@ -306,7 +321,7 @@ PRODUCTIONS
   Z80Integer           =   UnsignedInt
                          | ["@"] identifier .
 
-  Z80Indirection       = "(" ( Z80Integer | Z80Register16bit | Z80Indexed ) ")" .
+  Z80Indirection       = "[" ( Z80Integer | Z80Register16bit | Z80Indexed ) "]" .
 
   Z80Indexed           = ( "XI" | "YI" ) "+" Z80Integer .
 

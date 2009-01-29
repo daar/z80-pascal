@@ -1,13 +1,28 @@
 COMPILER Z80Pascal
-(* Z80-Pascal compiler description.
-   This grammar is not LL(1) *)
+(* Z80-Pascal compiler description for Coco/R.
+
+   This grammar is not LL(1).
+
+   Pascal keywords in uppercase to easy identification.
+
+   Note that this Pascal description is an adaptation, not strict Pascal.  Some
+   of the differences are:
+
+   - Not input/output files at "PROGRAM".
+   - Not label and "goto" allowed.
+   - ASM..END for Z80 assembler added.
+
+ *)
 
 IGNORE CASE
 
 CHARACTERS
   eol      = CHR(13) .
-  letter   = 'A'..'Z' + 'a'..'z'.
-  digit    = '0'..'9'.
+  letter   = 'A' .. 'Z' + 'a' .. 'z' .
+  digit    = '0' .. '9' .
+  bit      = '0' .. '7' .
+  hexdigit = digit + 'A' .. 'F' .
+  alfanum  = letter + digit.
   noQuote1 = ANY - "'" - eol .
 
 IGNORE CHR(9) .. CHR(13)
@@ -16,8 +31,9 @@ COMMENTS FROM "(*" TO "*)"
 COMMENTS FROM "{" TO "}"
 
 TOKENS
-  identifier  =  letter { letter | digit } .
+  identifier  =  letter { alfanum } .
   integer     =  digit { digit } | digit { digit }  CONTEXT ("..") .
+  hexinteger  =  "$" hexdigit { hexdigit }
   real        =  digit { digit } "." digit { digit }
                  [ "E" ["+" | "-"] digit { digit } ]
                  |  digit { digit } "E" ["+" | "-"] digit { digit }  .
@@ -25,30 +41,22 @@ TOKENS
 
 PRODUCTIONS
 
-  Target            = PascalProgram
+(* Target can be either a program or an unit.  Current version parses only
+   programs. *)
+  Target            = PascalProgram .
 
-  PascalProgram     = "program"  NewIdent [ ExternalFiles ] ";"
+  PascalProgram     = "PROGRAM"  NewIdent ";"
                       Block "." .
-
-  ExternalFiles     = "(" NewIdentList ")" .
 
   Block             =  DeclarationPart StatementPart .
 
-  DeclarationPart   = LabelDeclarations ConstDefinitions
+  DeclarationPart   = ConstDefinitions
                       TypeDefinitions VarDeclarations
                       { ProcDeclarations } .
 
 (* -------------------------------------------------------------------- *)
 
-  LabelDeclarations = [ "label" Labels ";" ] .
-
-  Labels            = Label { "," Label } .
-
-  Label             = UnsignedInt .
-
-(* -------------------------------------------------------------------- *)
-
-  ConstDefinitions  = [ "const" ConstDef { ConstDef } ] .
+  ConstDefinitions  = [ "CONST" ConstDef { ConstDef } ] .
 
   ConstDef          = NewIdent "=" Constant ";" .
 
@@ -60,11 +68,11 @@ PRODUCTIONS
 
 (* -------------------------------------------------------------------- *)
 
-  TypeDefinitions   = [ "type" TypeDef { TypeDef } ] .
+  TypeDefinitions   = [ "TYPE" TypeDef { TypeDef } ] .
 
   TypeDef           = NewIdent "=" Type ";" .
 
-  Type              = SimpleType | [ "packed" ] StructType | "^" TypeIdent .
+  Type              = SimpleType | [ "PACKED" ] StructType | "^" TypeIdent .
 
   SimpleType        = TypeIdent | EnumerationType | SubrangeType .
 
@@ -76,15 +84,15 @@ PRODUCTIONS
 
   StructType        = ArrayType | RecordType | SetType | FileType .
 
-  ArrayType         = "array" "[" IndexList "]" "of" Type .
+  ArrayType         = "ARRAY" "[" IndexList "]" "OF" Type .
 
   IndexList         = SimpleType { "," SimpleType } .
 
-  RecordType        = "record" FieldList "end" .
+  RecordType        = "RECORD" FieldList "END" .
 
-  SetType           = "set" "of" SimpleType .
+  SetType           = "SET" "OF" SimpleType .
 
-  FileType          = "file" "of" Type .
+  FileType          = "FILE" "OF" Type .
 
   FieldList         = [ ( fixedPart [ ";" VariantPart ] | VariantPart ) [ ";" ] ] .
 
@@ -92,7 +100,7 @@ PRODUCTIONS
 
   RecordSection     = NewIdentList ":" Type .
 
-  VariantPart       = "case" VariantSelector "of" Variant { ";" Variant } .
+  VariantPart       = "CASE" VariantSelector "OF" Variant { ";" Variant } .
 
   VariantSelector   = [ NewIdent ":" ] TypeIdent .
 
@@ -100,7 +108,7 @@ PRODUCTIONS
 
 (* -------------------------------------------------------------------- *)
 
-  VarDeclarations   = [ "var" VarDecl { VarDecl } ] .
+  VarDeclarations   = [ "VAR" VarDecl { VarDecl } ] .
 
   VarDecl           = NewIdentList ":" Type ";" .
 
@@ -108,23 +116,23 @@ PRODUCTIONS
 
   ProcDeclarations  = ( ProcHeading | FuncHeading ) ";" Body ";" .
 
-  ProcHeading       = "procedure" NewIdent [ FormalParams ] .
+  ProcHeading       = "PROCEDURE" NewIdent [ FormalParams ] .
 
-  FuncHeading       = "function" NewIdent [ FormalParams ] ReturnType .
+  FuncHeading       = "FUNCTION" NewIdent [ FormalParams ] ReturnType .
 
   ReturnType        = [ (* empty if forward referenced *) ":" TypeIdent ] .
 
-  Body              = Block | "forward" .
+  Body              = Block | "FORWARD" .
 
   FormalParams      = "(" FormalSection { ";" FormalSection } ")"  .
 
-  FormalSection     = [ "var" ] ParamGroup | ProcHeading | FuncHeading .
+  FormalSection     = [ "VAR" ] ParamGroup | ProcHeading | FuncHeading .
 
   ParamGroup        = NewIdentList ":" ParamType .
 
   ParamType         =   TypeIdent
-                      | "array" "[" IndexSpecList "]" "of" ParamType
-                      | "packed" "array" "[" IndexSpec "]" "of" TypeIdent .
+                      | "ARRAY" "[" IndexSpecList "]" "OF" ParamType
+                      | "PACKED" "ARRAY" "[" IndexSpec "]" "OF" TypeIdent .
 
   IndexSpecList     = IndexSpec { ";" IndexSpec } .
 
@@ -132,16 +140,15 @@ PRODUCTIONS
 
 (* -------------------------------------------------------------------- *)
 
-  StatementPart     = CompoundStatement .
+  StatementPart     = CompoundStatement | Z80CompoundStatement .
 
-  CompoundStatement = "begin" StatementSequence "end" .
+  CompoundStatement = "BEGIN" StatementSequence "END" .
 
   StatementSequence = Statement { ";" Statement } .
 
-  Statement         = [ Label ":" ]
-                      [   AssignmentOrCall
+  Statement         = [   AssignmentOrCall
                         | CompoundStatement
-                        | GotoStatement
+                        | ASMCompoundStatement
                         | WhileStatement
                         | RepeatStatement
                         | IfStatement
@@ -149,24 +156,24 @@ PRODUCTIONS
                         | ForStatement
                         | WithStatement ] .
 
-  AssignmentOrCall  = Designator ( ":=" Expression | [ ActualParams ] ) .
+  AssignmentOrCall  = Designator ( ":=" Value | [ ActualParams ] ) .
+
+  Value             = ( "@" Designator ) | Expression .
 
   ActualParams      = "(" ActualParameter { "," ActualParameter } ")" .
 
-  ActualParameter   = Expression [ FieldWidth (* only in i/o *) ] .
+  ActualParameter   = Value [ FieldWidth (* only in i/o *) ] .
 
   FieldWidth        = ":" IntegerExpression [ ":" IntegerExpression ] .
 
-  GotoStatement     = "goto" Label .
+  WhileStatement    = "WHILE" BooleanExpression "DO" Statement .
 
-  WhileStatement    = "while" BooleanExpression "do" Statement .
+  RepeatStatement   = "REPEAT" StatementSequence "UNTIL" BooleanExpression .
 
-  RepeatStatement   = "repeat" StatementSequence "until" BooleanExpression .
+  IfStatement       = "IF" BooleanExpression "THEN" Statement
+                      [ "ELSE" Statement ] .
 
-  IfStatement       = "if" BooleanExpression "then" Statement
-                      [ "else" Statement ] .
-
-  CaseStatement     = "case" OrdinalExpression "of" CaseList "end" .
+  CaseStatement     = "CASE" OrdinalExpression "OF" CaseList "END" .
 
   CaseList          = OneCase { ";" OneCase } [ ";" ] .
 
@@ -176,12 +183,12 @@ PRODUCTIONS
 
   CaseLabel         = Constant .
 
-  ForStatement      = "for" ControlVariable ":=" OrdinalExpression
-                      ( "to" | "downto" ) OrdinalExpression "do" Statement .
+  ForStatement      = "FOR" ControlVariable ":=" OrdinalExpression
+                      ( "TO" | "DOWNTO" ) OrdinalExpression "DO" Statement .
 
   ControlVariable   = identifier .
 
-  WithStatement     = "with" RecVarList "do" Statement .
+  WithStatement     = "WITH" RecVarList "DO" Statement .
 
   RecVarList        = Designator { "," Designator } .
 
@@ -195,27 +202,27 @@ PRODUCTIONS
 
   Expression        = SimpleExpression [ RelOp SimpleExpression ] .
 
-  RelOp             = "=" | "<" | ">" | "<=" | ">=" | "<>" | "in" .
+  RelOp             = "=" | "<" | ">" | "<=" | ">=" | "<>" | "IN" .
 
   SimpleExpression  = ( "+" Term | "-" Term | Term ) { AddOp Term } .
 
-  AddOp             = "+" | "-" | "or" .
+  AddOp             = "+" | "-" | "OR" .
 
   Term              = Factor { MulOp Factor } .
 
-  MulOp             = "*" | "/" | "div" | "mod" | "and" .
+  MulOp             = "*" | "/" | "DIV" | "MOD" | "AND" .
 
   Factor            =   Designator [ ActualParams ]
                       | UnsignedLiteral
                       | SetConstructor
                       | "(" Expression ")"
-                      | "not" Factor .
+                      | "NOT" Factor .
 
   Designator        = identifier { "." identifier | "[" ExpList "]" | "^" } .
 
   ExpList           = Expression { "," Expression } .
 
-  UnsignedLiteral   = UnsignedNumber | "nil" | String .
+  UnsignedLiteral   = UnsignedNumber | "NIL" | String .
 
   SetConstructor    = "[" Member { "," Member } "]" .
 
@@ -223,11 +230,127 @@ PRODUCTIONS
 
 (* -------------------------------------------------------------------- *)
 
+(* This is a Z80 Assembler parser.  Note that it would allow illegal assembler
+   constructions! *)
+
+  ASMCompoundStatement = "ASM" Z80StatementSequence "END" .
+
+  Z80StatementSequence = Z80Statement { ";" Z80Statement } .
+
+  Z80Statement         = [   Z80Sum
+                           | Z80Bin
+			   | Z80Bit
+			   | Z80Call
+			   | Z80Test
+			   | Z80Inc
+			   | Z80Operation
+			   | Z80Exchange
+			   | Z80InterruptMode
+			   | Z80Loop
+			   | Z80Port
+			   | Z80Jump
+			   | Z80RelativeJump
+                           | Z80Load
+                           | Z80Stack
+			   | Z80Return
+			   | Z80Rotate
+			   | Z80Restart
+			   | Z80Sub ] .
+
+  Z80Sum               = ( "ADC" | "ADD" ) Z80Register "," Z80Parameter .
+
+  Z80Bin               = ( "AND" | "OR" | "XOR" ) Z80Parameter8bit .
+
+  Z80Bit               = ( "BIT" | "RES" | "SET" ) bit "," ( Z80Indirection | Z80Register8bit ) .
+
+  Z80Call              = "CALL" [ Z80Condition "," ] Z80Integer .
+
+  Z80Test              = "CP" Z80Parameter8bit .
+
+  Z80Inc               =   "DEC" Z80Register
+                         | "INC" ( Z80Register | Z80Idirection ).
+
+  Z80Operation         =   "CCF" | "CPD" | "CPDR" | "CPI" | "CPIR" | "CPL"
+                         | "DAA" | "DI"  | "EI" | "EXX" | "HALT" | "IND"
+			 | "INDR" | "INI" | "INIR" | "LDD" | "LDDR" | "LDI"
+			 | "LDIR" | "NEG" | "NOP" | "OTDR" | "OTIR" | "OUTD"
+			 | "OUTI" | "RETI" | "RETN" |"RLA" | "RLCA" | "RLD"
+			 | "RRA" | "RRD" | "SCF" .
+
+  Z80Loop              = "DJNZ," Z80Integer .
+
+  Z80Exchange          =   "EX" ( "[SP], HL" | "[SP], IX" | "[SP], IY"
+                         | "AF, AF'" | "DE, HL" ) .
+
+  Z80InterruptMode     = "IM" digit .
+
+  Z80Port              =   ( "IN" Z80Register8bit "," "[" Z80Integer "]")
+                         | ( "OUT" "[" ( Z80Integer | "C" ) "]" "," Z80Register8bit ) .
+
+  Z80Jump              = "JP" [ Z80Condition "," ] Z80Parameter .
+
+  Z80RelativeJump      = "JR" [ Z80Condition "," ] Z80Integer .
+
+  Z80Load              = "LD" Z80Parameter "," Z80Parameter .
+
+  Z80Stack             = ( "PUSH" | "POP" ) Z80Register16bit .
+
+  Z80Return            = ( "RET" [ Z80Condition ] ) .
+
+  Z80Rotate            = ( "RL" | "RLC" | "RR" | "RRC" | "SLA" | "SRA" ) Z80Parameter8bit .
+
+  Z80Restart           = "RST" UnsignedInt .
+
+  Z80Sub               =   "SBC" ( "A" | "HL" ) Z80Parameter
+                         | "SUB" Z80Integer .
+
+  Z80Condition         =   "z"
+                         | "nz"
+			 | "c"
+			 | "nc" .
+
+  Z80Parameter8bit     =   Z80Integer
+                         | Z80Indirection
+                         | Z80Register8bit .
+
+  Z80Parameter         =   Z80Integer
+                         | Z80Indirection
+                         | Z80Register .
+
+  Z80Integer           =   UnsignedInt
+                         | ["@"] identifier .
+
+  Z80Indirection       = "[" ( Z80Integer | Z80Register16bit | Z80Indexed ) "]" .
+
+  Z80Indexed           = ( "XI" | "YI" ) "+" Z80Integer .
+
+  Z80Register          =   Z80Register8bit
+                         | Z80Register16bit .
+
+  Z80Register8bit      =   "A"
+                         | "H"
+                         | "L"
+                         | "B"
+                         | "C"
+                         | "D"
+                         | "E" .
+
+  Z80Register16bit     =   "AF"
+                         | "HL"
+                         | "BC"
+                         | "DE"
+                         | "XI"
+                         | "YI"
+                         | "SP"
+                         | "PC" .
+
+(* -------------------------------------------------------------------- *)
+
   NewIdentList      = NewIdent { "," NewIdent } .
 
   NewIdent          = identifier .
 
-  UnsignedInt       = integer .
+  UnsignedInt       = integer | hexinteger .
 
   UnsignedReal      = real .
 
