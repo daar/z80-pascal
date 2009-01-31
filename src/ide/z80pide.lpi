@@ -4,13 +4,19 @@
     <PathDelim Value="/"/>
     <Version Value="6"/>
     <General>
+      <Flags>
+        <AlwaysBuild Value="False"/>
+      </Flags>
       <MainUnit Value="0"/>
       <AutoCreateForms Value="False"/>
       <IconPath Value="./"/>
       <TargetFileExt Value=""/>
+      <Title Value="Z80 Pascal IDE"/>
       <ActiveEditorIndexAtStart Value="1"/>
     </General>
     <VersionInfo>
+      <UseVersionInfo Value="True"/>
+      <CurrentMajorRevNr Value="1"/>
       <ProjectVersion Value=""/>
     </VersionInfo>
     <PublishOptions>
@@ -39,7 +45,7 @@
         <Filename Value="z80pide.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="z80pide"/>
-        <CursorPos X="51" Y="12"/>
+        <CursorPos X="1" Y="16"/>
         <TopLine Value="1"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="21"/>
@@ -66,7 +72,7 @@
         <ResourceFilename Value="UnitAboutDlg.lrs"/>
         <UnitName Value="UnitAboutDlg"/>
         <CursorPos X="23" Y="31"/>
-        <TopLine Value="8"/>
+        <TopLine Value="7"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="21"/>
         <Loaded Value="True"/>
@@ -197,6 +203,19 @@
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="8"/>
+    <Target>
+      <Filename Value="../../bin/z80pide"/>
+    </Target>
+    <SearchPaths>
+      <UnitOutputDirectory Value="/home/guillermo/prog/z80-pascal/obj/ide/"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <CStyleOperator Value="False"/>
+        <AllowLabel Value="False"/>
+        <UseAnsiStrings Value="True"/>
+      </SyntaxOptions>
+    </Parsing>
     <Linking>
       <Options>
         <Win32>

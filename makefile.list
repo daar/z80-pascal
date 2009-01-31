@@ -1,0 +1,11 @@
+# Makefile generic - Sources
+
+#
+# Construye una lista de archivos fuente (FILES) y de archivos objeto (OBJS)
+# a partir del contenido de SRCDIR.
+#
+TEMP = $(wildcard $(SRCDIR)*$(SRCSUF))
+ifeq ($(strip $(TEMP)),)
+$(error ERROR: No source code found at $(SRCDIR)*$(SRCSUF) )
+endif
+OBJS = $(SRCDIR)$(BINARY).pp $(TEMP)

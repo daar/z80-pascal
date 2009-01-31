@@ -11,7 +11,10 @@ USES
   Forms
   { you can add units after this }, UnitMainWindow;
 
+{$IFDEF WINDOWS}{$R z80pide.rc}{$ENDIF}
+
 BEGIN
+  Application.Title:='Z80 Pascal IDE';
   Application.Initialize;
   Application.CreateForm(TMainWindow, MainWindow);
   Application.Run;

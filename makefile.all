@@ -1,0 +1,59 @@
+# Makefile generico - Reglas de construcción.
+
+.PHONY: all
+
+# Objetivo principal: todo el proyecto.
+all: $(BINDIR)/$(BINARY)$(BINSUF) adbanner
+	@echo "Finished $(PROJECT)"
+	@echo "Executable is at $<"
+
+# Ejecutable.
+$(BINDIR)/$(BINARY)$(BINSUF) : $(OBJS) 
+	fpc $(SRCDIR)$(BINARY).pp $(INCDIR) -FU$(OBJDIR) -FE$(BINDIR) $(FLAGS)
+	@echo The $@ is ready!
+
+# Devuelve los valores de las variables definidas
+status: adbanner
+	@echo "-----------------"
+	@echo "- Status Report -"
+	@echo "-----------------"
+	@echo "  Project : $(PROJECT)"
+	@echo "  Platform : $(PLATFORM)"
+	@echo "  Compiler options : $(FLAGS)"
+	@echo "  Object files : $(OBJS)"
+	@echo "  Binary : $(BINDIR)$(BINARY)$(BINSUF)"
+
+
+
+veryclean: clean
+	$(DELETE) $(BINDIR)$(BINARY)$(BINSUF)
+
+
+
+clean:
+	$(DELETE) $(OBJDIR)*$(OBJSUF) $(OBJDIR)*.ppu
+
+# Strip symbols and compress with upx packer (http://upx.sf.net/)
+upx:
+	strip --strip-all $(BINDIR)$(BINARY)$(BINSUF)
+	upx --best $(BINDIR)$(BINARY)$(BINSUF)
+
+# Instalar - Debe añadirse
+install:
+	@echo Sorry, the install feature is not done yet.
+
+# Muestra las opciones disponibles
+help: adbanner
+	@echo "---------"
+	@echo "- Ayuda -"
+	@echo "---------"
+	@echo "make all            } Build the project."
+	@echo "make clean          } Deletes all intermediate files."
+	@echo "make veryclean      } Deletes all created files."
+	@echo "make install        } Installs."
+	@echo "make status         } Shows the content of configuration variables."
+	@echo "make help           } Shows this help."
+
+#Información adicional
+adbanner:
+	@echo "$(PROJECT) - http://z80-pascal.sourceforge.net/"
