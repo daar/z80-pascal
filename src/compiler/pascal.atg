@@ -1,4 +1,4 @@
-COMPILER Z80Pascal
+COMPILER Z80Pas
 (* Z80-Pascal compiler description for Coco/R.
 
    This grammar is not LL(1).
@@ -20,7 +20,6 @@ CHARACTERS
   eol      = CHR(13) .
   letter   = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" .
   digit    = "0123456789" .
-  bit      = "01234567" .
   hexdigit = digit + "ABCDEFabcdef" .
   alfanum  = letter + digit .
   noQuote1 = ANY - "'" - eol .
@@ -43,7 +42,7 @@ PRODUCTIONS
 
 (* Target can be either a program or an unit.  Current version parses only
    programs. *)
-  Z80Pascal         = PascalProgram .
+  Z80Pas            = PascalProgram .
 
   PascalProgram     = "PROGRAM"  NewIdent ";"
                       Block "." .
@@ -261,7 +260,7 @@ PRODUCTIONS
 
   Z80Bin               = ( "AND" | "OR" | "XOR" ) Z80Parameter8bit .
 
-  Z80Bit               = ( "BIT" | "RES" | "SET" ) bit "," ( Z80Indirection | Z80Register8bit ) .
+  Z80Bit               = ( "BIT" | "RES" | "SET" ) integer "," ( Z80Indirection | Z80Register8bit ) .
 
   Z80Call              = "CALL" [ Z80Condition "," ] Z80Integer .
 
@@ -279,9 +278,9 @@ PRODUCTIONS
 
   Z80Loop              = "DJNZ," Z80Integer .
 
-  Z80Exchange          =   "EX" ( "[SP]" "," "HL" | "[SP]" "," "IX" | "[SP]" "," "IY" | "AF" "," "AF'" | "DE" "," "HL" ) .
+  Z80Exchange          =   "EX" ( "[SP]" "," ("HL" | "IX" | "IY") | "AF" "," "AF'" | "DE" "," "HL" ) .
 
-  Z80InterruptMode     = "IM" digit .
+  Z80InterruptMode     = "IM" integer .
 
   Z80Port              =   ( "IN" Z80Register8bit "," "[" Z80Integer "]")
                          | ( "OUT" "[" ( Z80Integer | "C" ) "]" "," Z80Register8bit ) .
@@ -319,9 +318,7 @@ PRODUCTIONS
   Z80Integer           =   UnsignedInt
                          | ["@"] identifier .
 
-  Z80Indirection       = "[" ( Z80Integer | Z80Register16bit | Z80Indexed ) "]" .
-
-  Z80Indexed           = ( "XI" | "YI" ) "+" Z80Integer .
+  Z80Indirection       = "[" ( Z80Integer | Z80Register16bit [ "+" integer] ) "]" .
 
   Z80Register          =   Z80Register8bit
                          | Z80Register16bit .
@@ -338,8 +335,8 @@ PRODUCTIONS
                          | "HL"
                          | "BC"
                          | "DE"
-                         | "XI"
-                         | "YI"
+                         | "IX"
+                         | "IY"
                          | "SP"
                          | "PC" .
 
@@ -355,4 +352,4 @@ PRODUCTIONS
 
   String            = string .
 
-END Z80Pascal.
+END Z80Pas.
