@@ -18,11 +18,11 @@ IGNORE CASE
 
 CHARACTERS
   eol      = CHR(13) .
-  letter   = 'A' .. 'Z' + 'a' .. 'z' .
-  digit    = '0' .. '9' .
-  bit      = '0' .. '7' .
-  hexdigit = digit + 'A' .. 'F' .
-  alfanum  = letter + digit.
+  letter   = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" .
+  digit    = "0123456789" .
+  bit      = "01234567" .
+  hexdigit = digit + "ABCDEFabcdef" .
+  alfanum  = letter + digit .
   noQuote1 = ANY - "'" - eol .
 
 IGNORE CHR(9) .. CHR(13)
@@ -33,7 +33,7 @@ COMMENTS FROM "{" TO "}"
 TOKENS
   identifier  =  letter { alfanum } .
   integer     =  digit { digit } | digit { digit }  CONTEXT ("..") .
-  hexinteger  =  "$" hexdigit { hexdigit }
+  hexinteger  =  "$" hexdigit { hexdigit } .
   real        =  digit { digit } "." digit { digit }
                  [ "E" ["+" | "-"] digit { digit } ]
                  |  digit { digit } "E" ["+" | "-"] digit { digit }  .
@@ -43,7 +43,7 @@ PRODUCTIONS
 
 (* Target can be either a program or an unit.  Current version parses only
    programs. *)
-  Target            = PascalProgram .
+  Z80Pascal         = PascalProgram .
 
   PascalProgram     = "PROGRAM"  NewIdent ";"
                       Block "." .
@@ -140,7 +140,7 @@ PRODUCTIONS
 
 (* -------------------------------------------------------------------- *)
 
-  StatementPart     = CompoundStatement | Z80CompoundStatement .
+  StatementPart     = CompoundStatement | ASMCompoundStatement .
 
   CompoundStatement = "BEGIN" StatementSequence "END" .
 
@@ -268,7 +268,7 @@ PRODUCTIONS
   Z80Test              = "CP" Z80Parameter8bit .
 
   Z80Inc               =   "DEC" Z80Register
-                         | "INC" ( Z80Register | Z80Idirection ).
+                         | "INC" ( Z80Register | Z80Indirection ).
 
   Z80Operation         =   "CCF" | "CPD" | "CPDR" | "CPI" | "CPIR" | "CPL"
                          | "DAA" | "DI"  | "EI" | "EXX" | "HALT" | "IND"
@@ -279,8 +279,7 @@ PRODUCTIONS
 
   Z80Loop              = "DJNZ," Z80Integer .
 
-  Z80Exchange          =   "EX" ( "[SP], HL" | "[SP], IX" | "[SP], IY"
-                         | "AF, AF'" | "DE, HL" ) .
+  Z80Exchange          =   "EX" ( "[SP]" "," "HL" | "[SP]" "," "IX" | "[SP]" "," "IY" | "AF" "," "AF'" | "DE" "," "HL" ) .
 
   Z80InterruptMode     = "IM" digit .
 
