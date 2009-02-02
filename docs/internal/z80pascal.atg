@@ -230,99 +230,29 @@ PRODUCTIONS
 
 (* -------------------------------------------------------------------- *)
 
-(* This is a Z80 Assembler parser.  Note that it would allow illegal assembler
-   constructions! *)
+(* This is a Z80 Assembler parser.  Note that it allows illegal assembler
+   instructions! *)
 
-  ASMCompoundStatement = "ASM" Z80StatementSequence "END" .
+  ASMCompoundStatement = "ASM" [ Z80StatementSequence ] "END" .
 
   Z80StatementSequence = Z80Statement { ";" Z80Statement } .
 
-  Z80Statement         = [   Z80Sum
-                           | Z80Bin
-			   | Z80Bit
-			   | Z80Call
-			   | Z80Test
-			   | Z80Inc
-			   | Z80Operation
-			   | Z80Exchange
-			   | Z80InterruptMode
-			   | Z80Loop
-			   | Z80Port
-			   | Z80Jump
-			   | Z80RelativeJump
-                           | Z80Load
-                           | Z80Stack
-			   | Z80Return
-			   | Z80Rotate
-			   | Z80Restart
-			   | Z80Sub ] .
+  Z80Statement         = Z80Instruction [ Z80Parameter [ "," Z80Parameter ] ] .
 
-  Z80Sum               = ( "ADC" | "ADD" ) Z80Register "," Z80Parameter .
-
-  Z80Bin               = ( "AND" | "OR" | "XOR" ) Z80Parameter8bit .
-
-  Z80Bit               = ( "BIT" | "RES" | "SET" ) integer "," ( Z80Indirection | Z80Register8bit ) .
-
-  Z80Call              = "CALL" [ Z80Condition "," ] Z80Integer .
-
-  Z80Test              = "CP" Z80Parameter8bit .
-
-  Z80Inc               =   "DEC" Z80Register
-                         | "INC" ( Z80Register | Z80Indirection ).
-
-  Z80Operation         =   "CCF" | "CPD" | "CPDR" | "CPI" | "CPIR" | "CPL"
-                         | "DAA" | "DI"  | "EI" | "EXX" | "HALT" | "IND"
-			 | "INDR" | "INI" | "INIR" | "LDD" | "LDDR" | "LDI"
-			 | "LDIR" | "NEG" | "NOP" | "OTDR" | "OTIR" | "OUTD"
-			 | "OUTI" | "RETI" | "RETN" |"RLA" | "RLCA" | "RLD"
-			 | "RRA" | "RRD" | "SCF" .
-
-  Z80Loop              = "DJNZ," Z80Integer .
-
-  Z80Exchange          =   "EX" ( "[SP]" "," ("HL" | "IX" | "IY") | "AF" "," "AF'" | "DE" "," "HL" ) .
-
-  Z80InterruptMode     = "IM" integer .
-
-  Z80Port              =   ( "IN" Z80Register8bit "," "[" Z80Integer "]")
-                         | ( "OUT" "[" ( Z80Integer | "C" ) "]" "," Z80Register8bit ) .
-
-  Z80Jump              = "JP" [ Z80Condition "," ] Z80Parameter .
-
-  Z80RelativeJump      = "JR" [ Z80Condition "," ] Z80Integer .
-
-  Z80Load              = "LD" Z80Parameter "," Z80Parameter .
-
-  Z80Stack             = ( "PUSH" | "POP" ) Z80Register16bit .
-
-  Z80Return            = ( "RET" [ Z80Condition ] ) .
-
-  Z80Rotate            = ( "RL" | "RLC" | "RR" | "RRC" | "SLA" | "SRA" ) Z80Parameter8bit .
-
-  Z80Restart           = "RST" UnsignedInt .
-
-  Z80Sub               =   "SBC" ( "A" | "HL" ) Z80Parameter
-                         | "SUB" Z80Integer .
-
-  Z80Condition         =   "z"
-                         | "nz"
-			 | "c"
-			 | "nc" .
-
-  Z80Parameter8bit     =   Z80Integer
-                         | Z80Indirection
-                         | Z80Register8bit .
+  Z80Instruction       = "ADC" | "ADD" | "AND" | "BIT" | "CALL" | "CCF" | "CP" | "CPD" | "CPDR" | "CPI" | "CPIR" | "CPL" | "DAA" | "DEC" | "DI" | "DJNZ," | "EI" | "EX" | "EXX" | "HALT" | "IM" | "IN" | "INC" | "IND" | "INDR" | "INI" | "INIR" | "JP" | "JR" | "LD" | "LDD" | "LDDR" | "LDI" | "LDIR" | "NEG" | "NOP" | "OR" | "OTDR" | "OTIR" | "OUT" | "OUTD" | "OUTI" | "POP" | "PUSH" | "RES" | "RET" | "RETI" | "RETN" | "RL" |"RLA" | "RLC" | "RLCA" | "RLD" | "RR" | "RRA" | "RRC" | "RRD" | "RST" | "SCF" | "SET" | "SLA" | "SRA" | "SBC" | "SUB" | "XOR" .
 
   Z80Parameter         =   Z80Integer
+                         | Z80Condition
                          | Z80Indirection
                          | Z80Register .
 
-  Z80Integer           =   UnsignedInt
-                         | ["@"] identifier .
+  Z80Integer           =   integer | hexinteger .
 
-  Z80Indirection       = "[" ( Z80Integer | Z80Register16bit [ "+" integer] ) "]" .
+  Z80Condition         =  "M" | "NC" | "NP" | "NZ" | "P" | "PE" | "PO" | "Z" . (* Carriage exactly the same than register ("C"). *)
 
-  Z80Register          =   Z80Register8bit
-                         | Z80Register16bit .
+  Z80Indirection       = "[" ( "BC" | "DE" | "HL" | integer | ( ( "IX" | "IY" ) "+" integer ) ) "]" .
+
+  Z80Register          =  Z80Register8bit | Z80Register16bit .
 
   Z80Register8bit      =   "A"
                          | "H"
@@ -333,8 +263,7 @@ PRODUCTIONS
                          | "E" .
 
   Z80Register16bit     =   "AF"
-                         | "HL"
-                         | "BC"
+                         | "HL" | "BC"
                          | "DE"
                          | "IX"
                          | "IY"

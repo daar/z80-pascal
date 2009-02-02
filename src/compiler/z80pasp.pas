@@ -28,13 +28,13 @@ PROCEDURE LookAheadName (VAR Lex : STRING);
 
 IMPLEMENTATION
 
-USES Z80PasS;
+USES Z80PasS, Z80PasG (* Symbol Constants *);
 
 
 
 
 CONST
-  maxT = 144;
+  maxT = 147;
   minErrDist  =  2;  (* minimal distance (good tokens) between two errors *)
   setsize     = 16;  (* sets are stored in 16 bits *)
 
@@ -43,7 +43,7 @@ TYPE
   SymbolSet = ARRAY [0 .. maxT DIV setsize] OF BITSET;
 
 VAR
-  symSet:  ARRAY [0 ..  10] OF SymbolSet; (*symSet[0] = allSyncSyms*)
+  symSet:  ARRAY [0 ..  12] OF SymbolSet; (*symSet[0] = allSyncSyms*)
   errDist: INTEGER;   (* number of symbols recognized since last error *)
   sym:     INTEGER;   (* current input symbol *)
 
@@ -140,32 +140,13 @@ FUNCTION Successful : BOOLEAN;
   END;
 
 PROCEDURE _Z80Register16bit; FORWARD;
-PROCEDURE _Z80Integer; FORWARD;
-PROCEDURE _Z80Condition; FORWARD;
 PROCEDURE _Z80Register8bit; FORWARD;
-PROCEDURE _Z80Indirection; FORWARD;
-PROCEDURE _Z80Parameter8bit; FORWARD;
-PROCEDURE _Z80Parameter; FORWARD;
 PROCEDURE _Z80Register; FORWARD;
-PROCEDURE _Z80Sub; FORWARD;
-PROCEDURE _Z80Restart; FORWARD;
-PROCEDURE _Z80Rotate; FORWARD;
-PROCEDURE _Z80Return; FORWARD;
-PROCEDURE _Z80Stack; FORWARD;
-PROCEDURE _Z80Load; FORWARD;
-PROCEDURE _Z80RelativeJump; FORWARD;
-PROCEDURE _Z80Jump; FORWARD;
-PROCEDURE _Z80Port; FORWARD;
-PROCEDURE _Z80Loop; FORWARD;
-PROCEDURE _Z80InterruptMode; FORWARD;
-PROCEDURE _Z80Exchange; FORWARD;
-PROCEDURE _Z80Operation; FORWARD;
-PROCEDURE _Z80Inc; FORWARD;
-PROCEDURE _Z80Test; FORWARD;
-PROCEDURE _Z80Call; FORWARD;
-PROCEDURE _Z80Bit; FORWARD;
-PROCEDURE _Z80Bin; FORWARD;
-PROCEDURE _Z80Sum; FORWARD;
+PROCEDURE _Z80Indirection; FORWARD;
+PROCEDURE _Z80Condition; FORWARD;
+PROCEDURE _Z80Integer; FORWARD;
+PROCEDURE _Z80Parameter; FORWARD;
+PROCEDURE _Z80Instruction; FORWARD;
 PROCEDURE _Z80Statement; FORWARD;
 PROCEDURE _Z80StatementSequence; FORWARD;
 PROCEDURE _Member; FORWARD;
@@ -255,84 +236,28 @@ PROCEDURE _Z80Pas; FORWARD;
 PROCEDURE _Z80Register16bit;
   BEGIN
     CASE sym OF
-      111 : BEGIN
+      AFSym : BEGIN
         Get;
         END;
-      108 : BEGIN
+      HLSym : BEGIN
         Get;
         END;
-      141 : BEGIN
+      BCSym : BEGIN
         Get;
         END;
-      113 : BEGIN
+      DESym : BEGIN
         Get;
         END;
-      109 : BEGIN
+      IXSym : BEGIN
         Get;
         END;
-      110 : BEGIN
+      IYSym : BEGIN
         Get;
         END;
-      142 : BEGIN
+      SPSym : BEGIN
         Get;
         END;
-      143 : BEGIN
-        Get;
-        END;
-    ELSE BEGIN SynError(145);
-        END;
-    END;
-  END;
-
-PROCEDURE _Z80Integer;
-  BEGIN
-    IF (sym = 2) OR (sym = 3) THEN BEGIN
-      _UnsignedInt;
-    END ELSE IF (sym = 1) OR (sym = 36) THEN BEGIN
-      IF (sym = 36) THEN BEGIN
-        Get;
-      END;
-      Expect(1);
-    END ELSE BEGIN SynError(146);
-    END;
-  END;
-
-PROCEDURE _Z80Condition;
-  BEGIN
-    IF (sym = 133) THEN BEGIN
-      Get;
-    END ELSE IF (sym = 134) THEN BEGIN
-      Get;
-    END ELSE IF (sym = 116) THEN BEGIN
-      Get;
-    END ELSE IF (sym = 135) THEN BEGIN
-      Get;
-    END ELSE BEGIN SynError(147);
-    END;
-  END;
-
-PROCEDURE _Z80Register8bit;
-  BEGIN
-    CASE sym OF
-      131 : BEGIN
-        Get;
-        END;
-      136 : BEGIN
-        Get;
-        END;
-      137 : BEGIN
-        Get;
-        END;
-      138 : BEGIN
-        Get;
-        END;
-      116 : BEGIN
-        Get;
-        END;
-      139 : BEGIN
-        Get;
-        END;
-      140 : BEGIN
+      PCSym : BEGIN
         Get;
         END;
     ELSE BEGIN SynError(148);
@@ -340,464 +265,338 @@ PROCEDURE _Z80Register8bit;
     END;
   END;
 
-PROCEDURE _Z80Indirection;
+PROCEDURE _Z80Register8bit;
   BEGIN
-    Expect(20);
-    IF (sym = 1) OR (sym = 2) OR (sym = 3) OR (sym = 36) THEN BEGIN
-      _Z80Integer;
-    END ELSE IF _In(symSet[1], sym) THEN BEGIN
-      _Z80Register16bit;
-      IF (sym = 11) THEN BEGIN
+    CASE sym OF
+      _ASym : BEGIN
         Get;
-        Expect(2);
-      END;
-    END ELSE BEGIN SynError(149);
-    END;
-    Expect(21);
-  END;
-
-PROCEDURE _Z80Parameter8bit;
-  BEGIN
-    IF (sym = 1) OR (sym = 2) OR (sym = 3) OR (sym = 36) THEN BEGIN
-      _Z80Integer;
-    END ELSE IF (sym = 20) THEN BEGIN
-      _Z80Indirection;
-    END ELSE IF _In(symSet[2], sym) THEN BEGIN
-      _Z80Register8bit;
-    END ELSE BEGIN SynError(150);
-    END;
-  END;
-
-PROCEDURE _Z80Parameter;
-  BEGIN
-    IF (sym = 1) OR (sym = 2) OR (sym = 3) OR (sym = 36) THEN BEGIN
-      _Z80Integer;
-    END ELSE IF (sym = 20) THEN BEGIN
-      _Z80Indirection;
-    END ELSE IF _In(symSet[3], sym) THEN BEGIN
-      _Z80Register;
-    END ELSE BEGIN SynError(151);
+        END;
+      _HSym : BEGIN
+        Get;
+        END;
+      _LSym : BEGIN
+        Get;
+        END;
+      _BSym : BEGIN
+        Get;
+        END;
+      _CSym : BEGIN
+        Get;
+        END;
+      _DSym : BEGIN
+        Get;
+        END;
+      _ESym : BEGIN
+        Get;
+        END;
+    ELSE BEGIN SynError(149);
+        END;
     END;
   END;
 
 PROCEDURE _Z80Register;
   BEGIN
-    IF _In(symSet[2], sym) THEN BEGIN
+    IF _In(symSet[1], sym) THEN BEGIN
       _Z80Register8bit;
-    END ELSE IF _In(symSet[1], sym) THEN BEGIN
+    END ELSE IF _In(symSet[2], sym) THEN BEGIN
       _Z80Register16bit;
-    END ELSE BEGIN SynError(152);
+    END ELSE BEGIN SynError(150);
     END;
   END;
 
-PROCEDURE _Z80Sub;
+PROCEDURE _Z80Indirection;
   BEGIN
-    IF (sym = 130) THEN BEGIN
+    Expect(_lbrackSym);
+    IF (sym = BCSym) THEN BEGIN
       Get;
-      IF (sym = 131) THEN BEGIN
+    END ELSE IF (sym = DESym) THEN BEGIN
+      Get;
+    END ELSE IF (sym = HLSym) THEN BEGIN
+      Get;
+    END ELSE IF (sym = integerSym) THEN BEGIN
+      Get;
+    END ELSE IF (sym = IXSym) OR
+          (sym = IYSym) THEN BEGIN
+      IF (sym = IXSym) THEN BEGIN
         Get;
-      END ELSE IF (sym = 108) THEN BEGIN
+      END ELSE BEGIN
         Get;
-      END ELSE BEGIN SynError(153);
       END;
-      _Z80Parameter;
-    END ELSE IF (sym = 132) THEN BEGIN
+      Expect(_plusSym);
+      Expect(integerSym);
+    END ELSE BEGIN SynError(151);
+    END;
+    Expect(_rbrackSym);
+  END;
+
+PROCEDURE _Z80Condition;
+  BEGIN
+    CASE sym OF
+      _MSym : BEGIN
+        Get;
+        END;
+      NCSym : BEGIN
+        Get;
+        END;
+      NPSym : BEGIN
+        Get;
+        END;
+      NZSym : BEGIN
+        Get;
+        END;
+      _PSym : BEGIN
+        Get;
+        END;
+      PESym : BEGIN
+        Get;
+        END;
+      POSym : BEGIN
+        Get;
+        END;
+      _ZSym : BEGIN
+        Get;
+        END;
+    ELSE BEGIN SynError(152);
+        END;
+    END;
+  END;
+
+PROCEDURE _Z80Integer;
+  BEGIN
+    IF (sym = integerSym) THEN BEGIN
       Get;
+    END ELSE IF (sym = hexintegerSym) THEN BEGIN
+      Get;
+    END ELSE BEGIN SynError(153);
+    END;
+  END;
+
+PROCEDURE _Z80Parameter;
+  BEGIN
+    IF (sym = integerSym) OR
+       (sym = hexintegerSym) THEN BEGIN
       _Z80Integer;
+    END ELSE IF _In(symSet[3], sym) THEN BEGIN
+      _Z80Condition;
+    END ELSE IF (sym = _lbrackSym) THEN BEGIN
+      _Z80Indirection;
+    END ELSE IF _In(symSet[4], sym) THEN BEGIN
+      _Z80Register;
     END ELSE BEGIN SynError(154);
     END;
   END;
 
-PROCEDURE _Z80Restart;
-  BEGIN
-    Expect(129);
-    _UnsignedInt;
-  END;
-
-PROCEDURE _Z80Rotate;
+PROCEDURE _Z80Instruction;
   BEGIN
     CASE sym OF
-      123 : BEGIN
+      ADCSym : BEGIN
         Get;
         END;
-      124 : BEGIN
+      ADDSym : BEGIN
         Get;
         END;
-      125 : BEGIN
+      ANDSym : BEGIN
         Get;
         END;
-      126 : BEGIN
+      BITSym : BEGIN
         Get;
         END;
-      127 : BEGIN
+      CALLSym : BEGIN
         Get;
         END;
-      128 : BEGIN
+      CCFSym : BEGIN
+        Get;
+        END;
+      CPSym : BEGIN
+        Get;
+        END;
+      CPDSym : BEGIN
+        Get;
+        END;
+      CPDRSym : BEGIN
+        Get;
+        END;
+      CPISym : BEGIN
+        Get;
+        END;
+      CPIRSym : BEGIN
+        Get;
+        END;
+      CPLSym : BEGIN
+        Get;
+        END;
+      DAASym : BEGIN
+        Get;
+        END;
+      DECSym : BEGIN
+        Get;
+        END;
+      DISym : BEGIN
+        Get;
+        END;
+      DJNZ_commaSym : BEGIN
+        Get;
+        END;
+      EISym : BEGIN
+        Get;
+        END;
+      EXSym : BEGIN
+        Get;
+        END;
+      EXXSym : BEGIN
+        Get;
+        END;
+      HALTSym : BEGIN
+        Get;
+        END;
+      IMSym : BEGIN
+        Get;
+        END;
+      INSym : BEGIN
+        Get;
+        END;
+      INCSym : BEGIN
+        Get;
+        END;
+      INDSym : BEGIN
+        Get;
+        END;
+      INDRSym : BEGIN
+        Get;
+        END;
+      INISym : BEGIN
+        Get;
+        END;
+      INIRSym : BEGIN
+        Get;
+        END;
+      JPSym : BEGIN
+        Get;
+        END;
+      JRSym : BEGIN
+        Get;
+        END;
+      LDSym : BEGIN
+        Get;
+        END;
+      LDDSym : BEGIN
+        Get;
+        END;
+      LDDRSym : BEGIN
+        Get;
+        END;
+      LDISym : BEGIN
+        Get;
+        END;
+      LDIRSym : BEGIN
+        Get;
+        END;
+      NEGSym : BEGIN
+        Get;
+        END;
+      NOPSym : BEGIN
+        Get;
+        END;
+      ORSym : BEGIN
+        Get;
+        END;
+      OTDRSym : BEGIN
+        Get;
+        END;
+      OTIRSym : BEGIN
+        Get;
+        END;
+      OUTSym : BEGIN
+        Get;
+        END;
+      OUTDSym : BEGIN
+        Get;
+        END;
+      OUTISym : BEGIN
+        Get;
+        END;
+      POPSym : BEGIN
+        Get;
+        END;
+      PUSHSym : BEGIN
+        Get;
+        END;
+      RESSym : BEGIN
+        Get;
+        END;
+      RETSym : BEGIN
+        Get;
+        END;
+      RETISym : BEGIN
+        Get;
+        END;
+      RETNSym : BEGIN
+        Get;
+        END;
+      RLSym : BEGIN
+        Get;
+        END;
+      RLASym : BEGIN
+        Get;
+        END;
+      RLCSym : BEGIN
+        Get;
+        END;
+      RLCASym : BEGIN
+        Get;
+        END;
+      RLDSym : BEGIN
+        Get;
+        END;
+      RRSym : BEGIN
+        Get;
+        END;
+      RRASym : BEGIN
+        Get;
+        END;
+      RRCSym : BEGIN
+        Get;
+        END;
+      RRDSym : BEGIN
+        Get;
+        END;
+      RSTSym : BEGIN
+        Get;
+        END;
+      SCFSym : BEGIN
+        Get;
+        END;
+      SETSym : BEGIN
+        Get;
+        END;
+      SLASym : BEGIN
+        Get;
+        END;
+      SRASym : BEGIN
+        Get;
+        END;
+      SBCSym : BEGIN
+        Get;
+        END;
+      SUBSym : BEGIN
+        Get;
+        END;
+      XORSym : BEGIN
         Get;
         END;
     ELSE BEGIN SynError(155);
         END;
     END;
-    _Z80Parameter8bit;
-  END;
-
-PROCEDURE _Z80Return;
-  BEGIN
-    Expect(122);
-    IF (sym = 116) OR (sym = 133) OR (sym = 134) OR (sym = 135) THEN BEGIN
-      _Z80Condition;
-    END;
-  END;
-
-PROCEDURE _Z80Stack;
-  BEGIN
-    IF (sym = 120) THEN BEGIN
-      Get;
-    END ELSE IF (sym = 121) THEN BEGIN
-      Get;
-    END ELSE BEGIN SynError(156);
-    END;
-    _Z80Register16bit;
-  END;
-
-PROCEDURE _Z80Load;
-  BEGIN
-    Expect(119);
-    _Z80Parameter;
-    Expect(23);
-    _Z80Parameter;
-  END;
-
-PROCEDURE _Z80RelativeJump;
-  BEGIN
-    Expect(118);
-    IF (sym = 116) OR (sym = 133) OR (sym = 134) OR (sym = 135) THEN BEGIN
-      _Z80Condition;
-      Expect(23);
-    END;
-    _Z80Integer;
-  END;
-
-PROCEDURE _Z80Jump;
-  BEGIN
-    Expect(117);
-    IF (sym = 116) OR (sym = 133) OR (sym = 134) OR (sym = 135) THEN BEGIN
-      _Z80Condition;
-      Expect(23);
-    END;
-    _Z80Parameter;
-  END;
-
-PROCEDURE _Z80Port;
-  BEGIN
-    IF (sym = 53) THEN BEGIN
-      Get;
-      _Z80Register8bit;
-      Expect(23);
-      Expect(20);
-      _Z80Integer;
-      Expect(21);
-    END ELSE IF (sym = 115) THEN BEGIN
-      Get;
-      Expect(20);
-      IF (sym = 1) OR (sym = 2) OR (sym = 3) OR (sym = 36) THEN BEGIN
-        _Z80Integer;
-      END ELSE IF (sym = 116) THEN BEGIN
-        Get;
-      END ELSE BEGIN SynError(157);
-      END;
-      Expect(21);
-      Expect(23);
-      _Z80Register8bit;
-    END ELSE BEGIN SynError(158);
-    END;
-  END;
-
-PROCEDURE _Z80Loop;
-  BEGIN
-    Expect(105);
-    _Z80Integer;
-  END;
-
-PROCEDURE _Z80InterruptMode;
-  BEGIN
-    Expect(114);
-    Expect(2);
-  END;
-
-PROCEDURE _Z80Exchange;
-  BEGIN
-    Expect(106);
-    IF (sym = 107) THEN BEGIN
-      Get;
-      Expect(23);
-      IF (sym = 108) THEN BEGIN
-        Get;
-      END ELSE IF (sym = 109) THEN BEGIN
-        Get;
-      END ELSE IF (sym = 110) THEN BEGIN
-        Get;
-      END ELSE BEGIN SynError(159);
-      END;
-    END ELSE IF (sym = 111) THEN BEGIN
-      Get;
-      Expect(23);
-      Expect(112);
-    END ELSE IF (sym = 113) THEN BEGIN
-      Get;
-      Expect(23);
-      Expect(108);
-    END ELSE BEGIN SynError(160);
-    END;
-  END;
-
-PROCEDURE _Z80Operation;
-  BEGIN
-    CASE sym OF
-      72 : BEGIN
-        Get;
-        END;
-      73 : BEGIN
-        Get;
-        END;
-      74 : BEGIN
-        Get;
-        END;
-      75 : BEGIN
-        Get;
-        END;
-      76 : BEGIN
-        Get;
-        END;
-      77 : BEGIN
-        Get;
-        END;
-      78 : BEGIN
-        Get;
-        END;
-      79 : BEGIN
-        Get;
-        END;
-      80 : BEGIN
-        Get;
-        END;
-      81 : BEGIN
-        Get;
-        END;
-      82 : BEGIN
-        Get;
-        END;
-      83 : BEGIN
-        Get;
-        END;
-      84 : BEGIN
-        Get;
-        END;
-      85 : BEGIN
-        Get;
-        END;
-      86 : BEGIN
-        Get;
-        END;
-      87 : BEGIN
-        Get;
-        END;
-      88 : BEGIN
-        Get;
-        END;
-      89 : BEGIN
-        Get;
-        END;
-      90 : BEGIN
-        Get;
-        END;
-      91 : BEGIN
-        Get;
-        END;
-      92 : BEGIN
-        Get;
-        END;
-      93 : BEGIN
-        Get;
-        END;
-      94 : BEGIN
-        Get;
-        END;
-      95 : BEGIN
-        Get;
-        END;
-      96 : BEGIN
-        Get;
-        END;
-      97 : BEGIN
-        Get;
-        END;
-      98 : BEGIN
-        Get;
-        END;
-      99 : BEGIN
-        Get;
-        END;
-      100 : BEGIN
-        Get;
-        END;
-      101 : BEGIN
-        Get;
-        END;
-      102 : BEGIN
-        Get;
-        END;
-      103 : BEGIN
-        Get;
-        END;
-      104 : BEGIN
-        Get;
-        END;
-    ELSE BEGIN SynError(161);
-        END;
-    END;
-  END;
-
-PROCEDURE _Z80Inc;
-  BEGIN
-    IF (sym = 70) THEN BEGIN
-      Get;
-      _Z80Register;
-    END ELSE IF (sym = 71) THEN BEGIN
-      Get;
-      IF _In(symSet[3], sym) THEN BEGIN
-        _Z80Register;
-      END ELSE IF (sym = 20) THEN BEGIN
-        _Z80Indirection;
-      END ELSE BEGIN SynError(162);
-      END;
-    END ELSE BEGIN SynError(163);
-    END;
-  END;
-
-PROCEDURE _Z80Test;
-  BEGIN
-    Expect(69);
-    _Z80Parameter8bit;
-  END;
-
-PROCEDURE _Z80Call;
-  BEGIN
-    Expect(68);
-    IF (sym = 116) OR (sym = 133) OR (sym = 134) OR (sym = 135) THEN BEGIN
-      _Z80Condition;
-      Expect(23);
-    END;
-    _Z80Integer;
-  END;
-
-PROCEDURE _Z80Bit;
-  BEGIN
-    IF (sym = 66) THEN BEGIN
-      Get;
-    END ELSE IF (sym = 67) THEN BEGIN
-      Get;
-    END ELSE IF (sym = 26) THEN BEGIN
-      Get;
-    END ELSE BEGIN SynError(164);
-    END;
-    Expect(2);
-    Expect(23);
-    IF (sym = 20) THEN BEGIN
-      _Z80Indirection;
-    END ELSE IF _In(symSet[2], sym) THEN BEGIN
-      _Z80Register8bit;
-    END ELSE BEGIN SynError(165);
-    END;
-  END;
-
-PROCEDURE _Z80Bin;
-  BEGIN
-    IF (sym = 59) THEN BEGIN
-      Get;
-    END ELSE IF (sym = 54) THEN BEGIN
-      Get;
-    END ELSE IF (sym = 65) THEN BEGIN
-      Get;
-    END ELSE BEGIN SynError(166);
-    END;
-    _Z80Parameter8bit;
-  END;
-
-PROCEDURE _Z80Sum;
-  BEGIN
-    IF (sym = 63) THEN BEGIN
-      Get;
-    END ELSE IF (sym = 64) THEN BEGIN
-      Get;
-    END ELSE BEGIN SynError(167);
-    END;
-    _Z80Register;
-    Expect(23);
-    _Z80Parameter;
   END;
 
 PROCEDURE _Z80Statement;
   BEGIN
-    IF _In(symSet[4], sym) THEN BEGIN
-      CASE sym OF
-        63, 64 : BEGIN
-          _Z80Sum;
-          END;
-        54, 59, 65 : BEGIN
-          _Z80Bin;
-          END;
-        26, 66, 67 : BEGIN
-          _Z80Bit;
-          END;
-        68 : BEGIN
-          _Z80Call;
-          END;
-        69 : BEGIN
-          _Z80Test;
-          END;
-        70, 71 : BEGIN
-          _Z80Inc;
-          END;
-        72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104 : BEGIN
-          _Z80Operation;
-          END;
-        106 : BEGIN
-          _Z80Exchange;
-          END;
-        114 : BEGIN
-          _Z80InterruptMode;
-          END;
-        105 : BEGIN
-          _Z80Loop;
-          END;
-        53, 115 : BEGIN
-          _Z80Port;
-          END;
-        117 : BEGIN
-          _Z80Jump;
-          END;
-        118 : BEGIN
-          _Z80RelativeJump;
-          END;
-        119 : BEGIN
-          _Z80Load;
-          END;
-        120, 121 : BEGIN
-          _Z80Stack;
-          END;
-        122 : BEGIN
-          _Z80Return;
-          END;
-        123, 124, 125, 126, 127, 128 : BEGIN
-          _Z80Rotate;
-          END;
-        129 : BEGIN
-          _Z80Restart;
-          END;
-        130, 132 : BEGIN
-          _Z80Sub;
-          END;
+    _Z80Instruction;
+    IF _In(symSet[5], sym) THEN BEGIN
+      _Z80Parameter;
+      IF (sym = _commaSym) THEN BEGIN
+        Get;
+        _Z80Parameter;
       END;
     END;
   END;
@@ -805,7 +604,7 @@ PROCEDURE _Z80Statement;
 PROCEDURE _Z80StatementSequence;
   BEGIN
     _Z80Statement;
-    WHILE (sym = 7) DO BEGIN
+    WHILE (sym = _semicolonSym) DO BEGIN
       Get;
       _Z80Statement;
     END;
@@ -814,7 +613,7 @@ PROCEDURE _Z80StatementSequence;
 PROCEDURE _Member;
   BEGIN
     _Expression;
-    IF (sym = 18) THEN BEGIN
+    IF (sym = _point_pointSym) THEN BEGIN
       Get;
       _Expression;
     END;
@@ -823,7 +622,7 @@ PROCEDURE _Member;
 PROCEDURE _ExpList;
   BEGIN
     _Expression;
-    WHILE (sym = 23) DO BEGIN
+    WHILE (sym = _commaSym) DO BEGIN
       Get;
       _Expression;
     END;
@@ -831,81 +630,91 @@ PROCEDURE _ExpList;
 
 PROCEDURE _SetConstructor;
   BEGIN
-    Expect(20);
+    Expect(_lbrackSym);
     _Member;
-    WHILE (sym = 23) DO BEGIN
+    WHILE (sym = _commaSym) DO BEGIN
       Get;
       _Member;
     END;
-    Expect(21);
+    Expect(_rbrackSym);
   END;
 
 PROCEDURE _UnsignedLiteral;
   BEGIN
-    IF (sym = 2) OR (sym = 3) OR (sym = 4) THEN BEGIN
+    IF (sym = integerSym) OR
+       (sym = hexintegerSym) OR
+       (sym = realSym) THEN BEGIN
       _UnsignedNumber;
-    END ELSE IF (sym = 61) THEN BEGIN
+    END ELSE IF (sym = NILSym) THEN BEGIN
       Get;
-    END ELSE IF (sym = 5) THEN BEGIN
+    END ELSE IF (sym = stringSym) THEN BEGIN
       _String;
-    END ELSE BEGIN SynError(168);
+    END ELSE BEGIN SynError(156);
     END;
   END;
 
 PROCEDURE _MulOp;
   BEGIN
-    IF (sym = 55) THEN BEGIN
+    IF (sym = _starSym) THEN BEGIN
       Get;
-    END ELSE IF (sym = 56) THEN BEGIN
+    END ELSE IF (sym = _slashSym) THEN BEGIN
       Get;
-    END ELSE IF (sym = 57) THEN BEGIN
+    END ELSE IF (sym = DIVSym) THEN BEGIN
       Get;
-    END ELSE IF (sym = 58) THEN BEGIN
+    END ELSE IF (sym = MODSym) THEN BEGIN
       Get;
-    END ELSE IF (sym = 59) THEN BEGIN
+    END ELSE IF (sym = ANDSym) THEN BEGIN
       Get;
-    END ELSE BEGIN SynError(169);
+    END ELSE BEGIN SynError(157);
     END;
   END;
 
 PROCEDURE _Factor;
   BEGIN
-    IF (sym = 1) THEN BEGIN
+    IF (sym = identifierSym) THEN BEGIN
       _Designator;
-      IF (sym = 16) THEN BEGIN
+      IF (sym = _lparenSym) THEN BEGIN
         _ActualParams;
       END;
-    END ELSE IF (sym = 2) OR (sym = 3) OR (sym = 4) OR (sym = 5) OR (sym = 61) THEN BEGIN
+    END ELSE IF (sym = integerSym) OR
+          (sym = hexintegerSym) OR
+          (sym = realSym) OR
+          (sym = stringSym) OR
+          (sym = NILSym) THEN BEGIN
       _UnsignedLiteral;
-    END ELSE IF (sym = 20) THEN BEGIN
+    END ELSE IF (sym = _lbrackSym) THEN BEGIN
       _SetConstructor;
-    END ELSE IF (sym = 16) THEN BEGIN
+    END ELSE IF (sym = _lparenSym) THEN BEGIN
       Get;
       _Expression;
-      Expect(17);
-    END ELSE IF (sym = 60) THEN BEGIN
+      Expect(_rparenSym);
+    END ELSE IF (sym = NOTSym) THEN BEGIN
       Get;
       _Factor;
-    END ELSE BEGIN SynError(170);
+    END ELSE BEGIN SynError(158);
     END;
   END;
 
 PROCEDURE _AddOp;
   BEGIN
-    IF (sym = 11) THEN BEGIN
+    IF (sym = _plusSym) THEN BEGIN
       Get;
-    END ELSE IF (sym = 12) THEN BEGIN
+    END ELSE IF (sym = _minusSym) THEN BEGIN
       Get;
-    END ELSE IF (sym = 54) THEN BEGIN
+    END ELSE IF (sym = ORSym) THEN BEGIN
       Get;
-    END ELSE BEGIN SynError(171);
+    END ELSE BEGIN SynError(159);
     END;
   END;
 
 PROCEDURE _Term;
   BEGIN
     _Factor;
-    WHILE (sym = 55) OR (sym = 56) OR (sym = 57) OR (sym = 58) OR (sym = 59) DO BEGIN
+    WHILE (sym = _starSym) OR
+          (sym = _slashSym) OR
+          (sym = DIVSym) OR
+          (sym = MODSym) OR
+          (sym = ANDSym) DO BEGIN
       _MulOp;
       _Factor;
     END;
@@ -914,45 +723,47 @@ PROCEDURE _Term;
 PROCEDURE _RelOp;
   BEGIN
     CASE sym OF
-      10 : BEGIN
+      _equalSym : BEGIN
         Get;
         END;
-      48 : BEGIN
+      _lessSym : BEGIN
         Get;
         END;
-      49 : BEGIN
+      _greaterSym : BEGIN
         Get;
         END;
-      50 : BEGIN
+      _less_equalSym : BEGIN
         Get;
         END;
-      51 : BEGIN
+      _greater_equalSym : BEGIN
         Get;
         END;
-      52 : BEGIN
+      _less_greaterSym : BEGIN
         Get;
         END;
-      53 : BEGIN
+      INSym : BEGIN
         Get;
         END;
-    ELSE BEGIN SynError(172);
+    ELSE BEGIN SynError(160);
         END;
     END;
   END;
 
 PROCEDURE _SimpleExpression;
   BEGIN
-    IF (sym = 11) THEN BEGIN
+    IF (sym = _plusSym) THEN BEGIN
       Get;
       _Term;
-    END ELSE IF (sym = 12) THEN BEGIN
+    END ELSE IF (sym = _minusSym) THEN BEGIN
       Get;
       _Term;
-    END ELSE IF _In(symSet[5], sym) THEN BEGIN
+    END ELSE IF _In(symSet[6], sym) THEN BEGIN
       _Term;
-    END ELSE BEGIN SynError(173);
+    END ELSE BEGIN SynError(161);
     END;
-    WHILE (sym = 11) OR (sym = 12) OR (sym = 54) DO BEGIN
+    WHILE (sym = _plusSym) OR
+          (sym = _minusSym) OR
+          (sym = ORSym) DO BEGIN
       _AddOp;
       _Term;
     END;
@@ -961,7 +772,7 @@ PROCEDURE _SimpleExpression;
 PROCEDURE _RecVarList;
   BEGIN
     _Designator;
-    WHILE (sym = 23) DO BEGIN
+    WHILE (sym = _commaSym) DO BEGIN
       Get;
       _Designator;
     END;
@@ -969,7 +780,7 @@ PROCEDURE _RecVarList;
 
 PROCEDURE _ControlVariable;
   BEGIN
-    Expect(1);
+    Expect(identifierSym);
   END;
 
 PROCEDURE _CaseLabel;
@@ -980,18 +791,18 @@ PROCEDURE _CaseLabel;
 PROCEDURE _OneCase;
   BEGIN
     _CaseLabelList;
-    Expect(28);
+    Expect(_colonSym);
     _Statement;
   END;
 
 PROCEDURE _CaseList;
   BEGIN
     _OneCase;
-    WHILE (sym = 7) DO BEGIN
+    WHILE (sym = _semicolonSym) DO BEGIN
       Get;
       _OneCase;
     END;
-    IF (sym = 7) THEN BEGIN
+    IF (sym = _semicolonSym) THEN BEGIN
       Get;
     END;
   END;
@@ -1013,9 +824,9 @@ PROCEDURE _IntegerExpression;
 
 PROCEDURE _FieldWidth;
   BEGIN
-    Expect(28);
+    Expect(_colonSym);
     _IntegerExpression;
-    IF (sym = 28) THEN BEGIN
+    IF (sym = _colonSym) THEN BEGIN
       Get;
       _IntegerExpression;
     END;
@@ -1024,7 +835,7 @@ PROCEDURE _FieldWidth;
 PROCEDURE _ActualParameter;
   BEGIN
     _Value;
-    IF (sym = 28) THEN BEGIN
+    IF (sym = _colonSym) THEN BEGIN
       _FieldWidth;
     END;
   END;
@@ -1032,7 +843,7 @@ PROCEDURE _ActualParameter;
 PROCEDURE _Expression;
   BEGIN
     _SimpleExpression;
-    IF _In(symSet[6], sym) THEN BEGIN
+    IF _In(symSet[7], sym) THEN BEGIN
       _RelOp;
       _SimpleExpression;
     END;
@@ -1040,37 +851,39 @@ PROCEDURE _Expression;
 
 PROCEDURE _ActualParams;
   BEGIN
-    Expect(16);
+    Expect(_lparenSym);
     _ActualParameter;
-    WHILE (sym = 23) DO BEGIN
+    WHILE (sym = _commaSym) DO BEGIN
       Get;
       _ActualParameter;
     END;
-    Expect(17);
+    Expect(_rparenSym);
   END;
 
 PROCEDURE _Value;
   BEGIN
-    IF (sym = 36) THEN BEGIN
+    IF (sym = _atSym) THEN BEGIN
       Get;
       _Designator;
-    END ELSE IF _In(symSet[7], sym) THEN BEGIN
+    END ELSE IF _In(symSet[8], sym) THEN BEGIN
       _Expression;
-    END ELSE BEGIN SynError(174);
+    END ELSE BEGIN SynError(162);
     END;
   END;
 
 PROCEDURE _Designator;
   BEGIN
-    Expect(1);
-    WHILE (sym = 8) OR (sym = 15) OR (sym = 20) DO BEGIN
-      IF (sym = 8) THEN BEGIN
+    Expect(identifierSym);
+    WHILE (sym = _pointSym) OR
+          (sym = _uparrowSym) OR
+          (sym = _lbrackSym) DO BEGIN
+      IF (sym = _pointSym) THEN BEGIN
         Get;
-        Expect(1);
-      END ELSE IF (sym = 20) THEN BEGIN
+        Expect(identifierSym);
+      END ELSE IF (sym = _lbrackSym) THEN BEGIN
         Get;
         _ExpList;
-        Expect(21);
+        Expect(_rbrackSym);
       END ELSE BEGIN
         Get;
       END;
@@ -1079,45 +892,45 @@ PROCEDURE _Designator;
 
 PROCEDURE _WithStatement;
   BEGIN
-    Expect(47);
+    Expect(WITHSym);
     _RecVarList;
-    Expect(38);
+    Expect(DOSym);
     _Statement;
   END;
 
 PROCEDURE _ForStatement;
   BEGIN
-    Expect(44);
+    Expect(FORSym);
     _ControlVariable;
-    Expect(35);
+    Expect(_colon_equalSym);
     _OrdinalExpression;
-    IF (sym = 45) THEN BEGIN
+    IF (sym = TOSym) THEN BEGIN
       Get;
-    END ELSE IF (sym = 46) THEN BEGIN
+    END ELSE IF (sym = DOWNTOSym) THEN BEGIN
       Get;
-    END ELSE BEGIN SynError(175);
+    END ELSE BEGIN SynError(163);
     END;
     _OrdinalExpression;
-    Expect(38);
+    Expect(DOSym);
     _Statement;
   END;
 
 PROCEDURE _CaseStatement;
   BEGIN
-    Expect(29);
+    Expect(CASESym);
     _OrdinalExpression;
-    Expect(22);
+    Expect(OFSym);
     _CaseList;
-    Expect(25);
+    Expect(ENDSym);
   END;
 
 PROCEDURE _IfStatement;
   BEGIN
-    Expect(41);
+    Expect(IFSym);
     _BooleanExpression;
-    Expect(42);
+    Expect(THENSym);
     _Statement;
-    IF (sym = 43) THEN BEGIN
+    IF (sym = ELSESym) THEN BEGIN
       Get;
       _Statement;
     END;
@@ -1125,63 +938,67 @@ PROCEDURE _IfStatement;
 
 PROCEDURE _RepeatStatement;
   BEGIN
-    Expect(39);
+    Expect(REPEATSym);
     _StatementSequence;
-    Expect(40);
+    Expect(UNTILSym);
     _BooleanExpression;
   END;
 
 PROCEDURE _WhileStatement;
   BEGIN
-    Expect(37);
+    Expect(WHILESym);
     _BooleanExpression;
-    Expect(38);
+    Expect(DOSym);
     _Statement;
   END;
 
 PROCEDURE _AssignmentOrCall;
   BEGIN
     _Designator;
-    IF (sym = 35) THEN BEGIN
+    IF (sym = _colon_equalSym) THEN BEGIN
       Get;
       _Value;
-    END ELSE IF (sym = 7) OR (sym = 16) OR (sym = 25) OR (sym = 40) OR (sym = 43) THEN BEGIN
-      IF (sym = 16) THEN BEGIN
+    END ELSE IF (sym = _semicolonSym) OR
+          (sym = _lparenSym) OR
+          (sym = ENDSym) OR
+          (sym = UNTILSym) OR
+          (sym = ELSESym) THEN BEGIN
+      IF (sym = _lparenSym) THEN BEGIN
         _ActualParams;
       END;
-    END ELSE BEGIN SynError(176);
+    END ELSE BEGIN SynError(164);
     END;
   END;
 
 PROCEDURE _Statement;
   BEGIN
-    IF _In(symSet[8], sym) THEN BEGIN
+    IF _In(symSet[9], sym) THEN BEGIN
       CASE sym OF
-        1 : BEGIN
+        identifierSym : BEGIN
           _AssignmentOrCall;
           END;
-        34 : BEGIN
+        BEGINSym : BEGIN
           _CompoundStatement;
           END;
-        62 : BEGIN
+        ASMSym : BEGIN
           _ASMCompoundStatement;
           END;
-        37 : BEGIN
+        WHILESym : BEGIN
           _WhileStatement;
           END;
-        39 : BEGIN
+        REPEATSym : BEGIN
           _RepeatStatement;
           END;
-        41 : BEGIN
+        IFSym : BEGIN
           _IfStatement;
           END;
-        29 : BEGIN
+        CASESym : BEGIN
           _CaseStatement;
           END;
-        44 : BEGIN
+        FORSym : BEGIN
           _ForStatement;
           END;
-        47 : BEGIN
+        WITHSym : BEGIN
           _WithStatement;
           END;
       END;
@@ -1191,7 +1008,7 @@ PROCEDURE _Statement;
 PROCEDURE _StatementSequence;
   BEGIN
     _Statement;
-    WHILE (sym = 7) DO BEGIN
+    WHILE (sym = _semicolonSym) DO BEGIN
       Get;
       _Statement;
     END;
@@ -1199,31 +1016,33 @@ PROCEDURE _StatementSequence;
 
 PROCEDURE _ASMCompoundStatement;
   BEGIN
-    Expect(62);
-    _Z80StatementSequence;
-    Expect(25);
+    Expect(ASMSym);
+    IF _In(symSet[10], sym) THEN BEGIN
+      _Z80StatementSequence;
+    END;
+    Expect(ENDSym);
   END;
 
 PROCEDURE _CompoundStatement;
   BEGIN
-    Expect(34);
+    Expect(BEGINSym);
     _StatementSequence;
-    Expect(25);
+    Expect(ENDSym);
   END;
 
 PROCEDURE _IndexSpec;
   BEGIN
     _NewIdent;
-    Expect(18);
+    Expect(_point_pointSym);
     _NewIdent;
-    Expect(28);
+    Expect(_colonSym);
     _TypeIdent;
   END;
 
 PROCEDURE _IndexSpecList;
   BEGIN
     _IndexSpec;
-    WHILE (sym = 7) DO BEGIN
+    WHILE (sym = _semicolonSym) DO BEGIN
       Get;
       _IndexSpec;
     END;
@@ -1231,52 +1050,53 @@ PROCEDURE _IndexSpecList;
 
 PROCEDURE _ParamType;
   BEGIN
-    IF (sym = 1) THEN BEGIN
+    IF (sym = identifierSym) THEN BEGIN
       _TypeIdent;
-    END ELSE IF (sym = 19) THEN BEGIN
+    END ELSE IF (sym = ARRAYSym) THEN BEGIN
       Get;
-      Expect(20);
+      Expect(_lbrackSym);
       _IndexSpecList;
-      Expect(21);
-      Expect(22);
+      Expect(_rbrackSym);
+      Expect(OFSym);
       _ParamType;
-    END ELSE IF (sym = 14) THEN BEGIN
+    END ELSE IF (sym = PACKEDSym) THEN BEGIN
       Get;
-      Expect(19);
-      Expect(20);
+      Expect(ARRAYSym);
+      Expect(_lbrackSym);
       _IndexSpec;
-      Expect(21);
-      Expect(22);
+      Expect(_rbrackSym);
+      Expect(OFSym);
       _TypeIdent;
-    END ELSE BEGIN SynError(177);
+    END ELSE BEGIN SynError(165);
     END;
   END;
 
 PROCEDURE _ParamGroup;
   BEGIN
     _NewIdentList;
-    Expect(28);
+    Expect(_colonSym);
     _ParamType;
   END;
 
 PROCEDURE _FormalSection;
   BEGIN
-    IF (sym = 1) OR (sym = 30) THEN BEGIN
-      IF (sym = 30) THEN BEGIN
+    IF (sym = identifierSym) OR
+       (sym = VARSym) THEN BEGIN
+      IF (sym = VARSym) THEN BEGIN
         Get;
       END;
       _ParamGroup;
-    END ELSE IF (sym = 31) THEN BEGIN
+    END ELSE IF (sym = PROCEDURESym) THEN BEGIN
       _ProcHeading;
-    END ELSE IF (sym = 32) THEN BEGIN
+    END ELSE IF (sym = FUNCTIONSym) THEN BEGIN
       _FuncHeading;
-    END ELSE BEGIN SynError(178);
+    END ELSE BEGIN SynError(166);
     END;
   END;
 
 PROCEDURE _ReturnType;
   BEGIN
-    IF (sym = 28) THEN BEGIN
+    IF (sym = _colonSym) THEN BEGIN
       Get;
       _TypeIdent;
     END;
@@ -1284,30 +1104,30 @@ PROCEDURE _ReturnType;
 
 PROCEDURE _FormalParams;
   BEGIN
-    Expect(16);
+    Expect(_lparenSym);
     _FormalSection;
-    WHILE (sym = 7) DO BEGIN
+    WHILE (sym = _semicolonSym) DO BEGIN
       Get;
       _FormalSection;
     END;
-    Expect(17);
+    Expect(_rparenSym);
   END;
 
 PROCEDURE _Body;
   BEGIN
-    IF _In(symSet[9], sym) THEN BEGIN
+    IF _In(symSet[11], sym) THEN BEGIN
       _Block;
-    END ELSE IF (sym = 33) THEN BEGIN
+    END ELSE IF (sym = FORWARDSym) THEN BEGIN
       Get;
-    END ELSE BEGIN SynError(179);
+    END ELSE BEGIN SynError(167);
     END;
   END;
 
 PROCEDURE _FuncHeading;
   BEGIN
-    Expect(32);
+    Expect(FUNCTIONSym);
     _NewIdent;
-    IF (sym = 16) THEN BEGIN
+    IF (sym = _lparenSym) THEN BEGIN
       _FormalParams;
     END;
     _ReturnType;
@@ -1315,9 +1135,9 @@ PROCEDURE _FuncHeading;
 
 PROCEDURE _ProcHeading;
   BEGIN
-    Expect(31);
+    Expect(PROCEDURESym);
     _NewIdent;
-    IF (sym = 16) THEN BEGIN
+    IF (sym = _lparenSym) THEN BEGIN
       _FormalParams;
     END;
   END;
@@ -1325,15 +1145,15 @@ PROCEDURE _ProcHeading;
 PROCEDURE _VarDecl;
   BEGIN
     _NewIdentList;
-    Expect(28);
+    Expect(_colonSym);
     _Type;
-    Expect(7);
+    Expect(_semicolonSym);
   END;
 
 PROCEDURE _CaseLabelList;
   BEGIN
     _CaseLabel;
-    WHILE (sym = 23) DO BEGIN
+    WHILE (sym = _commaSym) DO BEGIN
       Get;
       _CaseLabel;
     END;
@@ -1342,17 +1162,17 @@ PROCEDURE _CaseLabelList;
 PROCEDURE _Variant;
   BEGIN
     _CaseLabelList;
-    Expect(28);
-    Expect(16);
+    Expect(_colonSym);
+    Expect(_lparenSym);
     _FieldList;
-    Expect(17);
+    Expect(_rparenSym);
   END;
 
 PROCEDURE _VariantSelector;
   BEGIN
-    IF (sym = 1) THEN BEGIN
+    IF (sym = identifierSym) THEN BEGIN
       _NewIdent;
-      Expect(28);
+      Expect(_colonSym);
     END;
     _TypeIdent;
   END;
@@ -1360,17 +1180,17 @@ PROCEDURE _VariantSelector;
 PROCEDURE _RecordSection;
   BEGIN
     _NewIdentList;
-    Expect(28);
+    Expect(_colonSym);
     _Type;
   END;
 
 PROCEDURE _VariantPart;
   BEGIN
-    Expect(29);
+    Expect(CASESym);
     _VariantSelector;
-    Expect(22);
+    Expect(OFSym);
     _Variant;
-    WHILE (sym = 7) DO BEGIN
+    WHILE (sym = _semicolonSym) DO BEGIN
       Get;
       _Variant;
     END;
@@ -1379,7 +1199,7 @@ PROCEDURE _VariantPart;
 PROCEDURE _fixedPart;
   BEGIN
     _RecordSection;
-    WHILE (sym = 7) DO BEGIN
+    WHILE (sym = _semicolonSym) DO BEGIN
       Get;
       _RecordSection;
     END;
@@ -1387,17 +1207,18 @@ PROCEDURE _fixedPart;
 
 PROCEDURE _FieldList;
   BEGIN
-    IF (sym = 1) OR (sym = 29) THEN BEGIN
-      IF (sym = 1) THEN BEGIN
+    IF (sym = identifierSym) OR
+       (sym = CASESym) THEN BEGIN
+      IF (sym = identifierSym) THEN BEGIN
         _fixedPart;
-        IF (sym = 7) THEN BEGIN
+        IF (sym = _semicolonSym) THEN BEGIN
           Get;
           _VariantPart;
         END;
       END ELSE BEGIN
         _VariantPart;
       END;
-      IF (sym = 7) THEN BEGIN
+      IF (sym = _semicolonSym) THEN BEGIN
         Get;
       END;
     END;
@@ -1406,7 +1227,7 @@ PROCEDURE _FieldList;
 PROCEDURE _IndexList;
   BEGIN
     _SimpleType;
-    WHILE (sym = 23) DO BEGIN
+    WHILE (sym = _commaSym) DO BEGIN
       Get;
       _SimpleType;
     END;
@@ -1414,39 +1235,39 @@ PROCEDURE _IndexList;
 
 PROCEDURE _FileType;
   BEGIN
-    Expect(27);
-    Expect(22);
+    Expect(FILESym);
+    Expect(OFSym);
     _Type;
   END;
 
 PROCEDURE _SetType;
   BEGIN
-    Expect(26);
-    Expect(22);
+    Expect(SETSym);
+    Expect(OFSym);
     _SimpleType;
   END;
 
 PROCEDURE _RecordType;
   BEGIN
-    Expect(24);
+    Expect(RECORDSym);
     _FieldList;
-    Expect(25);
+    Expect(ENDSym);
   END;
 
 PROCEDURE _ArrayType;
   BEGIN
-    Expect(19);
-    Expect(20);
+    Expect(ARRAYSym);
+    Expect(_lbrackSym);
     _IndexList;
-    Expect(21);
-    Expect(22);
+    Expect(_rbrackSym);
+    Expect(OFSym);
     _Type;
   END;
 
 PROCEDURE _NewIdentList;
   BEGIN
     _NewIdent;
-    WHILE (sym = 23) DO BEGIN
+    WHILE (sym = _commaSym) DO BEGIN
       Get;
       _NewIdent;
     END;
@@ -1455,158 +1276,168 @@ PROCEDURE _NewIdentList;
 PROCEDURE _SubrangeType;
   BEGIN
     _Constant;
-    Expect(18);
+    Expect(_point_pointSym);
     _Constant;
   END;
 
 PROCEDURE _EnumerationType;
   BEGIN
-    Expect(16);
+    Expect(_lparenSym);
     _NewIdentList;
-    Expect(17);
+    Expect(_rparenSym);
   END;
 
 PROCEDURE _TypeIdent;
   BEGIN
-    Expect(1);
+    Expect(identifierSym);
   END;
 
 PROCEDURE _StructType;
   BEGIN
-    IF (sym = 19) THEN BEGIN
+    IF (sym = ARRAYSym) THEN BEGIN
       _ArrayType;
-    END ELSE IF (sym = 24) THEN BEGIN
+    END ELSE IF (sym = RECORDSym) THEN BEGIN
       _RecordType;
-    END ELSE IF (sym = 26) THEN BEGIN
+    END ELSE IF (sym = SETSym) THEN BEGIN
       _SetType;
-    END ELSE IF (sym = 27) THEN BEGIN
+    END ELSE IF (sym = FILESym) THEN BEGIN
       _FileType;
-    END ELSE BEGIN SynError(180);
+    END ELSE BEGIN SynError(168);
     END;
   END;
 
 PROCEDURE _SimpleType;
   BEGIN
-    IF (sym = 1) THEN BEGIN
+    IF (sym = identifierSym) THEN BEGIN
       _TypeIdent;
-    END ELSE IF (sym = 16) THEN BEGIN
+    END ELSE IF (sym = _lparenSym) THEN BEGIN
       _EnumerationType;
     END ELSE IF (sym < 16) (* prevent range error *) AND
-          (sym IN [1, 2, 3, 4, 5, 11, 12])  THEN BEGIN
+          (sym IN [identifierSym, integerSym, hexintegerSym, realSym, 
+                    stringSym, _plusSym, _minusSym])  THEN BEGIN
       _SubrangeType;
-    END ELSE BEGIN SynError(181);
+    END ELSE BEGIN SynError(169);
     END;
   END;
 
 PROCEDURE _Type;
   BEGIN
-    IF _In(symSet[10], sym) THEN BEGIN
+    IF _In(symSet[12], sym) THEN BEGIN
       _SimpleType;
-    END ELSE IF (sym = 14) OR (sym = 19) OR (sym = 24) OR (sym = 26) OR (sym = 27) THEN BEGIN
-      IF (sym = 14) THEN BEGIN
+    END ELSE IF (sym = PACKEDSym) OR
+          (sym = ARRAYSym) OR
+          (sym = RECORDSym) OR
+          (sym = SETSym) OR
+          (sym = FILESym) THEN BEGIN
+      IF (sym = PACKEDSym) THEN BEGIN
         Get;
       END;
       _StructType;
-    END ELSE IF (sym = 15) THEN BEGIN
+    END ELSE IF (sym = _uparrowSym) THEN BEGIN
       Get;
       _TypeIdent;
-    END ELSE BEGIN SynError(182);
+    END ELSE BEGIN SynError(170);
     END;
   END;
 
 PROCEDURE _TypeDef;
   BEGIN
     _NewIdent;
-    Expect(10);
+    Expect(_equalSym);
     _Type;
-    Expect(7);
+    Expect(_semicolonSym);
   END;
 
 PROCEDURE _UnsignedReal;
   BEGIN
-    Expect(4);
+    Expect(realSym);
   END;
 
 PROCEDURE _UnsignedInt;
   BEGIN
-    IF (sym = 2) THEN BEGIN
+    IF (sym = integerSym) THEN BEGIN
       Get;
-    END ELSE IF (sym = 3) THEN BEGIN
+    END ELSE IF (sym = hexintegerSym) THEN BEGIN
       Get;
-    END ELSE BEGIN SynError(183);
+    END ELSE BEGIN SynError(171);
     END;
   END;
 
 PROCEDURE _String;
   BEGIN
-    Expect(5);
+    Expect(stringSym);
   END;
 
 PROCEDURE _ConstIdent;
   BEGIN
-    Expect(1);
+    Expect(identifierSym);
   END;
 
 PROCEDURE _UnsignedNumber;
   BEGIN
-    IF (sym = 2) OR (sym = 3) THEN BEGIN
+    IF (sym = integerSym) OR
+       (sym = hexintegerSym) THEN BEGIN
       _UnsignedInt;
-    END ELSE IF (sym = 4) THEN BEGIN
+    END ELSE IF (sym = realSym) THEN BEGIN
       _UnsignedReal;
-    END ELSE BEGIN SynError(184);
+    END ELSE BEGIN SynError(172);
     END;
   END;
 
 PROCEDURE _Constant;
   BEGIN
     IF (sym < 16) (* prevent range error *) AND
-       (sym IN [1, 2, 3, 4, 11, 12])  THEN BEGIN
-      IF (sym = 11) OR (sym = 12) THEN BEGIN
-        IF (sym = 11) THEN BEGIN
+       (sym IN [identifierSym, integerSym, hexintegerSym, realSym, 
+                    _plusSym, _minusSym])  THEN BEGIN
+      IF (sym = _plusSym) OR
+         (sym = _minusSym) THEN BEGIN
+        IF (sym = _plusSym) THEN BEGIN
           Get;
         END ELSE BEGIN
           Get;
         END;
       END;
-      IF (sym = 2) OR (sym = 3) OR (sym = 4) THEN BEGIN
+      IF (sym = integerSym) OR
+         (sym = hexintegerSym) OR
+         (sym = realSym) THEN BEGIN
         _UnsignedNumber;
-      END ELSE IF (sym = 1) THEN BEGIN
+      END ELSE IF (sym = identifierSym) THEN BEGIN
         _ConstIdent;
-      END ELSE BEGIN SynError(185);
+      END ELSE BEGIN SynError(173);
       END;
-    END ELSE IF (sym = 5) THEN BEGIN
+    END ELSE IF (sym = stringSym) THEN BEGIN
       _String;
-    END ELSE BEGIN SynError(186);
+    END ELSE BEGIN SynError(174);
     END;
   END;
 
 PROCEDURE _ConstDef;
   BEGIN
     _NewIdent;
-    Expect(10);
+    Expect(_equalSym);
     _Constant;
-    Expect(7);
+    Expect(_semicolonSym);
   END;
 
 PROCEDURE _ProcDeclarations;
   BEGIN
-    IF (sym = 31) THEN BEGIN
+    IF (sym = PROCEDURESym) THEN BEGIN
       _ProcHeading;
-    END ELSE IF (sym = 32) THEN BEGIN
+    END ELSE IF (sym = FUNCTIONSym) THEN BEGIN
       _FuncHeading;
-    END ELSE BEGIN SynError(187);
+    END ELSE BEGIN SynError(175);
     END;
-    Expect(7);
+    Expect(_semicolonSym);
     _Body;
-    Expect(7);
+    Expect(_semicolonSym);
   END;
 
 PROCEDURE _VarDeclarations;
   BEGIN
-    IF (sym = 30) THEN BEGIN
+    IF (sym = VARSym) THEN BEGIN
       Get;
       _VarDecl;
-      WHILE (sym = 1) DO BEGIN
+      WHILE (sym = identifierSym) DO BEGIN
         _VarDecl;
       END;
     END;
@@ -1614,10 +1445,10 @@ PROCEDURE _VarDeclarations;
 
 PROCEDURE _TypeDefinitions;
   BEGIN
-    IF (sym = 13) THEN BEGIN
+    IF (sym = TYPESym) THEN BEGIN
       Get;
       _TypeDef;
-      WHILE (sym = 1) DO BEGIN
+      WHILE (sym = identifierSym) DO BEGIN
         _TypeDef;
       END;
     END;
@@ -1625,10 +1456,10 @@ PROCEDURE _TypeDefinitions;
 
 PROCEDURE _ConstDefinitions;
   BEGIN
-    IF (sym = 9) THEN BEGIN
+    IF (sym = CONSTSym) THEN BEGIN
       Get;
       _ConstDef;
-      WHILE (sym = 1) DO BEGIN
+      WHILE (sym = identifierSym) DO BEGIN
         _ConstDef;
       END;
     END;
@@ -1636,11 +1467,11 @@ PROCEDURE _ConstDefinitions;
 
 PROCEDURE _StatementPart;
   BEGIN
-    IF (sym = 34) THEN BEGIN
+    IF (sym = BEGINSym) THEN BEGIN
       _CompoundStatement;
-    END ELSE IF (sym = 62) THEN BEGIN
+    END ELSE IF (sym = ASMSym) THEN BEGIN
       _ASMCompoundStatement;
-    END ELSE BEGIN SynError(188);
+    END ELSE BEGIN SynError(176);
     END;
   END;
 
@@ -1649,7 +1480,8 @@ PROCEDURE _DeclarationPart;
     _ConstDefinitions;
     _TypeDefinitions;
     _VarDeclarations;
-    WHILE (sym = 31) OR (sym = 32) DO BEGIN
+    WHILE (sym = PROCEDURESym) OR
+          (sym = FUNCTIONSym) DO BEGIN
       _ProcDeclarations;
     END;
   END;
@@ -1662,16 +1494,16 @@ PROCEDURE _Block;
 
 PROCEDURE _NewIdent;
   BEGIN
-    Expect(1);
+    Expect(identifierSym);
   END;
 
 PROCEDURE _PascalProgram;
   BEGIN
-    Expect(6);
+    Expect(PROGRAMSym);
     _NewIdent;
-    Expect(7);
+    Expect(_semicolonSym);
     _Block;
-    Expect(8);
+    Expect(_pointSym);
   END;
 
 PROCEDURE _Z80Pas;
@@ -1690,7 +1522,7 @@ PROCEDURE  Parse;
 
 BEGIN
   errDist := minErrDist;
-  symSet[ 0, 0] := [0];
+  symSet[ 0, 0] := [EOFSYMB];
   symSet[ 0, 1] := [];
   symSet[ 0, 2] := [];
   symSet[ 0, 3] := [];
@@ -1706,9 +1538,10 @@ BEGIN
   symSet[ 1, 3] := [];
   symSet[ 1, 4] := [];
   symSet[ 1, 5] := [];
-  symSet[ 1, 6] := [12, 13, 14, 15];
-  symSet[ 1, 7] := [1];
-  symSet[ 1, 8] := [13, 14, 15];
+  symSet[ 1, 6] := [];
+  symSet[ 1, 7] := [];
+  symSet[ 1, 8] := [_ASym-128, _HSym-128, _LSym-128, _BSym-128, _CSym-128, _DSym-128, 
+                    _ESym-128];
   symSet[ 1, 9] := [];
   symSet[ 2, 0] := [];
   symSet[ 2, 1] := [];
@@ -1717,87 +1550,126 @@ BEGIN
   symSet[ 2, 4] := [];
   symSet[ 2, 5] := [];
   symSet[ 2, 6] := [];
-  symSet[ 2, 7] := [4];
-  symSet[ 2, 8] := [3, 8, 9, 10, 11, 12];
-  symSet[ 2, 9] := [];
+  symSet[ 2, 7] := [];
+  symSet[ 2, 8] := [BCSym-128, DESym-128, HLSym-128, IXSym-128, IYSym-128];
+  symSet[ 2, 9] := [AFSym-144, SPSym-144, PCSym-144];
   symSet[ 3, 0] := [];
   symSet[ 3, 1] := [];
   symSet[ 3, 2] := [];
   symSet[ 3, 3] := [];
   symSet[ 3, 4] := [];
   symSet[ 3, 5] := [];
-  symSet[ 3, 6] := [12, 13, 14, 15];
-  symSet[ 3, 7] := [1, 4];
-  symSet[ 3, 8] := [3, 8, 9, 10, 11, 12, 13, 14, 15];
+  symSet[ 3, 6] := [];
+  symSet[ 3, 7] := [_MSym-112, NCSym-112, NPSym-112, NZSym-112];
+  symSet[ 3, 8] := [_PSym-128, PESym-128, POSym-128, _ZSym-128];
   symSet[ 3, 9] := [];
   symSet[ 4, 0] := [];
-  symSet[ 4, 1] := [10];
+  symSet[ 4, 1] := [];
   symSet[ 4, 2] := [];
-  symSet[ 4, 3] := [5, 6, 11, 15];
-  symSet[ 4, 4] := [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-  symSet[ 4, 5] := [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-  symSet[ 4, 6] := [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  symSet[ 4, 7] := [2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-  symSet[ 4, 8] := [0, 1, 2, 4];
-  symSet[ 4, 9] := [];
-  symSet[ 5, 0] := [1, 2, 3, 4, 5];
-  symSet[ 5, 1] := [0, 4];
+  symSet[ 4, 3] := [];
+  symSet[ 4, 4] := [];
+  symSet[ 4, 5] := [];
+  symSet[ 4, 6] := [];
+  symSet[ 4, 7] := [];
+  symSet[ 4, 8] := [BCSym-128, DESym-128, HLSym-128, IXSym-128, IYSym-128, _ASym-128, 
+                    _HSym-128, _LSym-128, _BSym-128, _CSym-128, _DSym-128, _ESym-128];
+  symSet[ 4, 9] := [AFSym-144, SPSym-144, PCSym-144];
+  symSet[ 5, 0] := [integerSym, hexintegerSym];
+  symSet[ 5, 1] := [_lbrackSym-16];
   symSet[ 5, 2] := [];
-  symSet[ 5, 3] := [12, 13];
+  symSet[ 5, 3] := [];
   symSet[ 5, 4] := [];
   symSet[ 5, 5] := [];
   symSet[ 5, 6] := [];
-  symSet[ 5, 7] := [];
-  symSet[ 5, 8] := [];
-  symSet[ 5, 9] := [];
-  symSet[ 6, 0] := [10];
-  symSet[ 6, 1] := [];
+  symSet[ 5, 7] := [_MSym-112, NCSym-112, NPSym-112, NZSym-112];
+  symSet[ 5, 8] := [_PSym-128, PESym-128, POSym-128, _ZSym-128, BCSym-128, DESym-128, 
+                    HLSym-128, IXSym-128, IYSym-128, _ASym-128, _HSym-128, _LSym-128, 
+                    _BSym-128, _CSym-128, _DSym-128, _ESym-128];
+  symSet[ 5, 9] := [AFSym-144, SPSym-144, PCSym-144];
+  symSet[ 6, 0] := [identifierSym, integerSym, hexintegerSym, realSym, 
+                    stringSym];
+  symSet[ 6, 1] := [_lparenSym-16, _lbrackSym-16];
   symSet[ 6, 2] := [];
-  symSet[ 6, 3] := [0, 1, 2, 3, 4, 5];
+  symSet[ 6, 3] := [NOTSym-48, NILSym-48];
   symSet[ 6, 4] := [];
   symSet[ 6, 5] := [];
   symSet[ 6, 6] := [];
   symSet[ 6, 7] := [];
   symSet[ 6, 8] := [];
   symSet[ 6, 9] := [];
-  symSet[ 7, 0] := [1, 2, 3, 4, 5, 11, 12];
-  symSet[ 7, 1] := [0, 4];
+  symSet[ 7, 0] := [_equalSym];
+  symSet[ 7, 1] := [];
   symSet[ 7, 2] := [];
-  symSet[ 7, 3] := [12, 13];
+  symSet[ 7, 3] := [_lessSym-48, _greaterSym-48, _less_equalSym-48, 
+                    _greater_equalSym-48, _less_greaterSym-48, INSym-48];
   symSet[ 7, 4] := [];
   symSet[ 7, 5] := [];
   symSet[ 7, 6] := [];
   symSet[ 7, 7] := [];
   symSet[ 7, 8] := [];
   symSet[ 7, 9] := [];
-  symSet[ 8, 0] := [1];
-  symSet[ 8, 1] := [13];
-  symSet[ 8, 2] := [2, 5, 7, 9, 12, 15];
-  symSet[ 8, 3] := [14];
+  symSet[ 8, 0] := [identifierSym, integerSym, hexintegerSym, realSym, 
+                    stringSym, _plusSym, _minusSym];
+  symSet[ 8, 1] := [_lparenSym-16, _lbrackSym-16];
+  symSet[ 8, 2] := [];
+  symSet[ 8, 3] := [NOTSym-48, NILSym-48];
   symSet[ 8, 4] := [];
   symSet[ 8, 5] := [];
   symSet[ 8, 6] := [];
   symSet[ 8, 7] := [];
   symSet[ 8, 8] := [];
   symSet[ 8, 9] := [];
-  symSet[ 9, 0] := [9, 13];
-  symSet[ 9, 1] := [14, 15];
-  symSet[ 9, 2] := [0, 2];
-  symSet[ 9, 3] := [14];
+  symSet[ 9, 0] := [identifierSym];
+  symSet[ 9, 1] := [CASESym-16];
+  symSet[ 9, 2] := [BEGINSym-32, WHILESym-32, REPEATSym-32, IFSym-32, FORSym-32, 
+                    WITHSym-32];
+  symSet[ 9, 3] := [ASMSym-48];
   symSet[ 9, 4] := [];
   symSet[ 9, 5] := [];
   symSet[ 9, 6] := [];
   symSet[ 9, 7] := [];
   symSet[ 9, 8] := [];
   symSet[ 9, 9] := [];
-  symSet[10, 0] := [1, 2, 3, 4, 5, 11, 12];
-  symSet[10, 1] := [0];
+  symSet[10, 0] := [];
+  symSet[10, 1] := [SETSym-16];
   symSet[10, 2] := [];
-  symSet[10, 3] := [];
-  symSet[10, 4] := [];
-  symSet[10, 5] := [];
-  symSet[10, 6] := [];
-  symSet[10, 7] := [];
+  symSet[10, 3] := [INSym-48, ORSym-48, ANDSym-48, ADCSym-48];
+  symSet[10, 4] := [ADDSym-64, BITSym-64, CALLSym-64, CCFSym-64, CPSym-64, 
+                    CPDSym-64, CPDRSym-64, CPISym-64, CPIRSym-64, CPLSym-64, 
+                    DAASym-64, DECSym-64, DISym-64, DJNZ_commaSym-64, EISym-64, 
+                    EXSym-64];
+  symSet[10, 5] := [EXXSym-80, HALTSym-80, IMSym-80, INCSym-80, INDSym-80, 
+                    INDRSym-80, INISym-80, INIRSym-80, JPSym-80, JRSym-80, 
+                    LDSym-80, LDDSym-80, LDDRSym-80, LDISym-80, LDIRSym-80, 
+                    NEGSym-80];
+  symSet[10, 6] := [NOPSym-96, OTDRSym-96, OTIRSym-96, OUTSym-96, OUTDSym-96, 
+                    OUTISym-96, POPSym-96, PUSHSym-96, RESSym-96, RETSym-96, 
+                    RETISym-96, RETNSym-96, RLSym-96, RLASym-96, RLCSym-96, 
+                    RLCASym-96];
+  symSet[10, 7] := [RLDSym-112, RRSym-112, RRASym-112, RRCSym-112, RRDSym-112, 
+                    RSTSym-112, SCFSym-112, SLASym-112, SRASym-112, SBCSym-112, 
+                    SUBSym-112, XORSym-112];
   symSet[10, 8] := [];
   symSet[10, 9] := [];
+  symSet[11, 0] := [CONSTSym, TYPESym];
+  symSet[11, 1] := [VARSym-16, PROCEDURESym-16];
+  symSet[11, 2] := [FUNCTIONSym-32, BEGINSym-32];
+  symSet[11, 3] := [ASMSym-48];
+  symSet[11, 4] := [];
+  symSet[11, 5] := [];
+  symSet[11, 6] := [];
+  symSet[11, 7] := [];
+  symSet[11, 8] := [];
+  symSet[11, 9] := [];
+  symSet[12, 0] := [identifierSym, integerSym, hexintegerSym, realSym, 
+                    stringSym, _plusSym, _minusSym];
+  symSet[12, 1] := [_lparenSym-16];
+  symSet[12, 2] := [];
+  symSet[12, 3] := [];
+  symSet[12, 4] := [];
+  symSet[12, 5] := [];
+  symSet[12, 6] := [];
+  symSet[12, 7] := [];
+  symSet[12, 8] := [];
+  symSet[12, 9] := [];
 END. (* Z80PasP *)
