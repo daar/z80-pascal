@@ -4,7 +4,7 @@ PROGRAM Z80Pas;
 {$mode objfpc} {$H+}
 
 USES
-  Error,
+  Error, Encoder,
   Z80PasS, Z80PasP;
 
 
@@ -60,7 +60,7 @@ BEGIN
     WriteLn('Could not open input file');
     Exit;
   END;
-{ Installs error reporting procedure }
+{ Innitializes the modules. }
   Error.InitModule;
 { Instigate the compilation }
   WriteLn ('Parsing ', InputFileName); Error.CurrentFile := InputFileName;

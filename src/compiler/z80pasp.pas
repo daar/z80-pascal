@@ -28,7 +28,7 @@ PROCEDURE LookAheadName (VAR Lex : STRING);
 
 IMPLEMENTATION
 
-USES Z80PasS, Z80PasG (* Symbol Constants *);
+USES Encoder, Z80PasS, Z80PasG (* Symbol Constants *);
 
 
 
