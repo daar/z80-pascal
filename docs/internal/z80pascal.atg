@@ -250,7 +250,7 @@ PRODUCTIONS
 
   Z80Condition         =  "M" | "NC" | "NP" | "NZ" | "P" | "PE" | "PO" | "Z" . (* Carriage exactly the same than register ("C"). *)
 
-  Z80Indirection       = "[" ( "BC" | "DE" | "HL" | integer | ( ( "IX" | "IY" ) "+" integer ) ) "]" .
+  Z80Indirection       = "[" ( "BC" | "DE" | "HL" | Z80Integer | ( ( "IX" | "IY" ) "+" Z80Integer ) ) "]" .
 
   Z80Register          =  Z80Register8bit | Z80Register16bit .
 

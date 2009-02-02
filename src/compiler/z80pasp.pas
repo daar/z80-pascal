@@ -313,8 +313,9 @@ PROCEDURE _Z80Indirection;
       Get;
     END ELSE IF (sym = HLSym) THEN BEGIN
       Get;
-    END ELSE IF (sym = integerSym) THEN BEGIN
-      Get;
+    END ELSE IF (sym = integerSym) OR
+          (sym = hexintegerSym) THEN BEGIN
+      _Z80Integer;
     END ELSE IF (sym = IXSym) OR
           (sym = IYSym) THEN BEGIN
       IF (sym = IXSym) THEN BEGIN
@@ -323,7 +324,7 @@ PROCEDURE _Z80Indirection;
         Get;
       END;
       Expect(_plusSym);
-      Expect(integerSym);
+      _Z80Integer;
     END ELSE BEGIN SynError(151);
     END;
     Expect(_rbrackSym);
