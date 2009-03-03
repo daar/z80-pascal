@@ -1,16 +1,15 @@
 (* Compiler main module. *)
 PROGRAM Z80Pas;
 
-{$mode objfpc} {$H+}
-
 USES
-  Error, Encoder,
-  Z80PasS, Z80PasP;
+  Compiler, sysutils;
 
 
 
 VAR
-  InputFileName: STRING;
+  OutputFileName, InputFileName: STRING;
+(* The compiler. *)
+  PascalCompiler: TPascalCompiler;
 
 
 
@@ -39,34 +38,18 @@ VAR
   { TODO: Options. }
   { Input file. }
     InputFileName := ParamStr(1);
+    OutputFileName := ParamStr(0);
   END;
 
 
 
 BEGIN
-  Title;
-{ Checks on correct parameter usage. }
-  IF ParamCount < 1 THEN
-  BEGIN
-    WriteLn('No input file specified');
-    Help;
-    Exit;
+  TRY
+    CheckParameterList;
+    PascalCompiler.InputFileName := InputFileName;
+    PascalCompiler.OutputFileName := OutputFileName;
+  EXCEPT
+    ON Error: Exception DO
+      WriteLn (Error.Message);
   END;
-  CheckParameterList;
-{ Opens the sourcefile. }
-  Assign (src, InputFileName); {$I-} Reset(src, 1); {$I+}
-  IF IOResult <> 0 THEN
-  BEGIN
-    WriteLn('Could not open input file');
-    Exit;
-  END;
-{ Innitializes the modules. }
-  Error.InitModule;
-{ Instigate the compilation }
-  WriteLn ('Parsing ', InputFileName); Error.CurrentFile := InputFileName;
-  Parse;
-{ Shows the result. }
-  PrintErrors;
-  IF Successful THEN
-    WriteLn ('Parsed correctly.');
 END.
