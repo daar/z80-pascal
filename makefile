@@ -91,8 +91,8 @@ endif
 OBJDIR = obj/compiler/
 BINDIR = bin
 
-FLAGS = -g -O- -pg -Mtp
-#FLAGS = -02 -Mtp -Sh
+FLAGS = -g -O- -pg -Mobjfpc
+#FLAGS = -02 -Mobjfpc -Sh
 
 # -- La lista de archivos fuente --
 include makefile.list

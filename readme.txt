@@ -10,8 +10,8 @@ HOW  TO COMPILE
 
   Current version are for Free Pascal and Lazarus only.
 
-  Compile the "z80pas.pp" file at z80-pascal/src/compiler/ directory.  Note it
-  must be compiled using "objfpc" mode and ANSI strings.
+  First run the "fix" script to define the platform objective, then run the
+  makefile.
 
   For the IDE, open the "z80pide.lpr" file at z80-pascal/src/ide with Lazarus,
   check the project options and the compiler options to be sure the directory

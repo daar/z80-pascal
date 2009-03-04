@@ -2,14 +2,14 @@
 PROGRAM Z80Pas;
 
 USES
-  Compiler, sysutils;
+  ULexScan, (* Lexical scanner. *)
+  sysutils;
 
 
 
 VAR
   OutputFileName, InputFileName: STRING;
-(* The compiler. *)
-  PascalCompiler: TPascalCompiler;
+  Scanner: TLexicalScanner;
 
 
 
@@ -42,14 +42,21 @@ VAR
   END;
 
 
-
+VAR
+  Token: STRING;
 BEGIN
   TRY
+    Title;
     CheckParameterList;
-    PascalCompiler.InputFileName := InputFileName;
-    PascalCompiler.OutputFileName := OutputFileName;
+    Scanner := TLexicalScanner.Create (InputFileName);
+    WriteLn ('Compiling ', InputFileName);
+    REPEAT
+      Token := Scanner.GetToken;
+      WriteLn ('''',Token,'''');
+    UNTIL Token = '.';
   EXCEPT
     ON Error: Exception DO
       WriteLn (Error.Message);
   END;
+  Scanner.Free;
 END.
