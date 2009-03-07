@@ -51,7 +51,7 @@ BEGIN
     Scanner := TLexicalScanner.Create (InputFileName);
     WriteLn ('Compiling ', InputFileName);
     REPEAT
-      Token := Scanner.GetToken;
+      Token := Scanner.GetIdentifier;
       WriteLn ('''',Token,'''');
     UNTIL Token = '.';
   EXCEPT

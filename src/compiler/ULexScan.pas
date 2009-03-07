@@ -9,12 +9,19 @@ USES
 
 
 TYPE
-(* Lexical scanner. *)
+(* Token identificators. *)
+  TTokenId = ( tiIdentifier, tiInteger, tiHexInteger, tiReal, tiString );
+
+(* Lexical scanner.
+   It recognices the first part of the BNF definition. *)
   TLexicalScanner = CLASS
   PRIVATE
     fInputStream: TFileStream;
   (* Lookahead character. *)
     fLookahead: CHAR;
+  (* Last token read. *)
+    fLastTokenString: STRING;
+    fLastTokenId: TTokenId;
   PUBLIC
   (* Constructor.  Opens the given file as input stream.
      @raises (an exception if file doesn't exists or can't open it.) *)
@@ -41,13 +48,26 @@ TYPE
   (* Skips CR/CF. (TEST) *)
     PROCEDURE Fin;
 
-  (* Returns a name. (TEST) *)
-    FUNCTION GetName: STRING;
-  (* Returns a number. (TEST) *)
+  (* Returns an identifier. *)
+    FUNCTION GetIdentifier: STRING;
+  (* Returns a number. *)
     FUNCTION GetNumber: STRING;
-  (* Returns a token. (TEST) *)
-    FUNCTION GetToken: STRING;
+
+  (* Returns the last character read. *)
+    PROPERTY Lookahead: CHAR READ fLookahead;
+  (* Returns the last parsed token. *)
+    PROPERTY LastToken: STRING READ fLastTokenString;
+  (* Returns the last parsed token. *)
+    PROPERTY LastTokenId: TTokenId READ fLastTokenId;
   END;
+
+
+
+IMPLEMENTATION
+
+USES
+  sysutils;
+
 
 
 CONST
@@ -56,10 +76,6 @@ CONST
   CR = ^M;
   LF = ^J;
 
-IMPLEMENTATION
-
-USES
-  sysutils;
 
 
 (* Constructor.  Opens the given file as input stream. *)
@@ -148,52 +164,42 @@ BEGIN
     SELF.GetChar;
 END;
 
-(* Returns a name. (TEST) *)
-FUNCTION TLexicalScanner.GetName: STRING;
-VAR
-  Tmp: STRING;
-BEGIN
-  Tmp := '';
-  IF NOT SELF.isAlpha (fLookahead) THEN
-    RAISE Exception.Create ('Name expected!');
-  REPEAT
-    Tmp := Tmp + UpCase (fLookahead);
-    SELF.GetChar;
-  UNTIL NOT SELF.isAlphaNum (fLookahead);
-  RESULT := Tmp;
-END;
 
 
-
-(* Returns a number. (TEST) *)
-FUNCTION TLexicalScanner.GetNumber: STRING;
-VAR
-  Tmp: STRING;
-BEGIN
-  Tmp := '';
-  IF NOT SELF.isDigit (fLookahead) THEN
-    RAISE Exception.Create ('Number expected!');
-  REPEAT
-    Tmp := Tmp + fLookahead;
-    SELF.GetChar;
-  UNTIL NOT SELF.isDigit (fLookahead);
-  RESULT := Tmp;
-END;
-
-
-
-(* Returns a token. (TEST) *)
-FUNCTION TLexicalScanner.GetToken: STRING;
+(* Returns an identifier. *)
+FUNCTION TLexicalScanner.GetIdentifier: STRING;
 BEGIN
   WHILE (fLookahead = CR) OR (fLookahead = LF) DO Fin;
-  IF SELF.isAlpha (fLookahead) THEN
-    RESULT := SELF.GetName
-  ELSE IF SELF.isDigit (fLookahead) THEN
-    RESULT := SELF.GetNumber
-  ELSE BEGIN
-    RESULT := fLookahead;
+  fLastTokenString := '';
+  IF NOT SELF.isAlpha (fLookahead) THEN
+    RAISE Exception.Create ('Name expected!');
+  fLastTokenId := tiIdentifier;
+  REPEAT
+    fLastTokenString := fLastTokenString + UpCase (fLookahead);
     SELF.GetChar;
-  END;
+  UNTIL NOT SELF.isAlphaNum (fLookahead);
+  RESULT := fLastTokenString;
+  SkipWhite;
+END;
+
+
+
+(* Returns a number. *)
+FUNCTION TLexicalScanner.GetNumber: STRING;
+BEGIN
+  WHILE (fLookahead = CR) OR (fLookahead = LF) DO Fin;
+  fLastTokenString := '';
+  IF NOT SELF.isDigit (fLookahead) AND (fLookahead <> '$') THEN
+    RAISE Exception.Create ('Number expected!');
+  IF fLookahead = '$' THEN
+    fLastTokenId := tiHexInteger
+  ELSE
+    fLastTokenId := tiInteger;
+  REPEAT
+    fLastTokenString := fLastTokenString + fLookahead;
+    SELF.GetChar;
+  UNTIL NOT SELF.isDigit (fLookahead);
+  RESULT := fLastTokenString;
   SkipWhite;
 END;
 

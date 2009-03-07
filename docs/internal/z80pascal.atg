@@ -233,7 +233,7 @@ PRODUCTIONS
 (* This is a Z80 Assembler parser.  Note that it allows illegal assembler
    instructions! *)
 
-  ASMCompoundStatement = "ASM" Z80StatementSequence "END" .
+  ASMCompoundStatement = "ASM" [Z80StatementSequence] "END" .
 
   Z80StatementSequence = Z80Statement { ";" Z80Statement } .
 
