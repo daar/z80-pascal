@@ -1,9 +1,7 @@
   Please, visit http://z80-pascal.sourceforge.net/ before to follow.
 
-  After some testing I've decided to follow "Let's Build a Compiler!" articles
-  by Jack W. Creenshaw <http://compilers.iecc.com/crenshaw/>.
-
-  At the moment it doesn't do nothing. u_u"
+  This is the first public release of the compiler.  There are a lot of things
+  that just doesn't work at all.
 
 HOW  TO COMPILE
 ===============
@@ -17,8 +15,8 @@ HOW  TO COMPILE
   check the project options and the compiler options to be sure the directory
   paths weren't twisted and compile.
 
-HACKING
-=======
+Documentation
+=============
 
   See the docs/internal directory for several documents about internal
   definitions, including a brief UML description of the objects (You'll need

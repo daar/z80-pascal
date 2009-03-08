@@ -50,7 +50,7 @@ BEGIN
     CheckParameterList;
     PascalCompiler.Compile (InputFileName);
     WriteLn ('Compilation finished.');
-    PascalCompiler.Output.SaveToFile (OutputFileName);
+    PascalCompiler.SaveToFile (OutputFileName);
     WriteLn ('File saved at '''+OutputFileName+'''.');
   EXCEPT
     ON Error: Exception DO

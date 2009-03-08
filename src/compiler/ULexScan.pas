@@ -49,6 +49,8 @@ TYPE
     PROCEDURE SkipWhite;
   (* Skips CR/CF. (TEST) *)
     PROCEDURE Fin;
+  (* Skips a separator (i.e.: ',', '+', '(', etc. *)
+    PROCEDURE SkipCharacter;
 
   (* Returns any token. *)
     FUNCTION GetToken: STRING;
@@ -169,6 +171,15 @@ PROCEDURE TLexicalScanner.Fin;
 BEGIN
   WHILE fLookahead IN [CR, LF] DO
     SELF.GetChar;
+  SELF.SkipWhite;
+END;
+
+
+
+(* Skips a separator (i.e.: ',', '+', '(', etc. *)
+PROCEDURE TLexicalScanner.SkipCharacter;
+BEGIN
+  SELF.GetChar;
   SELF.SkipWhite;
 END;
 
