@@ -35,10 +35,12 @@ VAR
 (* Checks the parameter list and sets the configuration values. *)
   PROCEDURE CheckParameterList;
   BEGIN
+    IF ParamCount < 2 THEN
+      Help;
   { TODO: Options. }
   { Input file. }
     InputFileName := ParamStr(1);
-    OutputFileName := ParamStr(0);
+    OutputFileName := ParamStr(2);
   END;
 
 

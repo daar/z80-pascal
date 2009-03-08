@@ -109,6 +109,7 @@ VAR
 BEGIN
   Character := SELF.fInputStream.ReadByte;
   SELF.fLookahead := CHAR (Character);
+  //WriteLn ('Lh := ''', fLookahead, '''');
 END;
 
 
@@ -156,6 +157,7 @@ END;
 (* Skip over leading white spaces. *)
 PROCEDURE TLexicalScanner.SkipWhite;
 BEGIN
+  //WriteLn ('SkipWhite...');
   WHILE SELF.isWhite (fLookahead) DO
     SELF.GetChar;
 END;
@@ -167,6 +169,7 @@ PROCEDURE TLexicalScanner.Fin;
 BEGIN
   WHILE fLookahead IN [CR, LF] DO
     SELF.GetChar;
+  SELF.SkipWhite;
 END;
 
 
@@ -184,6 +187,8 @@ BEGIN
     SELF.fLastTokenId := tiOther;
     RESULT := SELF.fLastTokenString;
     SELF.GetChar;
+    SELF.SkipWhite;
+    //WriteLn ('Last Token : ''', fLastTokenString, '''');
   END;
 END;
 
@@ -203,27 +208,48 @@ BEGIN
   UNTIL NOT SELF.isAlphaNum (fLookahead);
   RESULT := fLastTokenString;
   SkipWhite;
+  //WriteLn ('Last Token : ''', fLastTokenString, '''');
 END;
 
 
 
 (* Returns a number. *)
 FUNCTION TLexicalScanner.GetNumber: STRING;
+
+  PROCEDURE HexNum;
+  BEGIN
+    REPEAT
+      fLastTokenString := fLastTokenString + fLookahead;
+      SELF.GetChar;
+    UNTIL NOT SELF.isHexDigit (fLookahead);
+  END;
+
+
+  PROCEDURE IntegerNum;
+  BEGIN
+    REPEAT
+      fLastTokenString := fLastTokenString + fLookahead;
+      SELF.GetChar;
+    UNTIL NOT SELF.isDigit (fLookahead);
+  END;
+
 BEGIN
   WHILE (fLookahead = CR) OR (fLookahead = LF) DO Fin;
   fLastTokenString := '';
   IF NOT SELF.isDigit (fLookahead) AND (fLookahead <> '$') THEN
     RAISE Exception.Create ('Number expected!');
   IF fLookahead = '$' THEN
-    fLastTokenId := tiHexInteger
-  ELSE
+  BEGIN
+    fLastTokenId := tiHexInteger;
+    HexNum;
+  END
+  ELSE BEGIN
     fLastTokenId := tiInteger;
-  REPEAT
-    fLastTokenString := fLastTokenString + fLookahead;
-    SELF.GetChar;
-  UNTIL NOT SELF.isDigit (fLookahead);
+    IntegerNum;
+  END;
   RESULT := fLastTokenString;
   SkipWhite;
+  //WriteLn ('Last Token : ''', fLastTokenString, '''');
 END;
 
 
