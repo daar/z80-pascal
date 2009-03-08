@@ -1,15 +1,15 @@
-(* Compiler main module. *)
 PROGRAM Z80Pas;
+(*< Compiler main module. *)
 
 USES
-  ULexScan, (* Lexical scanner. *)
+  Compiler, (* THE compiler *)
   sysutils;
 
 
 
 VAR
+(* Temporal storage for filenames. *)
   OutputFileName, InputFileName: STRING;
-  Scanner: TLexicalScanner;
 
 
 
@@ -42,21 +42,16 @@ VAR
   END;
 
 
-VAR
-  Token: STRING;
 BEGIN
   TRY
     Title;
     CheckParameterList;
-    Scanner := TLexicalScanner.Create (InputFileName);
-    WriteLn ('Compiling ', InputFileName);
-    REPEAT
-      Token := Scanner.GetIdentifier;
-      WriteLn ('''',Token,'''');
-    UNTIL Token = '.';
+    PascalCompiler.Compile (InputFileName);
+    WriteLn ('Compilation finished.');
+    PascalCompiler.Output.SaveToFile (OutputFileName);
+    WriteLn ('File saved at '''+OutputFileName+'''.');
   EXCEPT
     ON Error: Exception DO
       WriteLn (Error.Message);
   END;
-  Scanner.Free;
 END.

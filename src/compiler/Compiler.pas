@@ -5,7 +5,8 @@ UNIT Compiler;
 INTERFACE
 
 USES
-  Classes;
+  ULexScan,
+  Classes, sysutils;
 
 
 
@@ -13,18 +14,39 @@ TYPE
 (* The actual compiler. *)
   TPascalCompiler = CLASS
   PRIVATE
-  (* From -> To. *)
-    InputStream, OutputStream: TFileStream;
-    fInputFilename, fOutputFileName: STRING;
-  (* To open the files. *)
-    PROCEDURE PutInputFilename (aNewFileName: STRING);
-    PROCEDURE PutOutputFilename (aNewFileName: STRING);
+    fScanner: TLexicalScanner;
+    fFileName: STRING;
+    fOutput: TStringList;
   PUBLIC
-  (* Destructor *)
+  (* Constructor. *)
+    CONSTRUCTOR Create;
+  (* Destructor. *)
     DESTRUCTOR Destroy; OVERRIDE;
 
-    PROPERTY InputFileName: STRING READ fInputFileName WRITE PutInputFilename;
-    PROPERTY OutputFileName: STRING READ fOutputFileName WRITE PutOutputFilename;
+  (* Entry point for compilation. *)
+    PROCEDURE Compile (aFilename: STRING);
+
+  (* Set the input file. *)
+    PROPERTY FileName: STRING READ fFileName;
+  (* Compilation result. *)
+    PROPERTY Output: TStringList READ fOutput;
+  PRIVATE
+  { Recursive compiler. }
+    PROCEDURE PascalProgram;
+    PROCEDURE Block;
+    PROCEDURE DeclarationPart;
+    PROCEDURE StatementPart;
+    PROCEDURE CompoundStatement;
+
+    PROCEDURE ASMCompoundStatement;
+  END;
+
+
+
+(* To manage compilation exceptions. *)
+  CompilationException = CLASS (Exception)
+  PUBLIC
+    CONSTRUCTOR Expected (fExpected, fFound: STRING);
   END;
 
 
@@ -37,40 +59,138 @@ VAR
 
 IMPLEMENTATION
 
-USES
-  sysutils;
-
-
-
-(* Assigns the input file. *)
-PROCEDURE TPascalCompiler.PutInputFileName (aNewFileName: STRING);
+(* Something expected bot otherthing found. *)
+CONSTRUCTOR CompilationException.Expected (fExpected, fFound: STRING);
 BEGIN
-  IF SELF.InputStream <> NIL THEN
-    RAISE Exception.Create ('Input stream setted twice!');
-  SELF.InputStream := TFileStream.Create (aNewFileName, fmOpenRead, 0);
+  INHERITED Create (''''+fExpected+''' expected but '''+fFound+''' found.');
 END;
 
 
 
-(* Assigns the Output file. *)
-PROCEDURE TPascalCompiler.PutOutputFileName (aNewFileName: STRING);
+(************
+ * Compiler *
+ ************)
+
+(* Constructor. *)
+CONSTRUCTOR TPascalCompiler.Create;
 BEGIN
-  IF SELF.OutputStream <> NIL THEN
-    RAISE Exception.Create ('Output stream setted twice!');
-  SELF.OutputStream := TFileStream.Create (aNewFileName, fmCreate, 0);
+  fOutput := TStringList.Create;
 END;
 
 
 
-(* Destructor *)
+(* Destructor. *)
 DESTRUCTOR TPascalCompiler.Destroy;
 BEGIN
-{ Release resources. }
-  IF SELF.InputStream <> NIL THEN
-    SELF.InputStream.Free;
-  IF SELF.OutputStream <> NIL THEN
-    SELF.OutputStream.Free;
+  IF fScanner <> NIL THEN fScanner.Free;
+  IF fOutput  <> NIL THEN fOutput .Free;
   INHERITED;
+END;
+
+
+
+(* Entry point for compilation. *)
+PROCEDURE TPascalCompiler.Compile (aFileName: STRING);
+VAR
+  Token: STRING;
+BEGIN
+{ Set up the scanner. }
+  IF fScanner <> NIL THEN
+    RAISE CompilationException.Create ('''Compile'' should be called only once!');
+  fScanner := TLexicalScanner.Create (aFileName);
+{ BNF: Z80pas = PascalProgram .
+       PascalProgram = "PROGRAM" ...
+}
+  Token := fScanner.GetToken;
+  IF Token = 'PROGRAM' THEN
+    SELF.PascalProgram
+  ELSE
+    RAISE CompilationException.Expected ('PROGRAM', Token);
+END;
+
+
+
+(**********************
+ * Recursive compiler *
+ **********************)
+
+(* PascalProgram ::= "PROGRAM" NewIdent ";" Block "." . *)
+PROCEDURE TPascalCompiler.PascalProgram;
+VAR
+  ProgramIdentifier: STRING;
+BEGIN
+  IF fScanner.LastToken <> 'PROGRAM' THEN
+    RAISE CompilationException.Expected ('PROGRAM', fScanner.LastToken);
+  ProgramIdentifier := fScanner.GetIdentifier; { NewIdent ::= identifier . }
+  WriteLn ('Program name ''', ProgramIdentifier, '''');
+  IF fScanner.GetToken <> ';' THEN
+    RAISE CompilationException.Expected (';', fScanner.LastToken);
+{ TODO: Program prolog. }
+  SELF.Block;
+  IF fScanner.GetToken <> '.' THEN
+    RAISE CompilationException.Expected ('.', fScanner.LastToken);
+{ TODO: Program epilog. }
+END;
+
+
+
+(* Block ::= DeclarationPart StatementPart . *)
+PROCEDURE TPascalCompiler.Block;
+BEGIN
+  SELF.DeclarationPart;
+  SELF.StatementPart;
+END;
+
+
+
+(* At the moment, DeclarationPart is empty. *)
+PROCEDURE TPascalCompiler.DeclarationPart;
+BEGIN
+  ;
+END;
+
+
+
+(* StatementPart ::= CompoundStatement | ASMCompoundStatement . *)
+PROCEDURE TPascalCompiler.StatementPart;
+BEGIN
+
+  IF fScanner.GetToken = 'ASM' THEN
+    SELF.ASMCompoundStatement
+  ELSE
+    SELF.CompoundStatement;
+END;
+
+
+
+(* CompoundStatement ::= "BEGIN" StatementSequence "END" .
+   StatementSequence ::= Statement [ ";" Statement ]* . *)
+PROCEDURE TPascalCompiler.CompoundStatement;
+BEGIN
+  IF fScanner.LastToken <> 'BEGIN' THEN
+    RAISE CompilationException.Expected ('BEGIN', fScanner.LastToken);
+  WHILE fScanner.GetToken <> 'END' DO
+  BEGIN
+    IF fScanner.LastToken = 'ASM' THEN
+      SELF.ASMCompoundStatement
+    ELSE IF fScanner.LastToken = ';' THEN
+    { This allows empty statements. }
+      CONTINUE
+    ELSE
+      RAISE CompilationException.Create ('Synax error.');
+  END;
+END;
+
+
+
+(* ASMCompoundStatement ::= "ASM" [ASMStatementSequence] "END" .
+   ASMStatementSequence ::= Z80Statement [ ";" Z80Statement ]* . *)
+PROCEDURE TPascalCompiler.ASMCompoundStatement;
+BEGIN
+  IF fScanner.LastToken <> 'ASM' THEN
+    RAISE CompilationException.Expected ('ASM', fScanner.LastToken);
+  WHILE fScanner.GetToken <> 'END' DO
+    ;
 END;
 
 

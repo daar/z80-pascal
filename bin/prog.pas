@@ -1,7 +1,5 @@
 PROGRAM prog;
 
-BEGIN
-  ASM
-    RST 08
-  END;
+ASM
+  RST 08
 END.

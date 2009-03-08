@@ -10,10 +10,12 @@ USES
 
 TYPE
 (* Token identificators. *)
-  TTokenId = ( tiIdentifier, tiInteger, tiHexInteger, tiReal, tiString );
+  TTokenId = ( tiIdentifier, tiInteger, tiHexInteger, tiReal, tiString,
+		tiOther );
 
 (* Lexical scanner.
-   It recognices the first part of the BNF definition. *)
+   It recognices the first part of the BNF definition.
+   All identifiers converted to all-uppercase. *)
   TLexicalScanner = CLASS
   PRIVATE
     fInputStream: TFileStream;
@@ -48,6 +50,8 @@ TYPE
   (* Skips CR/CF. (TEST) *)
     PROCEDURE Fin;
 
+  (* Returns any token. *)
+    FUNCTION GetToken: STRING;
   (* Returns an identifier. *)
     FUNCTION GetIdentifier: STRING;
   (* Returns a number. *)
@@ -83,6 +87,7 @@ CONSTRUCTOR TLexicalScanner.Create (aFileName: STRING);
 BEGIN
   SELF.fInputStream := TFileStream.Create (aFileName, fmOpenRead);
   SELF.GetChar;
+  SkipWhite;
 END;
 
 
@@ -162,6 +167,24 @@ PROCEDURE TLexicalScanner.Fin;
 BEGIN
   WHILE fLookahead IN [CR, LF] DO
     SELF.GetChar;
+END;
+
+
+
+(* Returns any token. *)
+FUNCTION TLexicalScanner.GetToken: STRING;
+BEGIN
+  WHILE (fLookahead = CR) OR (fLookahead = LF) DO Fin;
+  IF SELF.isAlpha (Lookahead) THEN
+    RESULT := SELF.GetIdentifier
+  ELSE IF SELF.isDigit (Lookahead) OR (Lookahead = '$') THEN
+    RESULT := SELF.GetNumber
+  ELSE BEGIN
+    SELF.fLastTokenString := fLookahead;
+    SELF.fLastTokenId := tiOther;
+    RESULT := SELF.fLastTokenString;
+    SELF.GetChar;
+  END;
 END;
 
 
