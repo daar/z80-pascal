@@ -3,7 +3,6 @@
 rem Sets makefile source code for the different platforms
 rem Based on fix.bat of Allegro.
 rem Modified By Kronoman - In loving memory of my father.
-rem Modified By Ñuño Martínez - In loving memory of my father.
 
 if [%1] == [linux]   goto linux
 if [%1] == [djgpp]   goto djgpp

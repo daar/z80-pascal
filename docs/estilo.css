@@ -1,0 +1,249 @@
+/* Hoja de estilos creada para la plantilla XHTML. */
+body {
+	font-family: "Century Shoolbook", "New Century Schoolbook", "Times", serif;
+	font-size: 100%;
+	font-weight: normal;
+	font-style: normal;
+	text-decoration: none;
+	text-align: left;
+	background: white;
+	margin: 10px;
+	color: black;
+}
+h1 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 35px;
+	font-weight: bold;
+	text-decoration: none;
+	text-align: center;
+	border-width: 0px;
+	border-color: black;
+	border-style: none;
+	margin: 10px;
+	padding: 0px;
+}
+h2 {
+	width: 100%;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 30px;
+	font-weight: bold;
+	text-decoration: none;
+	text-align: left;
+	border-width: 2px;
+	border-color: black;
+	border-style: none;
+	border-bottom-style: solid;
+	margin: 0px;
+	margin-top: 10px;
+	margin-bottom: 5px;
+	padding: 0px;
+	padding-left: 2px;
+}
+h3 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 20px;
+	font-weight: bold;
+	text-decoration: none;
+	text-align: left;
+	border-width: 1px;
+	border-color: black;
+	border-style: none;
+	border-bottom-style: solid;
+	margin-left: 10px;
+	margin-top: 10px;
+	margin-bottom: 5px;
+	margin-right: 5px;
+	padding: 0px;
+}
+h4 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 15px;
+	font-weight: bold;
+	text-decoration: underline;
+	text-align: left;
+	border-width: 0px;
+	border-style: none;
+	margin-left: 20px;
+	margin-top: 10px;
+	margin-bottom: 5px;
+	margin-right: 5px;
+	padding: 0px;
+}
+blockquote {
+	font-family: "Comic Sans MS", Helvetica, sans-serif;
+	padding: 0px;
+}
+dd {
+	font-size: 15px;
+	margin-top: 0px;
+	margin-left: 80px;
+	margin-right: 10px;
+	margin-bottom: 10px;
+	padding: 0px;
+}
+dt {
+	font-family: Arial, helvetica, sans-serif;
+	font-size: 15px;
+	font-weight: bold;
+	text-decoration: underline;
+	text-align: left;
+	border-style: none;
+	margin-left: 20px;
+	margin-top: 10px;
+	margin-bottom: 5px;
+	margin-right: 5px;
+	padding: 0px;
+}
+li {
+	font-weight: normal;
+	font-size: 15px;
+	margin: 0px;
+}
+ol {
+	list-style-type: decimal;
+	list-style-position: outside;
+}
+p {
+	font-size: 15px;
+	margin-top: 0px;
+	margin-left: 20px;
+	margin-right: 10px;
+	margin-bottom: 10px;
+	padding: 0px;
+}
+pre {
+	background: navy;
+	border-color: yellow;
+	border-style: solid;
+	border-width: 1px;
+	color: yellow;
+	font-family: "Courier New", Courier, monospace;
+	font-size: 15px;
+	padding: 8px;
+	width: 80%;
+}
+ul {
+	list-style-type: disc;
+	list-style-position: outside;
+}
+
+a {
+	text-decoration: underline;
+	color: rgb(0, 0, 204);
+}
+a:hover {
+	color: rgb(128, 0, 128);
+}
+abbr {
+	border-bottom-color: black;
+	border-bottom-width: 1px;
+	border-bottom-style: dotted;
+}
+acronym {
+	border-bottom-color: black;
+	border-bottom-width: 1px;
+	border-bottom-style: dotted;
+}
+address {
+	font-size: 15px;
+	font-weight: normal;
+	font-style: italic;
+	text-decoration: none;
+}
+cite {
+	font-style: italic;
+}
+code {
+	font-family: "Courier New", Courier, monospace;
+}
+del {
+	text-decoration: line-through;
+	color: red;
+}
+dfn {
+	font-style: italic;
+}
+em {
+	font-style: italic;
+}
+ins {
+	text-decoration: underline;
+	color: green;
+}
+kbd {
+	font-family: "Courier New", Courier, monospace;
+}
+q {
+	font-style: italic;
+	quotes: '"' '"' "'" "'";
+}
+samp {
+	font-family: "Courier New", Courier, monospace;
+}
+small {
+	font-size: 75%
+}
+strong {
+	font-weight: bold;
+}
+sub {
+	/* Esto no sé hacerlo. Confiemos en el navegador. */
+}
+sup {
+	/* Esto no sé hacerlo. Confiemos en el navegador. */
+}
+tt {
+	font-family: "Courier New", Courier, monospace;
+}
+
+img {
+	border-width: 0px;
+	border-style: none;
+}
+
+table {
+	background: white;
+	border-width: 1px;
+	border-style: solid;
+	border-color: black;
+	margin-left: auto;
+	margin-right: auto;
+}
+caption {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 15px;
+	font-weight: bold;
+	text-decoration: none;
+	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
+}
+td {
+	background: rgb(255,255,153);
+	padding: 5px;
+}
+th {
+	background: rgb(204, 204, 153);
+	padding: 5px;
+}
+
+fieldset {
+	width: 50%;
+}
+label {
+	font-weight: bold;
+	text-decoration: none;
+}
+optgroup {
+	font-weight: bold;
+	font-style: normal;
+}
+option {
+	font-weight: normal;
+	font-style: normal;
+}
+
+*.ejemplo {
+	font-family: "Comic Sans MS", Helvetica, sans-serif;
+	margin-left: 50px;
+}

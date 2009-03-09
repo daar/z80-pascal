@@ -2,27 +2,28 @@
 <html xml:lang="es-ES" xmlns="http://www.w3.org/1999/xhtml" lang="es-ES"><head>
  <title>Z80-Pascal programmer manual</title>
  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+ <link type="text/css" rel="stylesheet" href="estilo.css" />
 </head><body>
  <h1><img src="images/logo.png" border="0" alt="" /><br />Z80-Pascal programmer manual</h1>
-  <p class="warning"><strong>Warning:</strong> Remember this is a very early releas so there's a lot of things that just doesn't work.</p>
+  <p class="warning"><strong>Warning:</strong> Remember this is a very early release so there's a lot of things that just don't work.</p>
  <h2>Table of contents</h2>
   <ul>
    <li><a href="#intro">Introduction</a></li>
    <li><a href="#comments">Comments</a></li>
-   <li><a href="#asm_end"><code>ASM .. END</a></li>
+   <li><a href="#asm_end"><code>ASM .. END</code></a></li>
   </ul>
  <h2 id="intro">Introduction</h2>
   <p>This is not an explanation about the Pascal language.&nbsp; This document just explains differences between Standard Pascal and the current compiled language.</p>
   <p><strong>Current version compiles a very limited subset of the Pascal language.</strong>&nbsp;</p>
  <h2 id="comments">Comments</h2>
   <p>Current version of the compiler doesn't support any kind of comments, so don't use them.</p>
- <h2 id="asm_end"><code>ASM .. END</h2>
+ <h2 id="asm_end"><code>ASM .. END</code></h2>
   <p></p>
   <p>Z80-Pascal introduces a block that allows to add Z80 Assembler code inside the Pascal sources.&nbsp; For example:</p>
-  <code><pre>ASM
+  <pre><code>ASM
   LD A, 65;
-  CALL $00A2
-END;</pre></code>
+  CALL $00A2;
+END;</code></pre>
   <p>There are some issues you must to know:</p>
   <ul>
     <li>You can write integers in both decimal or hexagesimal formats.&nbsp; Hexagesimal values are preceded by the <code>$</code> character, just as Pascal ones.&nbsp; <strong>Warning:</strong> Current version doesn't support negative numbers.</li>
