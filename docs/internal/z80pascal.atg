@@ -43,16 +43,31 @@ PRODUCTIONS
 
 (* Target can be either a program or an unit.  Current version parses only
    programs. *)
-  Z80Pas            = PascalProgram .
+  Z80Pas            = PascalProgram | PascalUnit .
 
   PascalProgram     = "PROGRAM"  NewIdent ";"
-                      Block "." .
+                      UnitBlock "." .
+
+  PascalUnit        = "UNIT" NewIdent ";"
+                      InterfaceBlock
+                      ImplementBlock
+                      "END" "." .
+
+  DeclarationPart   = UsesPart
 
   Block             =  DeclarationPart StatementPart .
+
+  InterfaceBlock    = "INTERFACE" UnitBlock .
+
+  ImplementBlock    = "IMPLEMENTATION" UnitBlock .
+
+  UnitBlock         = UnitDeclarations DeclarationPart .
 
   DeclarationPart   = ConstDefinitions
                       TypeDefinitions VarDeclarations
                       { ProcDeclarations } .
+
+  UnitDeclarations  = [ "USES" NewIdentList ";" ] .
 
 (* -------------------------------------------------------------------- *)
 
