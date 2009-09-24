@@ -1,5 +1,5 @@
 (* This is part of the Pascal compiler.
-   
+
    It defines the assembler used at the ASM .. END block. *)
 
 
