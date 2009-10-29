@@ -1,5 +1,5 @@
+(* Compiler main module. *)
 PROGRAM Z80Pas;
-(*< Compiler main module. *)
 
 USES
   Compiler, (* THE compiler *)
