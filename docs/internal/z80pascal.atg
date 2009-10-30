@@ -1,6 +1,5 @@
 COMPILER Z80Pascal
-(* Z80-Pascal compiler description.  This file MUST be synchronized with the
-   one in the src/compiler directory and vice versa.
+(* Z80-Pascal compiler description.
 
    This grammar is not LL(1).
 
@@ -10,7 +9,7 @@ COMPILER Z80Pascal
    of the differences are:
 
    - Not input/output files at "PROGRAM".
-   - Not label and "goto" allowed.
+   - Not label and "GOTO" allowed.
    - ASM..END for Z80 assembler added.
 
  *)
@@ -46,7 +45,8 @@ PRODUCTIONS
   Z80Pas            = PascalProgram | PascalUnit .
 
   PascalProgram     = "PROGRAM"  NewIdent ";"
-                      UnitBlock "." .
+                      UnitBlock
+                      StatementSequence "." .
 
   PascalUnit        = "UNIT" NewIdent ";"
                       InterfaceBlock
@@ -64,7 +64,8 @@ PRODUCTIONS
   UnitBlock         = UnitDeclarations DeclarationPart .
 
   DeclarationPart   = ConstDefinitions
-                      TypeDefinitions VarDeclarations
+                      TypeDefinitions
+                      VarDeclarations
                       { ProcDeclarations } .
 
   UnitDeclarations  = [ "USES" NewIdentList ";" ] .
@@ -278,7 +279,8 @@ PRODUCTIONS
                          | "E" .
 
   Z80Register16bit     =   "AF"
-                         | "HL" | "BC"
+                         | "BC"
+                         | "HL"
                          | "DE"
                          | "IX"
                          | "IY"
@@ -298,3 +300,4 @@ PRODUCTIONS
   String            = string .
 
 END Z80Pas.
+
