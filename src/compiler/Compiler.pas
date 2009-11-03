@@ -38,7 +38,7 @@ TYPE
     PROCEDURE StatementPart;
     PROCEDURE CompoundStatement;
 
-  { Assembler.  Actually implemented on fil 'z80asm.inc' }
+  { Assembler.  Actually implemented on file 'z80asm.inc' }
     PROCEDURE ASMCompoundStatement;
     PROCEDURE Z80Statement;
   END;
@@ -48,7 +48,7 @@ TYPE
 (* To manage compilation exceptions. *)
   CompilationException = CLASS (Exception)
   PUBLIC
-  (* Something expected but otherthing found. *)
+  (* Something expected but anotherthing found. *)
     CONSTRUCTOR Expected (fExpected, fFound: STRING);
   END;
 
@@ -62,7 +62,7 @@ VAR
 
 IMPLEMENTATION
 
-(* Something expected but otherthing found. *)
+(* Something expected but anotherthing found. *)
   CONSTRUCTOR CompilationException.Expected (fExpected, fFound: STRING);
   BEGIN
     INHERITED Create (''''+fExpected+''' expected but '''+fFound+''' found.');

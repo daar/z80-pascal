@@ -1,23 +1,22 @@
 <?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
-    <PathDelim Value="/"/>
-    <Version Value="6"/>
+    <Version Value="7"/>
     <General>
       <Flags>
         <AlwaysBuild Value="False"/>
+        <LRSInOutputDirectory Value="False"/>
       </Flags>
       <MainUnit Value="0"/>
       <AutoCreateForms Value="False"/>
-      <IconPath Value="./"/>
       <TargetFileExt Value=""/>
       <Title Value="Z80 Pascal IDE"/>
-      <ActiveEditorIndexAtStart Value="1"/>
+      <ActiveEditorIndexAtStart Value="2"/>
     </General>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <CurrentMajorRevNr Value="1"/>
-      <ProjectVersion Value=""/>
+      <ProjectVersion Value="0.1.0.0"/>
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
@@ -53,23 +52,21 @@
       </Unit0>
       <Unit1>
         <Filename Value="UnitMainWindow.pas"/>
-        <ComponentName Value="MainWindow"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainWindow"/>
         <ResourceBaseClass Value="Form"/>
-        <ResourceFilename Value="UnitMainWindow.lrs"/>
         <UnitName Value="UnitMainWindow"/>
-        <CursorPos X="12" Y="66"/>
-        <TopLine Value="1"/>
+        <CursorPos X="1" Y="31"/>
+        <TopLine Value="17"/>
         <EditorIndex Value="2"/>
         <UsageCount Value="21"/>
         <Loaded Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="UnitAboutDlg.pas"/>
-        <ComponentName Value="AboutDialog"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="AboutDialog"/>
         <ResourceBaseClass Value="Form"/>
-        <ResourceFilename Value="UnitAboutDlg.lrs"/>
         <UnitName Value="UnitAboutDlg"/>
         <CursorPos X="23" Y="31"/>
         <TopLine Value="7"/>
@@ -81,123 +78,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="17" Column="12" TopLine="1"/>
+        <Caret Line="17" Column="17" TopLine="1"/>
       </Position1>
       <Position2>
-        <Filename Value="z80pide.lpr"/>
-        <Caret Line="15" Column="51" TopLine="1"/>
+        <Filename Value="UnitMainWindow.pas"/>
+        <Caret Line="25" Column="49" TopLine="24"/>
       </Position2>
       <Position3>
-        <Filename Value="z80pide.lpr"/>
-        <Caret Line="11" Column="22" TopLine="1"/>
+        <Filename Value="UnitMainWindow.pas"/>
+        <Caret Line="52" Column="6" TopLine="31"/>
       </Position3>
       <Position4>
         <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="18" Column="17" TopLine="1"/>
+        <Caret Line="51" Column="34" TopLine="32"/>
       </Position4>
       <Position5>
         <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="17" Column="17" TopLine="1"/>
+        <Caret Line="26" Column="49" TopLine="17"/>
       </Position5>
       <Position6>
         <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="25" Column="49" TopLine="24"/>
+        <Caret Line="43" Column="21" TopLine="19"/>
       </Position6>
       <Position7>
         <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="52" Column="6" TopLine="31"/>
+        <Caret Line="24" Column="5" TopLine="19"/>
       </Position7>
       <Position8>
         <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="51" Column="34" TopLine="32"/>
+        <Caret Line="29" Column="50" TopLine="24"/>
       </Position8>
       <Position9>
         <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="26" Column="49" TopLine="17"/>
+        <Caret Line="56" Column="7" TopLine="42"/>
       </Position9>
       <Position10>
         <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="43" Column="21" TopLine="19"/>
+        <Caret Line="52" Column="54" TopLine="38"/>
       </Position10>
       <Position11>
         <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="24" Column="5" TopLine="19"/>
+        <Caret Line="54" Column="28" TopLine="38"/>
       </Position11>
       <Position12>
         <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="29" Column="50" TopLine="24"/>
+        <Caret Line="52" Column="42" TopLine="38"/>
       </Position12>
       <Position13>
         <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="56" Column="7" TopLine="42"/>
+        <Caret Line="30" Column="52" TopLine="29"/>
       </Position13>
       <Position14>
         <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="52" Column="54" TopLine="38"/>
+        <Caret Line="29" Column="5" TopLine="27"/>
       </Position14>
       <Position15>
-        <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="54" Column="28" TopLine="38"/>
+        <Filename Value="UnitAboutDlg.pas"/>
+        <Caret Line="11" Column="15" TopLine="1"/>
       </Position15>
       <Position16>
-        <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="52" Column="42" TopLine="38"/>
+        <Filename Value="UnitAboutDlg.pas"/>
+        <Caret Line="16" Column="9" TopLine="1"/>
       </Position16>
       <Position17>
-        <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="30" Column="52" TopLine="29"/>
+        <Filename Value="UnitAboutDlg.pas"/>
+        <Caret Line="17" Column="16" TopLine="1"/>
       </Position17>
       <Position18>
-        <Filename Value="UnitMainWindow.pas"/>
-        <Caret Line="29" Column="5" TopLine="27"/>
+        <Filename Value="UnitAboutDlg.pas"/>
+        <Caret Line="18" Column="14" TopLine="1"/>
       </Position18>
       <Position19>
         <Filename Value="UnitAboutDlg.pas"/>
-        <Caret Line="11" Column="15" TopLine="1"/>
+        <Caret Line="19" Column="17" TopLine="1"/>
       </Position19>
       <Position20>
         <Filename Value="UnitAboutDlg.pas"/>
-        <Caret Line="16" Column="9" TopLine="1"/>
+        <Caret Line="20" Column="16" TopLine="1"/>
       </Position20>
       <Position21>
         <Filename Value="UnitAboutDlg.pas"/>
-        <Caret Line="17" Column="16" TopLine="1"/>
+        <Caret Line="19" Column="26" TopLine="1"/>
       </Position21>
       <Position22>
         <Filename Value="UnitAboutDlg.pas"/>
-        <Caret Line="18" Column="14" TopLine="1"/>
+        <Caret Line="20" Column="16" TopLine="1"/>
       </Position22>
       <Position23>
         <Filename Value="UnitAboutDlg.pas"/>
-        <Caret Line="19" Column="17" TopLine="1"/>
+        <Caret Line="19" Column="26" TopLine="1"/>
       </Position23>
       <Position24>
         <Filename Value="UnitAboutDlg.pas"/>
-        <Caret Line="20" Column="16" TopLine="1"/>
+        <Caret Line="16" Column="16" TopLine="1"/>
       </Position24>
       <Position25>
         <Filename Value="UnitAboutDlg.pas"/>
-        <Caret Line="19" Column="26" TopLine="1"/>
+        <Caret Line="21" Column="30" TopLine="1"/>
       </Position25>
       <Position26>
         <Filename Value="UnitAboutDlg.pas"/>
-        <Caret Line="20" Column="16" TopLine="1"/>
+        <Caret Line="20" Column="26" TopLine="1"/>
       </Position26>
       <Position27>
-        <Filename Value="UnitAboutDlg.pas"/>
-        <Caret Line="19" Column="26" TopLine="1"/>
+        <Filename Value="UnitMainWindow.pas"/>
+        <Caret Line="64" Column="12" TopLine="26"/>
       </Position27>
       <Position28>
-        <Filename Value="UnitAboutDlg.pas"/>
-        <Caret Line="16" Column="16" TopLine="1"/>
+        <Filename Value="UnitMainWindow.pas"/>
+        <Caret Line="39" Column="14" TopLine="1"/>
       </Position28>
       <Position29>
-        <Filename Value="UnitAboutDlg.pas"/>
-        <Caret Line="21" Column="30" TopLine="1"/>
+        <Filename Value="UnitMainWindow.pas"/>
+        <Caret Line="41" Column="14" TopLine="3"/>
       </Position29>
       <Position30>
-        <Filename Value="UnitAboutDlg.pas"/>
-        <Caret Line="20" Column="26" TopLine="1"/>
+        <Filename Value="UnitMainWindow.pas"/>
+        <Caret Line="32" Column="1" TopLine="17"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>
@@ -207,7 +204,7 @@
       <Filename Value="../../bin/z80pide"/>
     </Target>
     <SearchPaths>
-      <UnitOutputDirectory Value="/home/guillermo/prog/z80-pascal/obj/ide/"/>
+      <UnitOutputDirectory Value="../../obj/ide"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>

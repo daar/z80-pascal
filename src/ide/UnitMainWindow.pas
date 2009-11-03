@@ -7,13 +7,15 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  Menus, SynEdit, SynHighlighterPas;
+  Menus, ActnList, StdActns, SynEdit, SynHighlighterPas;
 
 type
 
   { TMainWindow }
 
   TMainWindow = class(TForm)
+    ActionList: TActionList;
+    OpenFile: TFileOpen;
     MainMenu: TMainMenu;
       MenuItemFile: TMenuItem;
         MenuItemNew: TMenuItem;
@@ -21,14 +23,13 @@ type
         MenuItemSaveAs: TMenuItem;
         MenuItemSave: TMenuItem;
       MenuItemAbout: TMenuItem;
-    OpenDialog: TOpenDialog;
     SaveDialog: TSaveDialog;
     SynEdit: TSynEdit;
     SynPascalSyn: TSynPasSyn;
     procedure MenuItemAboutClick(Sender: TObject);
     procedure MenuItemNewClick(Sender: TObject);
-    procedure MenuItemOpenClick(Sender: TObject);
     procedure MenuItemSaveAsClick(Sender: TObject);
+    PROCEDURE OpenFileAccept(Sender: TObject);
   private
     { private declarations }
   public
@@ -69,17 +70,6 @@ end;
 
 
 
-(* To open files. *)
-procedure TMainWindow.MenuItemOpenClick(Sender: TObject);
-begin
-  IF OpenDialog.Execute THEN
-  BEGIN
-    SynEdit.Lines.LoadFromFile (OpenDialog.FileName);
-  END;
-end;
-
-
-
 (* To save the file. *)
 procedure TMainWindow.MenuItemSaveAsClick(Sender: TObject);
 begin
@@ -87,6 +77,14 @@ begin
   BEGIN
     SynEdit.Lines.SaveToFile (SaveDialog.FileName);
   END;
+end;
+
+
+
+(* To open files. *)
+PROCEDURE TMainWindow.OpenFileAccept(Sender: TObject);
+BEGIN
+  SynEdit.Lines.LoadFromFile (SELF.OpenFile.Dialog.FileName);
 end;
 
 initialization
