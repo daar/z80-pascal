@@ -1,42 +1,42 @@
 { Este es un archivo de recurso de Lazarus generado automáticamente }
 
 LazarusResources.Add('TMainWindow','FORMDATA',[
-  'TPF0'#11'TMainWindow'#10'MainWindow'#4'Left'#3'"'#1#6'Height'#3','#1#3'Top'#3
-  +#213#0#5'Width'#3#144#1#13'ActiveControl'#7#7'SynEdit'#7'Caption'#6#20'Z80-P'
-  +'ascal IDE 0.1.0'#12'ClientHeight'#3#19#1#11'ClientWidth'#3#144#1#4'Menu'#7#8
-  +'MainMenu'#10'LCLVersion'#6#8'0.9.28.2'#0#8'TSynEdit'#7'SynEdit'#4'Left'#2#0
-  +#6'Height'#3#19#1#3'Top'#2#0#5'Width'#3#144#1#5'Align'#7#8'alClient'#11'Font'
-  +'.Height'#2#14#9'Font.Name'#6'7-adobe-courier-medium-r-normal-*-*-*-*-*-*-*-'
-  +'iso10646-1'#10'Font.Pitch'#7#7'fpFixed'#12'Font.Quality'#7#16'fqNonAntialia'
-  +'sed'#11'ParentColor'#8#10'ParentFont'#8#8'TabOrder'#2#0#24'BookMarkOptions.'
-  +'OnChange'#13#12'Gutter.Width'#2'?'#19'Gutter.MouseActions'#14#1#5'Shift'#11
-  +#0#9'ShiftMask'#11#0#6'Button'#7#6'mbLeft'#10'ClickCount'#7#5'ccAny'#8'Click'
-  +'Dir'#7#6'cdDown'#7'Command'#2#13#9'MoveCaret'#8#6'Option'#2#0#8'Priority'#2
-  +#0#0#1#5'Shift'#11#0#9'ShiftMask'#11#0#6'Button'#7#7'mbRight'#10'ClickCount'
-  +#7#8'ccSingle'#8'ClickDir'#7#4'cdUp'#7'Command'#2#12#9'MoveCaret'#8#6'Option'
-  +#2#0#8'Priority'#2#0#0#0#11'Highlighter'#7#12'SynPascalSyn'#10'Keystrokes'#14
-  +#1#7'Command'#7#4'ecUp'#8'ShortCut'#2'&'#0#1#7'Command'#7#7'ecSelUp'#8'Short'
-  +'Cut'#3'& '#0#1#7'Command'#7#10'ecScrollUp'#8'ShortCut'#3'&@'#0#1#7'Command'
-  +#7#6'ecDown'#8'ShortCut'#2'('#0#1#7'Command'#7#9'ecSelDown'#8'ShortCut'#3'( '
-  +#0#1#7'Command'#7#12'ecScrollDown'#8'ShortCut'#3'(@'#0#1#7'Command'#7#6'ecLe'
-  +'ft'#8'ShortCut'#2'%'#0#1#7'Command'#7#9'ecSelLeft'#8'ShortCut'#3'% '#0#1#7
-  +'Command'#7#10'ecWordLeft'#8'ShortCut'#3'%@'#0#1#7'Command'#7#13'ecSelWordLe'
-  +'ft'#8'ShortCut'#3'%`'#0#1#7'Command'#7#7'ecRight'#8'ShortCut'#2''''#0#1#7'C'
-  +'ommand'#7#10'ecSelRight'#8'ShortCut'#3''' '#0#1#7'Command'#7#11'ecWordRight'
-  +#8'ShortCut'#3'''@'#0#1#7'Command'#7#14'ecSelWordRight'#8'ShortCut'#3'''`'#0
-  +#1#7'Command'#7#10'ecPageDown'#8'ShortCut'#2'"'#0#1#7'Command'#7#13'ecSelPag'
-  +'eDown'#8'ShortCut'#3'" '#0#1#7'Command'#7#12'ecPageBottom'#8'ShortCut'#3'"@'
-  +#0#1#7'Command'#7#15'ecSelPageBottom'#8'ShortCut'#3'"`'#0#1#7'Command'#7#8'e'
-  +'cPageUp'#8'ShortCut'#2'!'#0#1#7'Command'#7#11'ecSelPageUp'#8'ShortCut'#3'! '
-  +#0#1#7'Command'#7#9'ecPageTop'#8'ShortCut'#3'!@'#0#1#7'Command'#7#12'ecSelPa'
-  +'geTop'#8'ShortCut'#3'!`'#0#1#7'Command'#7#11'ecLineStart'#8'ShortCut'#2'$'#0
-  +#1#7'Command'#7#14'ecSelLineStart'#8'ShortCut'#3'$ '#0#1#7'Command'#7#11'ecE'
-  +'ditorTop'#8'ShortCut'#3'$@'#0#1#7'Command'#7#14'ecSelEditorTop'#8'ShortCut'
-  +#3'$`'#0#1#7'Command'#7#9'ecLineEnd'#8'ShortCut'#2'#'#0#1#7'Command'#7#12'ec'
-  +'SelLineEnd'#8'ShortCut'#3'# '#0#1#7'Command'#7#14'ecEditorBottom'#8'ShortCu'
-  +'t'#3'#@'#0#1#7'Command'#7#17'ecSelEditorBottom'#8'ShortCut'#3'#`'#0#1#7'Com'
-  +'mand'#7#12'ecToggleMode'#8'ShortCut'#2'-'#0#1#7'Command'#7#6'ecCopy'#8'Shor'
-  +'tCut'#3'-@'#0#1#7'Command'#7#7'ecPaste'#8'ShortCut'#3'- '#0#1#7'Command'#7
+  'TPF0'#11'TMainWindow'#10'MainWindow'#4'Left'#3'"'#1#6'Height'#3#156#1#3'Top'
+  +#3#213#0#5'Width'#3'f'#2#13'ActiveControl'#7#7'SynEdit'#7'Caption'#6#20'Z80-'
+  +'Pascal IDE 0.1.0'#12'ClientHeight'#3#131#1#11'ClientWidth'#3'f'#2#4'Menu'#7
+  +#8'MainMenu'#10'LCLVersion'#6#8'0.9.28.2'#0#8'TSynEdit'#7'SynEdit'#4'Left'#2
+  +#0#6'Height'#3#156#1#3'Top'#2#0#5'Width'#3'f'#2#5'Align'#7#8'alClient'#11'Fo'
+  +'nt.Height'#2#14#9'Font.Name'#6'7-adobe-courier-medium-r-normal-*-*-*-*-*-*-'
+  +'*-iso10646-1'#10'Font.Pitch'#7#7'fpFixed'#12'Font.Quality'#7#16'fqNonAntial'
+  +'iased'#11'ParentColor'#8#10'ParentFont'#8#8'TabOrder'#2#0#24'BookMarkOption'
+  +'s.OnChange'#13#12'Gutter.Width'#2'?'#19'Gutter.MouseActions'#14#1#5'Shift'
+  +#11#0#9'ShiftMask'#11#0#6'Button'#7#6'mbLeft'#10'ClickCount'#7#5'ccAny'#8'Cl'
+  +'ickDir'#7#6'cdDown'#7'Command'#2#13#9'MoveCaret'#8#6'Option'#2#0#8'Priority'
+  +#2#0#0#1#5'Shift'#11#0#9'ShiftMask'#11#0#6'Button'#7#7'mbRight'#10'ClickCoun'
+  +'t'#7#8'ccSingle'#8'ClickDir'#7#4'cdUp'#7'Command'#2#12#9'MoveCaret'#8#6'Opt'
+  +'ion'#2#0#8'Priority'#2#0#0#0#11'Highlighter'#7#12'SynPascalSyn'#10'Keystrok'
+  +'es'#14#1#7'Command'#7#4'ecUp'#8'ShortCut'#2'&'#0#1#7'Command'#7#7'ecSelUp'#8
+  +'ShortCut'#3'& '#0#1#7'Command'#7#10'ecScrollUp'#8'ShortCut'#3'&@'#0#1#7'Com'
+  +'mand'#7#6'ecDown'#8'ShortCut'#2'('#0#1#7'Command'#7#9'ecSelDown'#8'ShortCut'
+  +#3'( '#0#1#7'Command'#7#12'ecScrollDown'#8'ShortCut'#3'(@'#0#1#7'Command'#7#6
+  +'ecLeft'#8'ShortCut'#2'%'#0#1#7'Command'#7#9'ecSelLeft'#8'ShortCut'#3'% '#0#1
+  +#7'Command'#7#10'ecWordLeft'#8'ShortCut'#3'%@'#0#1#7'Command'#7#13'ecSelWord'
+  +'Left'#8'ShortCut'#3'%`'#0#1#7'Command'#7#7'ecRight'#8'ShortCut'#2''''#0#1#7
+  +'Command'#7#10'ecSelRight'#8'ShortCut'#3''' '#0#1#7'Command'#7#11'ecWordRigh'
+  +'t'#8'ShortCut'#3'''@'#0#1#7'Command'#7#14'ecSelWordRight'#8'ShortCut'#3'''`'
+  +#0#1#7'Command'#7#10'ecPageDown'#8'ShortCut'#2'"'#0#1#7'Command'#7#13'ecSelP'
+  +'ageDown'#8'ShortCut'#3'" '#0#1#7'Command'#7#12'ecPageBottom'#8'ShortCut'#3
+  +'"@'#0#1#7'Command'#7#15'ecSelPageBottom'#8'ShortCut'#3'"`'#0#1#7'Command'#7
+  +#8'ecPageUp'#8'ShortCut'#2'!'#0#1#7'Command'#7#11'ecSelPageUp'#8'ShortCut'#3
+  +'! '#0#1#7'Command'#7#9'ecPageTop'#8'ShortCut'#3'!@'#0#1#7'Command'#7#12'ecS'
+  +'elPageTop'#8'ShortCut'#3'!`'#0#1#7'Command'#7#11'ecLineStart'#8'ShortCut'#2
+  +'$'#0#1#7'Command'#7#14'ecSelLineStart'#8'ShortCut'#3'$ '#0#1#7'Command'#7#11
+  +'ecEditorTop'#8'ShortCut'#3'$@'#0#1#7'Command'#7#14'ecSelEditorTop'#8'ShortC'
+  +'ut'#3'$`'#0#1#7'Command'#7#9'ecLineEnd'#8'ShortCut'#2'#'#0#1#7'Command'#7#12
+  +'ecSelLineEnd'#8'ShortCut'#3'# '#0#1#7'Command'#7#14'ecEditorBottom'#8'Short'
+  +'Cut'#3'#@'#0#1#7'Command'#7#17'ecSelEditorBottom'#8'ShortCut'#3'#`'#0#1#7'C'
+  +'ommand'#7#12'ecToggleMode'#8'ShortCut'#2'-'#0#1#7'Command'#7#6'ecCopy'#8'Sh'
+  +'ortCut'#3'-@'#0#1#7'Command'#7#7'ecPaste'#8'ShortCut'#3'- '#0#1#7'Command'#7
   +#12'ecDeleteChar'#8'ShortCut'#2'.'#0#1#7'Command'#7#5'ecCut'#8'ShortCut'#3'.'
   +' '#0#1#7'Command'#7#16'ecDeleteLastChar'#8'ShortCut'#2#8#0#1#7'Command'#7#16
   +'ecDeleteLastChar'#8'ShortCut'#3#8' '#0#1#7'Command'#7#16'ecDeleteLastWord'#8
@@ -124,16 +124,20 @@ LazarusResources.Add('TMainWindow','FORMDATA',[
   +'ClickDir'#7#6'cdDown'#7'Command'#2#15#9'MoveCaret'#8#6'Option'#2#1#8'Priori'
   +'ty'#2#0#0#0#0#0#0#0#9'TMainMenu'#8'MainMenu'#4'left'#2#8#3'top'#2#8#0#9'TMe'
   +'nuItem'#12'MenuItemFile'#7'Caption'#6#4'File'#0#9'TMenuItem'#11'MenuItemNew'
-  +#7'Caption'#6#3'New'#7'OnClick'#7#16'MenuItemNewClick'#0#0#9'TMenuItem'#12'M'
-  +'enuItemOpen'#6'Action'#7#8'OpenFile'#0#0#9'TMenuItem'#14'MenuItemSaveAs'#7
-  +'Caption'#6#10'Save as...'#7'OnClick'#7#19'MenuItemSaveAsClick'#0#0#9'TMenuI'
-  +'tem'#12'MenuItemSave'#7'Caption'#6#4'Save'#7'OnClick'#7#19'MenuItemSaveAsCl'
-  +'ick'#0#0#0#9'TMenuItem'#13'MenuItemAbout'#7'Caption'#6#8'About...'#7'OnClic'
-  ,'k'#7#18'MenuItemAboutClick'#0#0#0#10'TSynPasSyn'#12'SynPascalSyn'#7'Enabled'
-  +#8#12'CompilerMode'#7#9'pcmDelphi'#14'NestedComments'#8#4'left'#2'('#3'top'#2
-  +#8#0#0#11'TSaveDialog'#10'SaveDialog'#6'Filter'#6#30'Pascal files|*.pas|All '
-  +'files|*'#4'left'#2'*'#3'top'#2'0'#0#0#11'TActionList'#10'ActionList'#4'left'
-  +#2#8#3'top'#2'0'#0#9'TFileOpen'#8'OpenFile'#8'Category'#6#4'File'#7'Caption'
-  +#6#9'&Abrir...'#13'Dialog.Filter'#6#30'Pascal files|*.pas|All files|*'#4'Hin'
-  +'t'#6#5'Abrir'#8'ShortCut'#3'O@'#8'OnAccept'#7#14'OpenFileAccept'#0#0#0#0
+  +#6'Action'#7#7'FileNew'#7'OnClick'#7#14'FileNewExecute'#0#0#9'TMenuItem'#12
+  +'MenuItemOpen'#6'Action'#7#8'OpenFile'#0#0#9'TMenuItem'#14'MenuItemSaveAs'#6
+  +'Action'#7#10'FileSaveAs'#0#0#9'TMenuItem'#12'MenuItemSave'#6'Action'#7#8'Fi'
+  +'leSave'#7'OnClick'#7#15'FileSaveExecute'#0#0#0#9'TMenuItem'#13'MenuItemAbou'
+  +'t'#7'Caption'#6#8'About...'#7'OnClick'#7#18'MenuItemAboutClick'#0#0#0#10'TS'
+  ,'ynPasSyn'#12'SynPascalSyn'#7'Enabled'#8#12'CompilerMode'#7#9'pcmDelphi'#14
+  +'NestedComments'#8#4'left'#2'('#3'top'#2#8#0#0#11'TActionList'#10'ActionList'
+  +#4'left'#2#8#3'top'#2'0'#0#9'TFileOpen'#8'OpenFile'#8'Category'#6#4'File'#7
+  +'Caption'#6#8'&Open...'#13'Dialog.Filter'#6#30'Pascal files|*.pas|All files|'
+  +'*'#4'Hint'#6#4'Open'#8'ShortCut'#3'O@'#8'OnAccept'#7#14'OpenFileAccept'#0#0
+  +#11'TFileSaveAs'#10'FileSaveAs'#8'Category'#6#4'File'#7'Caption'#6#11'Save &'
+  +'as...'#13'Dialog.Filter'#6#30'Pascal files|*.pas|All files|*'#4'Hint'#6#7'S'
+  +'ave As'#8'OnAccept'#7#16'FileSaveAsAccept'#0#0#7'TAction'#8'FileSave'#8'Cat'
+  +'egory'#6#4'File'#7'Caption'#6#5'&Save'#9'OnExecute'#7#15'FileSaveExecute'#0
+  +#0#7'TAction'#7'FileNew'#8'Category'#6#4'File'#7'Caption'#6#3'New'#9'OnExecu'
+  +'te'#7#14'FileNewExecute'#0#0#0#0
 ]);

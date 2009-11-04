@@ -2,44 +2,49 @@ object AboutDialog: TAboutDialog
   Left = 290
   Height = 315
   Top = 200
-  Width = 258
+  Width = 305
+  ActiveControl = ButtonClose
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'About Z80-Pascal IDE'
   ClientHeight = 315
-  ClientWidth = 258
-  ParentFont = False
-  LCLVersion = '0.9.26'
+  ClientWidth = 305
+  LCLVersion = '0.9.28.2'
   object BottomPanel: TPanel
+    Left = 0
     Height = 35
     Top = 280
-    Width = 258
+    Width = 305
     Align = alBottom
     BevelOuter = bvNone
     ClientHeight = 35
-    ClientWidth = 258
+    ClientWidth = 305
     TabOrder = 0
     object ButtonClose: TBitBtn
-      Left = 88
+      Left = 120
       Height = 30
       Top = -1
       Width = 75
-      Caption = '&Cerrar'
+      Caption = '&Close'
       Kind = bkClose
       NumGlyphs = 0
       TabOrder = 0
     end
   end
   object LogoPanel: TPanel
+    Left = 0
     Height = 260
-    Width = 258
+    Top = 0
+    Width = 305
     Align = alTop
     BevelOuter = bvNone
     ClientHeight = 260
-    ClientWidth = 258
+    ClientWidth = 305
     TabOrder = 1
     object Logo: TImage
+      Left = 24
       Height = 256
+      Top = 0
       Width = 256
       Center = True
       Picture.Data = {
@@ -102,17 +107,20 @@ object AboutDialog: TAboutDialog
     end
   end
   object AuthorsPanel: TPanel
+    Left = 0
     Height = 20
     Top = 260
-    Width = 258
+    Width = 305
     Align = alClient
     BevelOuter = bvNone
     ClientHeight = 20
-    ClientWidth = 258
+    ClientWidth = 305
     TabOrder = 2
     object LabelWebPage: TLabel
+      Left = 0
       Height = 20
-      Width = 258
+      Top = 0
+      Width = 305
       Align = alClient
       Alignment = taCenter
       Caption = 'http://z80-pascal.sourceforge.net/'

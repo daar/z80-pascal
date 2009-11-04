@@ -1,21 +1,24 @@
 (* The main window of the application. *)
-unit UnitMainWindow;
+UNIT UnitMainWindow;
 
 {$mode objfpc}{$H+}
 
-interface
+INTERFACE
 
-uses
+USES
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   Menus, ActnList, StdActns, SynEdit, SynHighlighterPas;
 
-type
+TYPE
 
   { TMainWindow }
 
-  TMainWindow = class(TForm)
+  TMainWindow = CLASS(TForm)
     ActionList: TActionList;
-    OpenFile: TFileOpen;
+      FileNew: TAction;
+      FileSave: TAction;
+      FileSaveAs: TFileSaveAs;
+      OpenFile: TFileOpen;
     MainMenu: TMainMenu;
       MenuItemFile: TMenuItem;
         MenuItemNew: TMenuItem;
@@ -23,72 +26,86 @@ type
         MenuItemSaveAs: TMenuItem;
         MenuItemSave: TMenuItem;
       MenuItemAbout: TMenuItem;
-    SaveDialog: TSaveDialog;
     SynEdit: TSynEdit;
     SynPascalSyn: TSynPasSyn;
-    procedure MenuItemAboutClick(Sender: TObject);
-    procedure MenuItemNewClick(Sender: TObject);
-    procedure MenuItemSaveAsClick(Sender: TObject);
+    PROCEDURE MenuItemAboutClick(Sender: TObject);
+    PROCEDURE FileNewExecute(Sender: TObject);
     PROCEDURE OpenFileAccept(Sender: TObject);
-  private
-    { private declarations }
-  public
+    PROCEDURE FileSaveAsAccept(Sender: TObject);
+    PROCEDURE FileSaveExecute(Sender: TObject);
+  PRIVATE
+  (* Full file name. *)
+    fFileName: STRING;
+  PUBLIC
     { public declarations }
-  end; 
+  END;
 
-var
+VAR
   MainWindow: TMainWindow;
 
-implementation
+IMPLEMENTATION
 
 USES
   UnitAboutDlg;
 
 { TMainWindow }
 
-(* To create a new file. *)
-procedure TMainWindow.MenuItemNewClick(Sender: TObject);
-begin
-  SynEdit.Lines.Text := '';
-  SynEdit.Modified := FALSE;
-end;
 
 
 
 (* Shows the "About..." dialog. *)
-procedure TMainWindow.MenuItemAboutClick(Sender: TObject);
-VAR
-  Dialog: TForm;
-begin
-  Dialog := TAboutDialog.Create (Self);
-  TRY
-    Dialog.ShowModal;
-  FINALLY
-    Dialog.Free;
-  END;
-end;
-
-
-
-(* To save the file. *)
-procedure TMainWindow.MenuItemSaveAsClick(Sender: TObject);
-begin
-  IF SaveDialog.Execute THEN
+  PROCEDURE TMainWindow.MenuItemAboutClick(Sender: TObject);
+  VAR
+    Dialog: TForm;
   BEGIN
-    SynEdit.Lines.SaveToFile (SaveDialog.FileName);
+    Dialog := TAboutDialog.Create (Self);
+    TRY
+      Dialog.ShowModal;
+    FINALLY
+      Dialog.Free;
+    END;
   END;
-end;
+
+
+
+
+(* Creates new file. *)
+  PROCEDURE TMainWindow.FileNewExecute(Sender: TObject);
+  BEGIN
+    SynEdit.Lines.Text := '';
+    SynEdit.Modified := FALSE;
+    SELF.fFileName := '';
+  END;
 
 
 
 (* To open files. *)
-PROCEDURE TMainWindow.OpenFileAccept(Sender: TObject);
-BEGIN
-  SynEdit.Lines.LoadFromFile (SELF.OpenFile.Dialog.FileName);
-end;
+  PROCEDURE TMainWindow.OpenFileAccept(Sender: TObject);
+  BEGIN
+    SynEdit.Lines.LoadFromFile (SELF.OpenFile.Dialog.FileName);
+  END;
 
-initialization
+
+
+(* To save files. *)
+  PROCEDURE TMainWindow.FileSaveExecute(Sender: TObject);
+  BEGIN
+    IF SELF.fFileName = '' THEN
+      FileSaveAs.ExecuteTarget (Sender)
+    ELSE
+      SynEdit.Lines.SaveToFile (SELF.fFileName);
+  END;
+
+  PROCEDURE TMainWindow.FileSaveAsAccept(Sender: TObject);
+  BEGIN
+    SynEdit.Lines.SaveToFile (SELF.FileSaveAs.Dialog.FileName);
+    SELF.fFileName := SELF.FileSaveAs.Dialog.FileName;
+  END;
+
+
+
+INITIALIZATION
   {$I UnitMainWindow.lrs}
 
-end.
+END.
 

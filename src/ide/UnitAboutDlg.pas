@@ -1,38 +1,36 @@
 (* Window to show information about the project. *)
-unit UnitAboutDlg;
+UNIT UnitAboutDlg;
 
 {$mode objfpc}{$H+}
 
-interface
+INTERFACE
 
-uses
+USES
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   ExtCtrls, StdCtrls, Buttons;
 
-type
-
-  { TAboutDialog }
-
-  TAboutDialog = class(TForm)
+TYPE
+{ TAboutDialog }
+  TAboutDialog = CLASS(TForm)
     ButtonClose: TBitBtn;
     LabelWebPage: TLabel;
     Logo: TImage;
     BottomPanel: TPanel;
     LogoPanel: TPanel;
     AuthorsPanel: TPanel;
-  private
+  PRIVATE
     { private declarations }
-  public
+  PUBLIC
     { public declarations }
-  end; 
+  END;
 
-var
+VAR
   AboutDialog: TAboutDialog;
 
-implementation
+IMPLEMENTATION
 
-initialization
+INITIALIZATION
   {$I UnitAboutDlg.lrs}
 
-end.
+END.
 
