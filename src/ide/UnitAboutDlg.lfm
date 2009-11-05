@@ -3,12 +3,12 @@ object AboutDialog: TAboutDialog
   Height = 315
   Top = 200
   Width = 305
-  ActiveControl = ButtonClose
-  BorderIcons = [biSystemMenu, biMinimize]
-  BorderStyle = bsSingle
+  ActiveControl = LogoPanel
   Caption = 'About Z80-Pascal IDE'
   ClientHeight = 315
   ClientWidth = 305
+  FormStyle = fsStayOnTop
+  Position = poMainFormCenter
   LCLVersion = '0.9.28.2'
   object BottomPanel: TPanel
     Left = 0
