@@ -3,13 +3,8 @@ PROGRAM Z80Pas;
 
 USES
   Compiler, (* THE compiler *)
+  Configuration,
   sysutils;
-
-
-
-VAR
-(* Temporal storage for filenames. *)
-  OutputFileName, InputFileName: STRING;
 
 
 
@@ -23,37 +18,17 @@ VAR
 
 
 
-(* Shows a help message with description of available options. *)
-  PROCEDURE Help;
-  BEGIN
-    WriteLn ('Usage:');
-    WriteLn ('  z80pas <inputfile> <outputfile>');
-  END;
-
-
-
-(* Checks the parameter list and sets the configuration values. *)
-  PROCEDURE CheckParameterList;
-  BEGIN
-    IF ParamCount < 2 THEN
-      Help;
-  { TODO: Options. }
-  { Input file. }
-    InputFileName := ParamStr(1);
-    OutputFileName := ParamStr(2);
-  END;
-
-
 BEGIN
   TRY
     Title;
-    CheckParameterList;
-    PascalCompiler.Compile (InputFileName);
+    Configuration.Load;
+    PascalCompiler.Compile (Configuration.InputFileName);
     WriteLn ('Compilation finished.');
-    PascalCompiler.SaveToFile (OutputFileName);
-    WriteLn ('File saved at '''+OutputFileName+'''.');
+    PascalCompiler.SaveToFile (Configuration.OutputFileName);
+    WriteLn ('File saved at '''+Configuration.OutputFileName+'''.');
   EXCEPT
     ON Error: Exception DO
       WriteLn (Error.Message);
   END;
+  Configuration.Unload;
 END.
