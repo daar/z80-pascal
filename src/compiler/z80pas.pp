@@ -22,6 +22,8 @@ BEGIN
   TRY
     Title;
     Configuration.Load;
+    IF Configuration.InputFileName = '' THEN
+      RAISE Exception.Create ('No input file given...');
     PascalCompiler.Compile (Configuration.InputFileName);
     WriteLn ('Compilation finished.');
     PascalCompiler.SaveToFile (Configuration.OutputFileName);
