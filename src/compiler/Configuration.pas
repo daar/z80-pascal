@@ -64,10 +64,52 @@ USES
 (* Sets the default configuration. *)
   PROCEDURE Default;
   BEGIN
-    OutputFileName := 'out.asm';
+    OutputFileName := '';
     ListsComments := FALSE;
     ListsSourcecode := FALSE;
     Verbose := [vblErrors];
+  END;
+
+
+
+(* Parses a command. *)
+  PROCEDURE ParseCommand (Command: STRING);
+  VAR
+    Ndx: INTEGER;
+  BEGIN
+    IF Command[1] <> '-' THEN
+      RAISE Exception.Create ('Unknown parameter ''' + Command + '''');
+    CASE Command[2] OF
+    'a':
+      BEGIN
+	ListsComments := TRUE;
+	IF (Length (Command) > 2) AND (Command[3] = 'l') THEN
+	  ListsSourcecode := TRUE;
+      END;
+    'c':
+      BEGIN
+	IF Command <> '-cfg' THEN
+	  RAISE Exception.Create ('Unknown parameter ''' + Command + '''');
+	WriteLn ('Config file path: ', GetAppConfigFile (FALSE));
+      END;
+    'o':
+      OutputFileName := RightStr (Command, Length (Command) - 2);
+    'v':
+      BEGIN
+	Verbose := []; { To cancel previous configuration. }
+	FOR Ndx := 3 TO Length (Command) DO
+	  CASE Command[Ndx] OF
+	  'e':
+	    Include (Verbose, vblErrors);
+	  'w':
+	    Include (Verbose, vblWarnings);
+	  ELSE
+	    RAISE Exception.Create ('Unknown parameter ''' + Command + '''');
+	  END;
+      END;
+    ELSE
+      RAISE Exception.Create ('Unknown parameter ''' + Command + '''');
+    END;
   END;
 
 
@@ -76,12 +118,16 @@ USES
   PROCEDURE LoadFile;
   VAR
     ConfigFile: TStringList;
+    Ndx: INTEGER;
   BEGIN
     IF FileExists (GetAppConfigFile (FALSE)) THEN
     BEGIN
       ConfigFile := TStringList.Create;
+      ConfigFile.LoadFromFile (GetAppConfigFile (FALSE));
       TRY
-	ConfigFile.LoadFromFile (GetAppConfigFile (FALSE));
+        FOR Ndx := 0 TO ConfigFile.Count - 1 DO
+	  IF (ConfigFile[Ndx] <> '') AND (ConfigFile[Ndx][1] <> '#') THEN
+	    ParseCommand (ConfigFile[Ndx]);
       FINALLY
 	ConfigFile.Free;
       END;
@@ -93,46 +139,14 @@ USES
 (* Checks the parameter list and sets the configuration values. *)
   PROCEDURE CheckParameterList;
   VAR
-    Cnt, Ndx: INTEGER;
+    Cnt: INTEGER;
   BEGIN
     IF ParamCount < 1 THEN
       Help;
     FOR Cnt := 1 TO ParamCount DO
     BEGIN
       IF ParamStr (Cnt)[1] = '-' THEN
-      BEGIN
-	CASE ParamStr (Cnt)[2] OF
-	'a':
-	  BEGIN
-	    ListsComments := TRUE;
-	    IF (Length (ParamStr (Cnt)) > 2) AND (ParamStr (Cnt)[3] = 'l') THEN
-	      ListsSourcecode := TRUE;
-	  END;
-	'c':
-	  BEGIN
-	    IF ParamStr (Cnt) <> '-cfg' THEN
-	      RAISE Exception.Create ('Unknown parameter ''' + ParamStr (Cnt) + '''');
-	    WriteLn ('Config file path: ', GetAppConfigFile (FALSE));
-	  END;
-	'o':
-	  OutputFileName := RightStr (ParamStr (Cnt), Length (ParamStr (Cnt)) - 2);
-	'v':
-	  BEGIN
-	    Verbose := [];
-	    FOR Ndx := 3 TO Length (ParamStr (Cnt)) DO
-	      CASE ParamStr (Cnt)[Ndx] OF
-	      'e':
-		Include (Verbose, vblErrors);
-	      'w':
-		Include (Verbose, vblWarnings);
-	      ELSE
-		RAISE Exception.Create ('Unknown parameter ''' + ParamStr (Cnt) + '''');
-	      END;
-	  END;
-	ELSE
-	  RAISE Exception.Create ('Unknown parameter ''' + ParamStr (Cnt) + '''');
-	END;
-      END
+	ParseCommand (ParamStr (Cnt))
       ELSE
 	InputFileName := ParamStr (Cnt);
     END;
@@ -140,12 +154,34 @@ USES
 
 
 
+(* Checks configuration to avoid mistakes. *)
+  PROCEDURE CheckConfiguration;
+  VAR
+    Tmp: STRING;
+  BEGIN
+  { Check verbose. }
+    IF vblWarnings IN Verbose THEN
+      Include (Verbose, vblErrors);
+  { Must have output file name. }
+    IF OutputFileName = '' THEN
+    BEGIN
+      Tmp := ExtractFileName (InputFileName);
+      OutputFileName := LeftStr (Tmp, Length (Tmp) - Length (ExtractFileExt (Tmp))) + '.asm';
+    END;
+  { Check source listing. }
+    IF ListsSourcecode THEN
+      ListsComments := TRUE;
+  END;
+
+
+
 (* Gets the configuration. *)
   PROCEDURE Load;
   BEGIN
-    Configuration.Default;
+    Default;
     LoadFile;
     CheckParameterList;
+    CheckConfiguration;
   END;
 
 
