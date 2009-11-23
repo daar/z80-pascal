@@ -57,7 +57,7 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UnitMainWindow"/>
         <CursorPos X="53" Y="63"/>
-        <TopLine Value="23"/>
+        <TopLine Value="41"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="26"/>
         <Loaded Value="True"/>

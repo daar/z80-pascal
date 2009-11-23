@@ -41,6 +41,14 @@ TYPE
   { Assembler.  Actually implemented on file 'z80asm.inc' }
     PROCEDURE ASMCompoundStatement;
     PROCEDURE Z80Statement;
+
+  { Output. }
+    PROCEDURE DispatchLines;
+    PROCEDURE ProgramProlog (ProgramName: STRING);
+    PROCEDURE ProgramEpilog;
+
+    PROCEDURE AddComment (Comment: STRING);
+    PROCEDURE Emit (aLine: STRING);
   END;
 
 
@@ -61,6 +69,11 @@ VAR
 
 
 IMPLEMENTATION
+
+USES
+  Configuration;
+
+
 
 (* Something expected but anotherthing found. *)
   CONSTRUCTOR CompilationException.Expected (fExpected, fFound: STRING);
@@ -86,7 +99,7 @@ IMPLEMENTATION
   DESTRUCTOR TPascalCompiler.Destroy;
   BEGIN
     IF fScanner <> NIL THEN fScanner.Free;
-    IF fOutput  <> NIL THEN fOutput .Free;
+    IF fOutput  <> NIL THEN fOutput.Free;
     INHERITED;
   END;
 
@@ -138,11 +151,11 @@ IMPLEMENTATION
     IF fScanner.GetToken <> ';' THEN
       RAISE CompilationException.Expected (';', fScanner.LastToken);
   { Program prolog. }
-    fOutput.AddProlog (fFileName, ProgramIdentifier);
+    SELF.ProgramProlog (ProgramIdentifier);
     SELF.Block;
     IF fScanner.GetToken <> '.' THEN
       RAISE CompilationException.Expected ('.', fScanner.LastToken);
-    fOutput.AddEpilog;
+    SELF.ProgramEpilog;
   END;
 
 
@@ -151,9 +164,9 @@ IMPLEMENTATION
   PROCEDURE TPascalCompiler.Block;
   BEGIN
     SELF.DeclarationPart;
-    fOutput.AddComment ('; ');
-    fOutput.AddComment ('; Program starts here');
-    fOutput.AddComment ('; ');
+    SELF.AddComment ('; ');
+    SELF.AddComment ('; Program starts here');
+    SELF.AddComment ('; ');
     SELF.StatementPart;
   END;
 
@@ -200,6 +213,66 @@ IMPLEMENTATION
 
 (* The ASM .. END block is in another file for make it easy to read. *)
 {$include z80asm.inc}
+
+
+
+(**********
+ * Output *
+ **********)
+
+  PROCEDURE TPascalCompiler.DispatchLines;
+  VAR
+    Ndx: INTEGER;
+  BEGIN
+    IF Configuration.ListsComments AND (fScanner.Comments.Count > 0) THEN
+    BEGIN
+      FOR Ndx := 0 TO fScanner.Comments.Count - 1 DO
+      BEGIN
+	fOutput.AddComment (fScanner.Comments.Strings[Ndx]);
+      END;
+      fScanner.Comments.Clear;
+    END;
+  END;
+
+
+
+  PROCEDURE TPascalCompiler.ProgramProlog (ProgramName: STRING);
+  BEGIN
+    SELF.AddComment ('; Assembler file created by Z80-Pascal.');
+    SELF.AddComment (';');
+    SELF.AddComment ('; File: '+fFileName);
+    SELF.AddComment ('; Program name: '+ProgramName);
+    SELF.Emit ('');
+    SELF.AddComment ('This orig was set staticly.');
+    SELF.Emit ('ORG #F000');
+    SELF.Emit ('');
+  END;
+
+
+
+  PROCEDURE TPascalCompiler.ProgramEpilog;
+  BEGIN
+    SELF.AddComment ('; Program finishes here.');
+    SELF.Emit ('RET');
+  END;
+
+
+
+  PROCEDURE TPascalCompiler.AddComment (Comment: STRING);
+  BEGIN
+    IF Configuration.ListsComments AND (fScanner.Comments.Count > 0) THEN
+      DispatchLines;
+    fOutput.AddComment (Comment);
+  END;
+
+
+
+  PROCEDURE TPascalCompiler.Emit (aLine: STRING);
+  BEGIN
+    IF Configuration.ListsComments AND (fScanner.Comments.Count > 0) THEN
+      DispatchLines;
+    fOutput.Emit (aLine);
+  END;
 
 
 

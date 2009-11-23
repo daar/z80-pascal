@@ -21,9 +21,16 @@ TYPE
     fInputStream: TFileStream;
   (* Lookahead character. *)
     fLookahead: CHAR;
+  (* Advance next character. *)
+    fNext: STRING;
   (* Last token read. *)
     fLastTokenString: STRING;
     fLastTokenId: TTokenId;
+  (* To store comments. *)
+    fComments: TStringList;
+
+  (* To get the next character. *)
+    FUNCTION GetNextCharacter: CHAR;
   PUBLIC
   (* Constructor.  Opens the given file as input stream.
      @raises (an exception if file doesn't exists or can't open it.) *)
@@ -45,7 +52,7 @@ TYPE
   (* Checks if the given character is a white space. *)
     FUNCTION isWhite (aChar: CHAR): BOOLEAN;
 
-  (* Skip over leading white spaces. *)
+  (* Skip over leading white spaces and comments. *)
     PROCEDURE SkipWhite;
   (* Skips CR/CF. (TEST) *)
     PROCEDURE Fin;
@@ -61,10 +68,14 @@ TYPE
 
   (* Returns the last character read. *)
     PROPERTY Lookahead: CHAR READ fLookahead;
+  (* Returns the next character to read.  Needed for some tokens (i.e. := and comments) *)
+    PROPERTY NextCharacter: CHAR READ GetNextCharacter;
   (* Returns the last parsed token. *)
     PROPERTY LastToken: STRING READ fLastTokenString;
   (* Returns the last parsed token. *)
     PROPERTY LastTokenId: TTokenId READ fLastTokenId;
+  (* Reference to encoder. *)
+    PROPERTY Comments: TStringList READ fComments;
   END;
 
 
@@ -72,6 +83,7 @@ TYPE
 IMPLEMENTATION
 
 USES
+  Configuration,
   sysutils;
 
 
@@ -84,11 +96,29 @@ CONST
 
 
 
+(* To get the next character. *)
+  FUNCTION TLexicalScanner.GetNextCharacter: CHAR;
+  VAR
+    Character: BYTE;
+  BEGIN
+    IF fNext = '' THEN
+    BEGIN
+      Character := SELF.fInputStream.ReadByte;
+      fNext := ' ';
+      fNext[1] := CHAR (Character);
+    END;
+    RESULT := fNext[1];
+  END;
+
+
+
 (* Constructor.  Opens the given file as input stream. *)
   CONSTRUCTOR TLexicalScanner.Create (aFileName: STRING);
   BEGIN
     SELF.fInputStream := TFileStream.Create (aFileName, fmOpenRead);
     SELF.GetChar;
+    IF Configuration.ListsComments THEN
+      fComments := TStringList.Create;
     SkipWhite;
   END;
 
@@ -99,6 +129,8 @@ CONST
   BEGIN
     IF SELF.fInputStream <> NIL THEN
       SELF.fInputStream.Free;
+    IF SELF.fComments <> NIL THEN
+      SELF.fComments.Free;
     INHERITED;
   END;
 
@@ -109,7 +141,13 @@ CONST
   VAR
     Character: BYTE;
   BEGIN
-    Character := SELF.fInputStream.ReadByte;
+  { Checks if it has read the next character yet. }
+    IF fNext = '' THEN
+      Character := SELF.fInputStream.ReadByte
+    ELSE BEGIN
+      Character := BYTE (fNext[1]);
+      fNext := '';
+    END;
     SELF.fLookahead := CHAR (Character);
   // To help debug.  Should be deleted on final release.
   //WriteLn ('Lh := ''', fLookahead, '''');
@@ -159,9 +197,59 @@ CONST
 
 (* Skip over leading white spaces. *)
   PROCEDURE TLexicalScanner.SkipWhite;
+
+  (* Checks and skips a comment. *)
+    PROCEDURE SkipComment;
+
+      FUNCTION IsBeginComment: BOOLEAN;
+      BEGIN
+	RESULT := (fLookahead = '{')
+		OR ((fLookahead = '(') AND (SELF.NextCharacter = '*'));
+	IF RESULT THEN
+	BEGIN
+	  SELF.GetChar;
+	  IF fLookahead = '*' THEN
+	    SELF.GetChar;
+	END;
+      END;
+
+      FUNCTION IsEndComment: BOOLEAN;
+      BEGIN
+	RESULT := (fLookahead = '}')
+		OR ((fLookahead = '*') AND (SELF.NextCharacter = ')'));
+	IF RESULT THEN
+	BEGIN
+	  SELF.GetChar;
+	  IF fLookahead = ')' THEN
+	    SELF.GetChar;
+	END;
+      END;
+
+    VAR
+      Comment, Tmp: STRING;
+    BEGIN
+      Comment := '';
+      Tmp := ' ';
+      WHILE IsBeginComment DO
+	REPEAT
+	  IF fComments <> NIL THEN
+	  BEGIN
+	    Tmp[1] := fLookahead;
+	    Comment := Comment + Tmp;
+	  END;
+	  SELF.GetChar;
+	UNTIL IsEndComment;
+      IF (fComments <> NIL) AND (Comment <> '') THEN
+	fComments.Text := Comment;
+    END;
+
   BEGIN
+    SkipComment;
     WHILE SELF.isWhite (fLookahead) DO
+    BEGIN
       SELF.GetChar;
+      SkipComment;
+    END;
   END;
 
 

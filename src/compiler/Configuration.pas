@@ -18,7 +18,7 @@ VAR
 (* The source and the output files. *)
   InputFileName, OutputFileName: STRING;
 (* Lists sourcecodelines in assembler file. *)
-  ListsComments, ListsSourcecode: BOOLEAN;
+  ListsComments: BOOLEAN;
 (* Verbosity level. *)
   Verbose: VERBOSITY;
 
@@ -46,7 +46,6 @@ USES
     WriteLn ('  z80pas [options] <inputfile> [options]');
     WriteLn ('Options:');
     WriteLn ('  -a     Lists comments in assembler file');
-    WriteLn ('      -al    List sourcecode lines in assembler file');
     WriteLn ('  -cfg   Returns the full path to the config file');
   {
     WriteLn ('  -i     Information');
@@ -66,7 +65,6 @@ USES
   BEGIN
     OutputFileName := '';
     ListsComments := FALSE;
-    ListsSourcecode := FALSE;
     Verbose := [vblErrors];
   END;
 
@@ -83,8 +81,6 @@ USES
     'a':
       BEGIN
 	ListsComments := TRUE;
-	IF (Length (Command) > 2) AND (Command[3] = 'l') THEN
-	  ListsSourcecode := TRUE;
       END;
     'c':
       BEGIN
@@ -168,9 +164,6 @@ USES
       Tmp := ExtractFileName (InputFileName);
       OutputFileName := LeftStr (Tmp, Length (Tmp) - Length (ExtractFileExt (Tmp))) + '.asm';
     END;
-  { Check source listing. }
-    IF ListsSourcecode THEN
-      ListsComments := TRUE;
   END;
 
 

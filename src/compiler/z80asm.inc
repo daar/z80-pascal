@@ -107,5 +107,5 @@
 	Instruction := Instruction + ', ' + Z80Parameter;
       END;
     END;
-    fOutput.Emit (Instruction);
+    SELF.Emit (Instruction);
   END;
