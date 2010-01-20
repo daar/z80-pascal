@@ -18,7 +18,7 @@ TYPE
    All identifiers converted to all-uppercase. *)
   TLexicalScanner = CLASS
   PRIVATE
-    fInputStream: TFileStream;
+    fInputStream: TStream;
   (* Lookahead character. *)
     fLookahead: CHAR;
   (* Advance next character. *)
@@ -29,12 +29,16 @@ TYPE
   (* To store comments. *)
     fComments: TStringList;
 
+  (* The "StoreComments" property. *)
+    FUNCTION GetStoreComments: BOOLEAN;
+    PROCEDURE PutStoreComments (Value: BOOLEAN);
   (* To get the next character. *)
     FUNCTION GetNextCharacter: CHAR;
   PUBLIC
-  (* Constructor.  Opens the given file as input stream.
-     @raises (an exception if file doesn't exists or can't open it.) *)
-    CONSTRUCTOR Create (aFileName: STRING);
+  (* Constructor.  Uses the given stream as input.
+     @param(aStoreComments sets the StoreComments property.
+       Default to @false). *)
+    CONSTRUCTOR Create (aStream: TStream; aStoreComments: BOOLEAN = FALSE);
   (* Destructor. *)
     DESTRUCTOR Destroy; OVERRIDE;
 
@@ -74,7 +78,10 @@ TYPE
     PROPERTY LastToken: STRING READ fLastTokenString;
   (* Returns the last parsed token. *)
     PROPERTY LastTokenId: TTokenId READ fLastTokenId;
-  (* Reference to encoder. *)
+  (* Tells the scanner if should store the comments it finds. *)
+    PROPERTY StoreComments: BOOLEAN READ GetStoreComments WRITE PutStoreComments;
+  (* If property StoreComments is @true, it stores the comments it finds
+     here. *)
     PROPERTY Comments: TStringList READ fComments;
   END;
 
@@ -83,7 +90,6 @@ TYPE
 IMPLEMENTATION
 
 USES
-  Configuration,
   sysutils;
 
 
@@ -96,6 +102,31 @@ CONST
 
 
 
+(* Returns TRUE if it stores comments. *)
+  FUNCTION TLexicalScanner.GetStoreComments: BOOLEAN;
+  BEGIN
+    RESULT := fComments <> NIL;
+  END;
+
+
+
+(* Activates or deactivates the comment storage. *)
+  PROCEDURE TLexicalScanner.PutStoreComments (Value: BOOLEAN);
+  BEGIN
+    IF Value THEN
+    BEGIN
+      IF fComments = NIL THEN
+	fComments := TStringList.Create;
+    END
+    ELSE IF fComments <> NIL THEN
+    BEGIN
+      fComments.Free;
+      fComments := NIL;
+    END;
+  END;
+
+
+
 (* To get the next character. *)
   FUNCTION TLexicalScanner.GetNextCharacter: CHAR;
   VAR
@@ -103,7 +134,7 @@ CONST
   BEGIN
     IF fNext = '' THEN
     BEGIN
-      Character := SELF.fInputStream.ReadByte;
+      Character := fInputStream.ReadByte;
       fNext := ' ';
       fNext[1] := CHAR (Character);
     END;
@@ -112,13 +143,12 @@ CONST
 
 
 
-(* Constructor.  Opens the given file as input stream. *)
-  CONSTRUCTOR TLexicalScanner.Create (aFileName: STRING);
+(* Constructor.  Uses the given stream as input. *)
+  CONSTRUCTOR TLexicalScanner.Create (aStream: TStream; aStoreComments: BOOLEAN);
   BEGIN
-    SELF.fInputStream := TFileStream.Create (aFileName, fmOpenRead);
+    PutStoreComments (aStoreComments);
+    fInputStream := aStream;
     SELF.GetChar;
-    IF Configuration.ListsComments THEN
-      fComments := TStringList.Create;
     SkipWhite;
   END;
 
@@ -127,10 +157,8 @@ CONST
 (* Destructor. *)
   DESTRUCTOR TLexicalScanner.Destroy;
   BEGIN
-    IF SELF.fInputStream <> NIL THEN
-      SELF.fInputStream.Free;
-    IF SELF.fComments <> NIL THEN
-      SELF.fComments.Free;
+    IF fComments <> NIL THEN
+      fComments.Free;
     INHERITED;
   END;
 
@@ -143,12 +171,12 @@ CONST
   BEGIN
   { Checks if it has read the next character yet. }
     IF fNext = '' THEN
-      Character := SELF.fInputStream.ReadByte
+      Character := fInputStream.ReadByte
     ELSE BEGIN
       Character := BYTE (fNext[1]);
       fNext := '';
     END;
-    SELF.fLookahead := CHAR (Character);
+    fLookahead := CHAR (Character);
   // To help debug.  Should be deleted on final release.
   //WriteLn ('Lh := ''', fLookahead, '''');
   END;
@@ -282,9 +310,9 @@ CONST
     ELSE IF SELF.isDigit (Lookahead) OR (Lookahead = '$') THEN
       RESULT := SELF.GetNumber
     ELSE BEGIN
-      SELF.fLastTokenString := fLookahead;
-      SELF.fLastTokenId := tiOther;
-      RESULT := SELF.fLastTokenString;
+      fLastTokenString := fLookahead;
+      fLastTokenId := tiOther;
+      RESULT := fLastTokenString;
       SELF.GetChar;
       SELF.SkipWhite;
     // To help debug.  Should be deleted on final release.

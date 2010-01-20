@@ -24,9 +24,9 @@ TYPE
     DESTRUCTOR Destroy; OVERRIDE;
 
   (* Entry point for compilation. *)
-    PROCEDURE Compile (aFilename: STRING);
+    PROCEDURE Compile (aFileName: STRING);
   (* Saves the result on a file. *)
-    PROCEDURE SaveToFile (aFilename: STRING);
+    PROCEDURE SaveToFile (aFileName: STRING);
 
   (* Set the input file. *)
     PROPERTY FileName: STRING READ fFileName;
@@ -109,26 +109,32 @@ USES
   PROCEDURE TPascalCompiler.Compile (aFileName: STRING);
   VAR
     Token: STRING;
+    aFile: TFileStream;
   BEGIN
   { Set up the scanner. }
     IF fScanner <> NIL THEN
       RAISE CompilationException.Create ('''Compile'' should be called only once!');
-    fScanner := TLexicalScanner.Create (aFileName);
-  { Z80pas ::= PascalProgram .
-    PascalProgram ::= PascalProgram . }
-    Token := fScanner.GetToken;
-    IF Token = 'PROGRAM' THEN
-      SELF.PascalProgram
-    ELSE
-      RAISE CompilationException.Expected ('PROGRAM', Token);
+    aFile := TFileStream.Create (aFileName, fmOpenRead);
+    TRY
+      fScanner := TLexicalScanner.Create (aFile, Configuration.ListsComments);
+    { Z80pas ::= PascalProgram .
+      PascalProgram ::= PascalProgram . }
+      Token := fScanner.GetToken;
+      IF Token = 'PROGRAM' THEN
+        SELF.PascalProgram
+      ELSE
+        RAISE CompilationException.Expected ('PROGRAM', Token);
+    FINALLY
+      aFile.Free;
+    END;
   END;
 
 
 
 (* Saves the result on a file. *)
-  PROCEDURE TPascalCompiler.SaveToFile (aFilename: STRING);
+  PROCEDURE TPascalCompiler.SaveToFile (aFileName: STRING);
   BEGIN
-    fOutput.SaveToFile (aFilename);
+    fOutput.SaveToFile (aFileName);
   END;
 
 
