@@ -233,9 +233,7 @@ USES
     IF Configuration.ListsComments AND (fScanner.Comments.Count > 0) THEN
     BEGIN
       FOR Ndx := 0 TO fScanner.Comments.Count - 1 DO
-      BEGIN
 	fOutput.AddComment (fScanner.Comments.Strings[Ndx]);
-      END;
       fScanner.Comments.Clear;
     END;
   END;
