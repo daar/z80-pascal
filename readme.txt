@@ -1,12 +1,12 @@
   Please, visit http://z80-pascal.sourceforge.net/ before to follow.
 
   This is the first public release of the compiler.  There are a lot of things
-  that just doesn't work at all.
+  that just don't work at all.
 
 HOW  TO COMPILE
 ===============
 
-  Current version are for Free Pascal and Lazarus only.
+  Current version is for Free Pascal and Lazarus only.
 
   First run the "fix" script to define the platform objective, then run the
   makefile.

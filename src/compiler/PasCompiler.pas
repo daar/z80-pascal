@@ -1,6 +1,27 @@
-(* Defines a lexical scanner. *)
-UNIT ULexScan;
+UNIT PasCompiler;
+(*<Defines a basic reusable Pascal compiler. *)
+(*
+  Copyright (c) 2009, 2010 Guillermo Martínez J.
 
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+    1. The origin of this software must not be misrepresented; you must not
+    claim that you wrote the original software. If you use this software
+    in a product, an acknowledgment in the product documentation would be
+    appreciated but is not required.
+
+    2. Altered source versions must be plainly marked as such, and must not be
+    misrepresented as being the original software.
+
+    3. This notice may not be removed or altered from any source
+    distribution.
+*)
 INTERFACE
 
 USES
@@ -9,14 +30,14 @@ USES
 
 
 TYPE
-(* Token identificators. *)
-  TTokenId = ( tiIdentifier, tiInteger, tiHexInteger, tiReal, tiString,
-		tiOther );
+(* Token types. *)
+  TPascalTokenType = ( pttIdentifier, pttInteger, pttHexInteger, pttReal,
+			pttString, pttOther );
 
-(* Lexical scanner.
-   It recognices the first part of the BNF definition.
-   All identifiers converted to all-uppercase. *)
-  TLexicalScanner = CLASS
+
+
+(* Lexical scanner.  It's prepared to parse Pascal source files. *)
+  TPascalLexicalScanner = CLASS
   PRIVATE
     fInputStream: TStream;
   (* Lookahead character. *)
@@ -25,7 +46,7 @@ TYPE
     fNext: STRING;
   (* Last token read. *)
     fLastTokenString: STRING;
-    fLastTokenId: TTokenId;
+    fLastTokenType: TPascalTokenType;
   (* To store comments. *)
     fComments: TStringList;
 
@@ -42,7 +63,8 @@ TYPE
   (* Destructor. *)
     DESTRUCTOR Destroy; OVERRIDE;
 
-  (* Gets next character from the stream.  Ignores control characters. *)
+  (* Gets next character from the stream and stores it in the LookAhead
+     property.  Ignores control characters. *)
     PROCEDURE GetChar;
 
   (* Checks if the given character is a leter. *)
@@ -53,6 +75,8 @@ TYPE
     FUNCTION isHexDigit (aChar: CHAR): BOOLEAN;
   (* Checks if the given character is alphanumeric. *)
     FUNCTION isAlphaNum (aChar: CHAR): BOOLEAN;
+  (* Checks if the given character is a string delimiter. *)
+    FUNCTION isStringDelimiter (aChar: CHAR): BOOLEAN;
   (* Checks if the given character is a white space. *)
     FUNCTION isWhite (aChar: CHAR): BOOLEAN;
 
@@ -60,28 +84,32 @@ TYPE
     PROCEDURE SkipWhite;
   (* Skips CR/CF. (TEST) *)
     PROCEDURE Fin;
-  (* Skips a separator (i.e.: ',', '+', '(', etc. *)
+  (* Skips a separator (i.e.: ',', '+', '(', etc.).  It will skip also the
+     following white spaces. *)
     PROCEDURE SkipCharacter;
 
-  (* Returns any token. *)
+  (* Retrieves and returns the next token from the stream. *)
     FUNCTION GetToken: STRING;
   (* Returns an identifier. *)
     FUNCTION GetIdentifier: STRING;
-  (* Returns a number. *)
+  (* Returns a number constant. *)
     FUNCTION GetNumber: STRING;
+  (* Returns a string constant. *)
+    FUNCTION GetString: STRING;
 
   (* Returns the last character read. *)
     PROPERTY Lookahead: CHAR READ fLookahead;
-  (* Returns the next character to read.  Needed for some tokens (i.e. := and comments) *)
+  (* Returns the next character to read but don't extracts it from the stream.
+     Needed to identify some tokens (i.e. := and comments) *)
     PROPERTY NextCharacter: CHAR READ GetNextCharacter;
   (* Returns the last parsed token. *)
     PROPERTY LastToken: STRING READ fLastTokenString;
-  (* Returns the last parsed token. *)
-    PROPERTY LastTokenId: TTokenId READ fLastTokenId;
-  (* Tells the scanner if should store the comments it finds. *)
+  (* Returns the last parsed token type. *)
+    PROPERTY LastTokenType: TPascalTokenType READ fLastTokenType;
+  (* Tells the scanner if should store the comments it finds.
+     @seealso(Comments) *)
     PROPERTY StoreComments: BOOLEAN READ GetStoreComments WRITE PutStoreComments;
-  (* If property StoreComments is @true, it stores the comments it finds
-     here. *)
+  (* If @link(StoreComments) is @true, it stores the comments it finds here. *)
     PROPERTY Comments: TStringList READ fComments;
   END;
 
@@ -103,7 +131,7 @@ CONST
 
 
 (* Returns TRUE if it stores comments. *)
-  FUNCTION TLexicalScanner.GetStoreComments: BOOLEAN;
+  FUNCTION TPascalLexicalScanner.GetStoreComments: BOOLEAN;
   BEGIN
     RESULT := fComments <> NIL;
   END;
@@ -111,7 +139,7 @@ CONST
 
 
 (* Activates or deactivates the comment storage. *)
-  PROCEDURE TLexicalScanner.PutStoreComments (Value: BOOLEAN);
+  PROCEDURE TPascalLexicalScanner.PutStoreComments (Value: BOOLEAN);
   BEGIN
     IF Value THEN
     BEGIN
@@ -128,7 +156,7 @@ CONST
 
 
 (* To get the next character. *)
-  FUNCTION TLexicalScanner.GetNextCharacter: CHAR;
+  FUNCTION TPascalLexicalScanner.GetNextCharacter: CHAR;
   VAR
     Character: BYTE;
   BEGIN
@@ -144,7 +172,7 @@ CONST
 
 
 (* Constructor.  Uses the given stream as input. *)
-  CONSTRUCTOR TLexicalScanner.Create (aStream: TStream; aStoreComments: BOOLEAN);
+  CONSTRUCTOR TPascalLexicalScanner.Create (aStream: TStream; aStoreComments: BOOLEAN);
   BEGIN
     PutStoreComments (aStoreComments);
     fInputStream := aStream;
@@ -155,7 +183,7 @@ CONST
 
 
 (* Destructor. *)
-  DESTRUCTOR TLexicalScanner.Destroy;
+  DESTRUCTOR TPascalLexicalScanner.Destroy;
   BEGIN
     IF fComments <> NIL THEN
       fComments.Free;
@@ -165,7 +193,7 @@ CONST
 
 
 (* Gets a simple character from the stream. *)
-  PROCEDURE TLexicalScanner.GetChar;
+  PROCEDURE TPascalLexicalScanner.GetChar;
   VAR
     Character: BYTE;
   BEGIN
@@ -184,7 +212,7 @@ CONST
 
 
 (* Checks if the given character is a leter. *)
-  FUNCTION TLexicalScanner.isAlpha (aChar: CHAR): BOOLEAN;
+  FUNCTION TPascalLexicalScanner.isAlpha (aChar: CHAR): BOOLEAN;
   BEGIN
     RESULT := aChar IN ['A'..'Z', 'a'..'z'];
   END;
@@ -192,7 +220,7 @@ CONST
 
 
 (* Checks if the given character is a digit. *)
-  FUNCTION TLexicalScanner.isDigit (aChar: CHAR): BOOLEAN;
+  FUNCTION TPascalLexicalScanner.isDigit (aChar: CHAR): BOOLEAN;
   BEGIN
     RESULT := aChar IN ['0'..'9'];
   END;
@@ -200,23 +228,31 @@ CONST
 
 
 (* Checks if the given character is an hexagesimal digit. *)
-  FUNCTION TLexicalScanner.isHexDigit (aChar: CHAR): BOOLEAN;
+  FUNCTION TPascalLexicalScanner.isHexDigit (aChar: CHAR): BOOLEAN;
   BEGIN
-    RESULT := SELF.isDigit (aCHAR) OR (aChar IN ['A'..'F', 'a'..'f']);
+    RESULT := SELF.isDigit (aChar) OR (aChar IN ['A'..'F', 'a'..'f']);
   END;
 
 
 
 (* Checks if the given character is alphanumeric. *)
-  FUNCTION TLexicalScanner.isAlphaNum (aChar: CHAR): BOOLEAN;
+  FUNCTION TPascalLexicalScanner.isAlphaNum (aChar: CHAR): BOOLEAN;
   BEGIN
     RESULT := SELF.isAlpha (aChar) OR SELF.isDigit (aChar);
   END;
 
 
 
+(* Checks if the given character is a string delimiter. *)
+  FUNCTION TPascalLexicalScanner.isStringDelimiter (aChar: CHAR): BOOLEAN;
+  BEGIN
+    RESULT := aChar = '''';
+  END;
+
+
+
 (* Checks if the given character is a white space. *)
-  FUNCTION TLexicalScanner.isWhite (aChar: CHAR): BOOLEAN;
+  FUNCTION TPascalLexicalScanner.isWhite (aChar: CHAR): BOOLEAN;
   BEGIN
     RESULT := aChar IN [' ', TAB];
   END;
@@ -224,7 +260,7 @@ CONST
 
 
 (* Skip over leading white spaces. *)
-  PROCEDURE TLexicalScanner.SkipWhite;
+  PROCEDURE TPascalLexicalScanner.SkipWhite;
 
   (* Checks and skips a comment. *)
     PROCEDURE SkipComment;
@@ -283,7 +319,7 @@ CONST
 
 
 (* Skips CR/CF. (TEST) *)
-  PROCEDURE TLexicalScanner.Fin;
+  PROCEDURE TPascalLexicalScanner.Fin;
   BEGIN
     WHILE fLookahead IN [CR, LF] DO
       SELF.GetChar;
@@ -293,7 +329,7 @@ CONST
 
 
 (* Skips a separator (i.e.: ',', '+', '(', etc. *)
-  PROCEDURE TLexicalScanner.SkipCharacter;
+  PROCEDURE TPascalLexicalScanner.SkipCharacter;
   BEGIN
     SELF.GetChar;
     SELF.SkipWhite;
@@ -302,16 +338,18 @@ CONST
 
 
 (* Returns any token. *)
-  FUNCTION TLexicalScanner.GetToken: STRING;
+  FUNCTION TPascalLexicalScanner.GetToken: STRING;
   BEGIN
     WHILE (fLookahead = CR) OR (fLookahead = LF) DO Fin;
     IF SELF.isAlpha (Lookahead) THEN
       RESULT := SELF.GetIdentifier
     ELSE IF SELF.isDigit (Lookahead) OR (Lookahead = '$') THEN
       RESULT := SELF.GetNumber
+    ELSE IF SELF.isStringDelimiter (Lookahead) THEN
+      RESULT := SELF.GetString
     ELSE BEGIN
       fLastTokenString := fLookahead;
-      fLastTokenId := tiOther;
+      fLastTokenType := pttOther;
       RESULT := fLastTokenString;
       SELF.GetChar;
       SELF.SkipWhite;
@@ -323,13 +361,13 @@ CONST
 
 
 (* Returns an identifier. *)
-  FUNCTION TLexicalScanner.GetIdentifier: STRING;
+  FUNCTION TPascalLexicalScanner.GetIdentifier: STRING;
   BEGIN
     WHILE (fLookahead = CR) OR (fLookahead = LF) DO Fin;
     fLastTokenString := '';
     IF NOT SELF.isAlpha (fLookahead) THEN
       RAISE Exception.Create ('Name expected!');
-    fLastTokenId := tiIdentifier;
+    fLastTokenType := pttIdentifier;
     REPEAT
       fLastTokenString := fLastTokenString + UpCase (fLookahead);
       SELF.GetChar;
@@ -343,7 +381,7 @@ CONST
 
 
 (* Returns a number. *)
-  FUNCTION TLexicalScanner.GetNumber: STRING;
+  FUNCTION TPascalLexicalScanner.GetNumber: STRING;
 
     PROCEDURE HexNum;
     BEGIN
@@ -369,17 +407,48 @@ CONST
       RAISE Exception.Create ('Number expected!');
     IF fLookahead = '$' THEN
     BEGIN
-      fLastTokenId := tiHexInteger;
+      fLastTokenType := pttHexInteger;
       HexNum;
     END
     ELSE BEGIN
-      fLastTokenId := tiInteger;
+      fLastTokenType := pttInteger;
       IntegerNum;
     END;
     RESULT := fLastTokenString;
     SkipWhite;
   // To help debug.  Should be deleted on final release.
   //WriteLn ('Last Token : ''', fLastTokenString, '''');
+  END;
+
+(* Returns a string constant. *)
+  FUNCTION TPascalLexicalScanner.GetString: STRING;
+
+  (* Helper function to detect the delimiter. *)
+    FUNCTION EndOfString: BOOLEAN;
+    BEGIN
+      RESULT := SELF.isStringDelimiter (fLookahead)
+		AND NOT SELF.isStringDelimiter (NextCharacter);
+    END;
+
+  BEGIN
+    IF NOT SELF.isStringDelimiter (fLookahead) THEN
+      RAISE Exception.Create ('String constant delimiter expected!');
+    SELF.GetChar; { Skips first delimiter. }
+    fLastTokenString := '';
+  { Get's the string. }
+{TODO: Doesn't manage line breaks nor file end! }
+    WHILE NOT EndOfString DO
+    BEGIN
+      fLastTokenString := fLastTokenString + fLookahead;
+    { Test for double quote. }
+      IF SELF.isStringDelimiter (fLookahead)
+	 AND SELF.isStringDelimiter (NextCharacter) THEN
+    { Skips one of them.  The other will be skipped later. }
+	SELF.GetChar;
+    { Skips current character. }
+      SELF.GetChar;
+    END;
+    RESULT := fLastTokenString;
   END;
 
 END.

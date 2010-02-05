@@ -5,7 +5,7 @@ UNIT Compiler;
 INTERFACE
 
 USES
-  ULexScan, UEncoder,
+  PasCompiler, UEncoder,
   Classes, sysutils;
 
 
@@ -14,7 +14,7 @@ TYPE
 (* The actual compiler. *)
   TPascalCompiler = CLASS
   PRIVATE
-    fScanner: TLexicalScanner;
+    fScanner: TPascalLexicalScanner;
     fFileName: STRING;
     fOutput: TEncoder;
   PUBLIC
@@ -116,7 +116,7 @@ USES
       RAISE CompilationException.Create ('''Compile'' should be called only once!');
     aFile := TFileStream.Create (aFileName, fmOpenRead);
     TRY
-      fScanner := TLexicalScanner.Create (aFile, Configuration.ListsComments);
+      fScanner := TPascalLexicalScanner.Create (aFile, Configuration.ListsComments);
     { Z80pas ::= PascalProgram .
       PascalProgram ::= PascalProgram . }
       Token := fScanner.GetToken;

@@ -55,16 +55,16 @@
       BEGIN
 	fScanner.SkipCharacter; { Skips '(' }
 	Tmp := fScanner.GetToken;
-	IF NOT (fScanner.LastTokenId IN [tiIdentifier, tiInteger, tiHexInteger])
+	IF NOT (fScanner.LastTokenType IN [pttIdentifier, pttInteger, pttHexInteger])
 	THEN
 	  RAISE CompilationException.Create ('Bad ASM parameter');
-	IF fScanner.LastTokenId = tiHexInteger THEN
+	IF fScanner.LastTokenType = pttHexInteger THEN
 	  Tmp[1] := '#';
 	IF fScanner.Lookahead = '+' THEN
 	BEGIN
 	  fScanner.SkipCharacter; { Skips '+' }
 	  TmpNum := fScanner.GetNumber;
-	  IF fScanner.LastTokenId = tiHexInteger THEN
+	  IF fScanner.LastTokenType = pttHexInteger THEN
 	    TmpNum[1] := '#';
 	  Tmp := Tmp + '+' + TmpNum;
 	END;
