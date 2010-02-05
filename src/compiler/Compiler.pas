@@ -1,11 +1,12 @@
 (* Defines the Pascal compiler, that loads a file, parses it and saves the
    result in another file. *)
 UNIT Compiler;
+(* TODO: Refactorize to the new object definition. *)
 
 INTERFACE
 
 USES
-  PasCompiler, UEncoder,
+  PasCompiler, Z80Encoders,
   Classes, sysutils;
 
 
@@ -16,7 +17,7 @@ TYPE
   PRIVATE
     fScanner: TPascalLexicalScanner;
     fFileName: STRING;
-    fOutput: TEncoder;
+    fOutput: TZ80Encoder;
   PUBLIC
   (* Constructor. *)
     CONSTRUCTOR Create;
@@ -90,7 +91,8 @@ USES
 (* Constructor. *)
   CONSTRUCTOR TPascalCompiler.Create;
   BEGIN
-    fOutput := TEncoder.Create;
+  (* At the moment, no scanner set. *)
+    fOutput := TZ80Encoder.Create (NIL);
   END;
 
 

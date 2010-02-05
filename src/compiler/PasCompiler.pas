@@ -37,7 +37,7 @@ TYPE
 
 
 (* Lexical scanner.  It's prepared to parse Pascal source files. *)
-  TPascalLexicalScanner = CLASS
+  TPascalLexicalScanner = CLASS (TObject)
   PRIVATE
     fInputStream: TStream;
   (* Lookahead character. *)
@@ -82,8 +82,8 @@ TYPE
 
   (* Skip over leading white spaces and comments. *)
     PROCEDURE SkipWhite;
-  (* Skips CR/CF. (TEST) *)
-    PROCEDURE Fin;
+  (* Skips CR/CF. *)
+    PROCEDURE SkipLineBreak;
   (* Skips a separator (i.e.: ',', '+', '(', etc.).  It will skip also the
      following white spaces. *)
     PROCEDURE SkipCharacter;
@@ -115,6 +115,40 @@ TYPE
 
 
 
+(* Abstract class that generalizes the encoding.  It's used by the compiler to
+   create the code.  Actually is a P-Code encoder:  The compiler "translates"
+   the Pascal sources to P-Code and "send" it to the encoder, and the encoder
+   "translates" the P-Code to the final code. *)
+  TPascalEncoder = CLASS (TObject)
+  PRIVATE
+    fRefScanner: TPascalLexicalScanner;
+  PROTECTED
+  (* Reference to the scanner.  It should be the same than the used by the
+     compler.  Assigned by the constructor. *)
+    PROPERTY RefScanner: TPascalLexicalScanner READ fRefScanner;
+  PUBLIC
+  (* Constructor.
+     @param(aScanner Reference to the scanner used by the compiler.  The
+      encoder may need it to parse inline assembler code (see
+      @link(ParseAssembler).  It's assigned to @link(RefScanner) and souldn't
+      be destroyed) *)
+    CONSTRUCTOR Create (aScanner: TPascalLexicalScanner); VIRTUAL;
+  (* Add a coment line to the output. *)
+    PROCEDURE AddComment (Comment: STRING); VIRTUAL;
+  (* It's called by the compiler when it finds an "ASM .. END" block.  It
+     should use the RefScanner, and the first token should be "ASM" and should
+     parse until the first END token.
+
+     By default it raises an exception because there are no target. *)
+    PROCEDURE ParseASM; VIRTUAL;
+
+
+  (* Adds an assembler line.  This is only temporal. *)
+    PROCEDURE Emit (aLine: STRING); VIRTUAL; ABSTRACT;
+  END;
+
+
+
 IMPLEMENTATION
 
 USES
@@ -123,12 +157,16 @@ USES
 
 
 CONST
-(* Fool constants for control characters. (TEST) *)
+(* Fool constants for control characters. *)
   TAB = ^I;
   CR = ^M;
   LF = ^J;
 
 
+
+(*************************
+ * TPascalLexicalScanner *
+ *************************)
 
 (* Returns TRUE if it stores comments. *)
   FUNCTION TPascalLexicalScanner.GetStoreComments: BOOLEAN;
@@ -318,8 +356,8 @@ CONST
 
 
 
-(* Skips CR/CF. (TEST) *)
-  PROCEDURE TPascalLexicalScanner.Fin;
+(* Skips CR/CF. *)
+  PROCEDURE TPascalLexicalScanner.SkipLineBreak;
   BEGIN
     WHILE fLookahead IN [CR, LF] DO
       SELF.GetChar;
@@ -340,7 +378,7 @@ CONST
 (* Returns any token. *)
   FUNCTION TPascalLexicalScanner.GetToken: STRING;
   BEGIN
-    WHILE (fLookahead = CR) OR (fLookahead = LF) DO Fin;
+    WHILE (fLookahead = CR) OR (fLookahead = LF) DO SkipLineBreak;
     IF SELF.isAlpha (Lookahead) THEN
       RESULT := SELF.GetIdentifier
     ELSE IF SELF.isDigit (Lookahead) OR (Lookahead = '$') THEN
@@ -363,7 +401,7 @@ CONST
 (* Returns an identifier. *)
   FUNCTION TPascalLexicalScanner.GetIdentifier: STRING;
   BEGIN
-    WHILE (fLookahead = CR) OR (fLookahead = LF) DO Fin;
+    WHILE (fLookahead = CR) OR (fLookahead = LF) DO SkipLineBreak;
     fLastTokenString := '';
     IF NOT SELF.isAlpha (fLookahead) THEN
       RAISE Exception.Create ('Name expected!');
@@ -401,7 +439,7 @@ CONST
     END;
 
   BEGIN
-    WHILE (fLookahead = CR) OR (fLookahead = LF) DO Fin;
+    WHILE (fLookahead = CR) OR (fLookahead = LF) DO SkipLineBreak;
     fLastTokenString := '';
     IF NOT SELF.isDigit (fLookahead) AND (fLookahead <> '$') THEN
       RAISE Exception.Create ('Number expected!');
@@ -436,9 +474,11 @@ CONST
     SELF.GetChar; { Skips first delimiter. }
     fLastTokenString := '';
   { Get's the string. }
-{TODO: Doesn't manage line breaks nor file end! }
     WHILE NOT EndOfString DO
     BEGIN
+    { Test for line breaking. }
+      IF (fLookahead = CR) OR (fLookahead = LF) THEN
+	RAISE Exception.Create ('String exceeds line');
       fLastTokenString := fLastTokenString + fLookahead;
     { Test for double quote. }
       IF SELF.isStringDelimiter (fLookahead)
@@ -449,6 +489,34 @@ CONST
       SELF.GetChar;
     END;
     RESULT := fLastTokenString;
+  END;
+
+
+
+(******************
+ * TPascalEncoder *
+ ******************)
+
+(* Constructor. *)
+  CONSTRUCTOR TPascalEncoder.Create (aScanner: TPascalLexicalScanner);
+  BEGIN
+    fRefScanner := aScanner;
+  END;
+
+
+
+(* Add a coment line to the output. *)
+  PROCEDURE TPascalEncoder.AddComment (Comment: STRING);
+  BEGIN
+    ;
+  END;
+
+
+
+(* By default it raises an exception because there are no target. *)
+  PROCEDURE TPascalEncoder.ParseASM;
+  BEGIN
+    RAISE Exception.Create ('No ASM allowed.');
   END;
 
 END.
