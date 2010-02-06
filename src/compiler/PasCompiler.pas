@@ -25,11 +25,20 @@ UNIT PasCompiler;
 INTERFACE
 
 USES
-  Classes;
+  Classes, sysutils;
 
 
 
 TYPE
+(* To manage compilation exceptions. *)
+  CompilationException = CLASS (Exception)
+  PUBLIC
+  (* Something expected but anotherthing found. *)
+    CONSTRUCTOR Expected (fExpected, fFound: STRING);
+  END;
+
+
+
 (* Token types. *)
   TPascalTokenType = ( pttIdentifier, pttInteger, pttHexInteger, pttReal,
 			pttString, pttOther );
@@ -50,16 +59,16 @@ TYPE
   (* To store comments. *)
     fComments: TStringList;
 
+  (* The input stream property. *)
+    PROCEDURE PutInputStream (aStream: TStream);
   (* The "StoreComments" property. *)
     FUNCTION GetStoreComments: BOOLEAN;
     PROCEDURE PutStoreComments (Value: BOOLEAN);
   (* To get the next character. *)
     FUNCTION GetNextCharacter: CHAR;
   PUBLIC
-  (* Constructor.  Uses the given stream as input.
-     @param(aStoreComments sets the StoreComments property.
-       Default to @false). *)
-    CONSTRUCTOR Create (aStream: TStream; aStoreComments: BOOLEAN = FALSE);
+  (* Constructor. *)
+    CONSTRUCTOR Create;
   (* Destructor. *)
     DESTRUCTOR Destroy; OVERRIDE;
 
@@ -97,6 +106,8 @@ TYPE
   (* Returns a string constant. *)
     FUNCTION GetString: STRING;
 
+  (* The input stream.  It will not be destroyed by the scanner. *)
+    PROPERTY InputStream: TStream READ fInputStream WRITE PutInputStream;
   (* Returns the last character read. *)
     PROPERTY Lookahead: CHAR READ fLookahead;
   (* Returns the next character to read but don't extracts it from the stream.
@@ -127,12 +138,8 @@ TYPE
      compler.  Assigned by the constructor. *)
     PROPERTY RefScanner: TPascalLexicalScanner READ fRefScanner;
   PUBLIC
-  (* Constructor.
-     @param(aScanner Reference to the scanner used by the compiler.  The
-      encoder may need it to parse inline assembler code (see
-      @link(ParseAssembler).  It's assigned to @link(RefScanner) and souldn't
-      be destroyed) *)
-    CONSTRUCTOR Create (aScanner: TPascalLexicalScanner); VIRTUAL;
+  (* Constructor. *)
+    CONSTRUCTOR Create; VIRTUAL;
   (* Add a coment line to the output. *)
     PROCEDURE AddComment (Comment: STRING); VIRTUAL;
   (* It's called by the compiler when it finds an "ASM .. END" block.  It
@@ -141,6 +148,13 @@ TYPE
 
      By default it raises an exception because there are no target. *)
     PROCEDURE ParseASM; VIRTUAL;
+  (* Emits program prologue.  That is, initialization code needed.  By default
+     it does nothing. *)
+    PROCEDURE ProgramProlog (ProgramName: STRING); VIRTUAL;
+  (* Emits program Epilogue.  That is, Finalization code needed.  By default it
+     does nothing. *)
+    PROCEDURE ProgramEpilog; VIRTUAL;
+
 
 
   (* Adds an assembler line.  This is only temporal. *)
@@ -149,12 +163,66 @@ TYPE
 
 
 
+(* Implements a P-Code compiler of Pascal. *)
+  TPascalCompiler = CLASS (TObject)
+  PRIVATE
+  (* Lexical Scanner used. *)
+    fScanner: TPascalLexicalScanner;
+  (* Encoder. *)
+    fEncoder: TPascalEncoder;
+  PROTECTED
+  (* This procedure is called by the compiler when it needs to inform the user
+     for someting (i.e.: what's doing in verbose mode).  By default it does
+     nothing. *)
+    PROCEDURE Inform (aMessage: STRING); VIRTUAL;
+  PUBLIC
+  (* Constructor.
+     @param(aEncoder The encoder to be used by the compiler.  It will be freed
+       by the compiler's destructor.) *)
+    CONSTRUCTOR Create (aEncoder: TPascalEncoder);
+  (* Destructor.  It will free the encoder too. *)
+    DESTRUCTOR Destroy; OVERRIDE;
+  (* Entry point for compilation. *)
+    PROCEDURE Compile; VIRTUAL;
+  (* Lexical scanner used by the compiler. *)
+    PROPERTY Scanner: TPascalLexicalScanner READ fScanner;
+  (* Encoder used by the compiler. *)
+    PROPERTY Encoder: TPascalEncoder READ fEncoder;
+  PRIVATE
+  { Recursive compiler. }
+    PROCEDURE PascalProgram;
+    PROCEDURE Block;
+    PROCEDURE DeclarationPart;
+    PROCEDURE StatementPart;
+    PROCEDURE CompoundStatement;
+
+  { Output.  THESE SHOULD BE REMOVED. }
+    PROCEDURE DispatchLines;
+    PROCEDURE AddComment (Comment: STRING);
+    PROCEDURE Emit (aLine: STRING);
+  END;
+
+
+
 IMPLEMENTATION
 
-USES
-  sysutils;
+USES Configuration; (* TODO: Esto DEBE desaparecer. *)
+
+(************************
+ * CompilationException *
+ ************************)
+
+(* Something expected but anotherthing found. *)
+  CONSTRUCTOR CompilationException.Expected (fExpected, fFound: STRING);
+  BEGIN
+    INHERITED Create (''''+fExpected+''' expected but '''+fFound+''' found.');
+  END;
 
 
+
+(*************************
+ * TPascalLexicalScanner *
+ *************************)
 
 CONST
 (* Fool constants for control characters. *)
@@ -164,9 +232,16 @@ CONST
 
 
 
-(*************************
- * TPascalLexicalScanner *
- *************************)
+(* The input stream property. *)
+  PROCEDURE TPascalLexicalScanner.PutInputStream (aStream: TStream);
+  BEGIN
+    fInputStream := aStream;
+  { Initializes the scanner. }
+    SELF.GetChar;
+    SkipWhite;
+  END;
+
+
 
 (* Returns TRUE if it stores comments. *)
   FUNCTION TPascalLexicalScanner.GetStoreComments: BOOLEAN;
@@ -210,12 +285,10 @@ CONST
 
 
 (* Constructor.  Uses the given stream as input. *)
-  CONSTRUCTOR TPascalLexicalScanner.Create (aStream: TStream; aStoreComments: BOOLEAN);
+  CONSTRUCTOR TPascalLexicalScanner.Create;
   BEGIN
-    PutStoreComments (aStoreComments);
-    fInputStream := aStream;
-    SELF.GetChar;
-    SkipWhite;
+    PutStoreComments (FALSE);
+    fInputStream := NIL;
   END;
 
 
@@ -306,7 +379,7 @@ CONST
       FUNCTION IsBeginComment: BOOLEAN;
       BEGIN
 	RESULT := (fLookahead = '{')
-		OR ((fLookahead = '(') AND (SELF.NextCharacter = '*'));
+		OR ((fLookahead = '(') AND (NextCharacter = '*'));
 	IF RESULT THEN
 	BEGIN
 	  SELF.GetChar;
@@ -318,7 +391,7 @@ CONST
       FUNCTION IsEndComment: BOOLEAN;
       BEGIN
 	RESULT := (fLookahead = '}')
-		OR ((fLookahead = '*') AND (SELF.NextCharacter = ')'));
+		OR ((fLookahead = '*') AND (NextCharacter = ')'));
 	IF RESULT THEN
 	BEGIN
 	  SELF.GetChar;
@@ -361,7 +434,7 @@ CONST
   BEGIN
     WHILE fLookahead IN [CR, LF] DO
       SELF.GetChar;
-    SELF.SkipWhite;
+    SkipWhite;
   END;
 
 
@@ -370,7 +443,7 @@ CONST
   PROCEDURE TPascalLexicalScanner.SkipCharacter;
   BEGIN
     SELF.GetChar;
-    SELF.SkipWhite;
+    SkipWhite;
   END;
 
 
@@ -380,17 +453,17 @@ CONST
   BEGIN
     WHILE (fLookahead = CR) OR (fLookahead = LF) DO SkipLineBreak;
     IF SELF.isAlpha (Lookahead) THEN
-      RESULT := SELF.GetIdentifier
+      RESULT := GetIdentifier
     ELSE IF SELF.isDigit (Lookahead) OR (Lookahead = '$') THEN
-      RESULT := SELF.GetNumber
-    ELSE IF SELF.isStringDelimiter (Lookahead) THEN
-      RESULT := SELF.GetString
+      RESULT := GetNumber
+    ELSE IF isStringDelimiter (Lookahead) THEN
+      RESULT := GetString
     ELSE BEGIN
       fLastTokenString := fLookahead;
       fLastTokenType := pttOther;
       RESULT := fLastTokenString;
       SELF.GetChar;
-      SELF.SkipWhite;
+      SkipWhite;
     // To help debug.  Should be deleted on final release.
     //WriteLn ('Last Token : ''', fLastTokenString, '''');
     END;
@@ -464,12 +537,12 @@ CONST
   (* Helper function to detect the delimiter. *)
     FUNCTION EndOfString: BOOLEAN;
     BEGIN
-      RESULT := SELF.isStringDelimiter (fLookahead)
-		AND NOT SELF.isStringDelimiter (NextCharacter);
+      RESULT := isStringDelimiter (fLookahead)
+		AND NOT isStringDelimiter (NextCharacter);
     END;
 
   BEGIN
-    IF NOT SELF.isStringDelimiter (fLookahead) THEN
+    IF NOT isStringDelimiter (fLookahead) THEN
       RAISE Exception.Create ('String constant delimiter expected!');
     SELF.GetChar; { Skips first delimiter. }
     fLastTokenString := '';
@@ -481,8 +554,8 @@ CONST
 	RAISE Exception.Create ('String exceeds line');
       fLastTokenString := fLastTokenString + fLookahead;
     { Test for double quote. }
-      IF SELF.isStringDelimiter (fLookahead)
-	 AND SELF.isStringDelimiter (NextCharacter) THEN
+      IF isStringDelimiter (fLookahead)
+      AND isStringDelimiter (NextCharacter) THEN
     { Skips one of them.  The other will be skipped later. }
 	SELF.GetChar;
     { Skips current character. }
@@ -498,9 +571,10 @@ CONST
  ******************)
 
 (* Constructor. *)
-  CONSTRUCTOR TPascalEncoder.Create (aScanner: TPascalLexicalScanner);
+  CONSTRUCTOR TPascalEncoder.Create;
   BEGIN
-    fRefScanner := aScanner;
+    INHERITED Create;
+    ;
   END;
 
 
@@ -517,6 +591,189 @@ CONST
   PROCEDURE TPascalEncoder.ParseASM;
   BEGIN
     RAISE Exception.Create ('No ASM allowed.');
+  END;
+
+
+
+(* Emits program prologue.  That is, initialization code needed.  By default
+   it does nothing. *)
+  PROCEDURE TPascalEncoder.ProgramProlog (ProgramName: STRING);
+  BEGIN
+    ;
+  END;
+
+
+
+(* Emits program Epilogue.  That is, Finalization code needed.  By default it
+   does nothing. *)
+  PROCEDURE TPascalEncoder.ProgramEpilog;
+  BEGIN
+    ;
+  END;
+
+
+
+(*******************
+ * TPascalCompiler *
+ *******************)
+
+(* This procedure is called by the compiler when it needs to inform the user
+   for someting (i.e.: what's doing in verbose mode).  By default it does
+   nothing. *)
+  PROCEDURE TPascalCompiler.Inform (aMessage: STRING);
+  BEGIN
+    ;
+  END;
+
+
+
+(* Constructor.
+   @param(aEncoder The encoder to be used by the compiler.  It will be freed by
+     the compiler's destructor.) *)
+  CONSTRUCTOR TPascalCompiler.Create (aEncoder: TPascalEncoder);
+  BEGIN
+    fScanner := TPascalLexicalScanner.Create;
+    fEncoder := aEncoder;
+    fEncoder.fRefScanner := fScanner;
+  END;
+
+
+
+(* Destructor.  It will free the encoder too. *)
+  DESTRUCTOR TPascalCompiler.Destroy;
+  BEGIN
+    fScanner.Free;
+    fEncoder.Free;
+    INHERITED Destroy;
+  END;
+
+
+
+(* Entry point for compilation. *)
+  PROCEDURE TPascalCompiler.Compile;
+  VAR
+    Token: STRING;
+  BEGIN
+  { Z80pas ::= PascalProgram .
+    PascalProgram ::= PascalProgram . }
+    Token := fScanner.GetToken;
+    IF Token = 'PROGRAM' THEN
+      PascalProgram
+    ELSE
+      RAISE CompilationException.Expected ('PROGRAM', Token);
+  END;
+
+
+(**********************
+ * Recursive compiler *
+ **********************)
+
+(* PascalProgram ::= "PROGRAM" NewIdent ";" Block "." . *)
+  PROCEDURE TPascalCompiler.PascalProgram;
+  VAR
+    ProgramIdentifier: STRING;
+  BEGIN
+    IF fScanner.LastToken <> 'PROGRAM' THEN
+      RAISE CompilationException.Expected ('PROGRAM', fScanner.LastToken);
+    ProgramIdentifier := fScanner.GetIdentifier; { NewIdent ::= identifier . }
+  { TODO: May be it should store the program identifier in a symbol list to
+    prevent duplicate definitions. }
+    Inform ('Program name ''' + ProgramIdentifier + '''');
+    IF fScanner.GetToken <> ';' THEN
+      RAISE CompilationException.Expected (';', fScanner.LastToken);
+  { Program prolog. }
+    fEncoder.ProgramProlog (ProgramIdentifier);
+    Block;
+    IF fScanner.GetToken <> '.' THEN
+      RAISE CompilationException.Expected ('.', fScanner.LastToken);
+    fEncoder.ProgramEpilog;
+  END;
+
+
+
+(* Block ::= DeclarationPart StatementPart . *)
+  PROCEDURE TPascalCompiler.Block;
+  BEGIN
+    DeclarationPart;
+    fEncoder.AddComment ('>');
+    fEncoder.AddComment ('> Program starts here');
+    fEncoder.AddComment ('>');
+    StatementPart;
+  END;
+
+
+
+(* At the moment, DeclarationPart is empty. *)
+  PROCEDURE TPascalCompiler.DeclarationPart;
+  BEGIN
+    ;
+  END;
+
+
+
+(* StatementPart ::= CompoundStatement | ASMCompoundStatement . *)
+  PROCEDURE TPascalCompiler.StatementPart;
+  BEGIN
+    IF fScanner.GetToken = 'ASM' THEN
+      fEncoder.ParseASM
+    ELSE
+      CompoundStatement;
+  END;
+
+
+
+(* CompoundStatement ::= "BEGIN" StatementSequence "END" .
+   StatementSequence ::= Statement [ ";" Statement ]* . *)
+  PROCEDURE TPascalCompiler.CompoundStatement;
+  BEGIN
+    IF fScanner.LastToken <> 'BEGIN' THEN
+      RAISE CompilationException.Expected ('BEGIN', fScanner.LastToken);
+    WHILE fScanner.GetToken <> 'END' DO
+    BEGIN
+      IF fScanner.LastToken = 'ASM' THEN
+	fEncoder.ParseASM
+      ELSE IF fScanner.LastToken = ';' THEN
+      { This allows empty statements. }
+	CONTINUE
+      ELSE
+	RAISE CompilationException.Create ('Synax error.');
+    END;
+  END;
+
+
+
+(**********
+ * Output *
+ **********)
+
+  PROCEDURE TPascalCompiler.DispatchLines;
+  VAR
+    Ndx: INTEGER;
+  BEGIN
+    IF Configuration.ListsComments AND (fScanner.Comments.Count > 0) THEN
+    BEGIN
+      FOR Ndx := 0 TO fScanner.Comments.Count - 1 DO
+	Encoder.AddComment (fScanner.Comments.Strings[Ndx]);
+      fScanner.Comments.Clear;
+    END;
+  END;
+
+
+
+  PROCEDURE TPascalCompiler.AddComment (Comment: STRING);
+  BEGIN
+    IF Configuration.ListsComments AND (fScanner.Comments.Count > 0) THEN
+      DispatchLines;
+    Encoder.AddComment (Comment);
+  END;
+
+
+
+  PROCEDURE TPascalCompiler.Emit (aLine: STRING);
+  BEGIN
+    IF Configuration.ListsComments AND (fScanner.Comments.Count > 0) THEN
+      DispatchLines;
+    Encoder.Emit (aLine);
   END;
 
 END.
