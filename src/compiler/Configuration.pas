@@ -45,7 +45,7 @@ USES
     WriteLn ('Usage:');
     WriteLn ('  z80pas [options] <inputfile> [options]');
     WriteLn ('Options:');
-    WriteLn ('  -a     Lists comments in assembler file');
+    WriteLn ('  -a     List source comments in assembler file');
     WriteLn ('  -cfg   Returns the full path to the config file');
   {
     WriteLn ('  -i     Information');

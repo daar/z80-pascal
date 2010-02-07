@@ -37,10 +37,14 @@ TYPE
    @seealso(TPascalEncoder) *)
   TZ80Encoder = CLASS (TPascalEncoder)
   PRIVATE
+  (* To store the ouput Assembler code before to save it. *)
     fOutputStrings: TStringList;
+  PROTECTED
+  (* Adds a raw assembler line. *)
+    PROCEDURE Emit (aLine: STRING);
   PUBLIC
   (* Constructor. *)
-    CONSTRUCTOR Create; OVERRIDE;
+    CONSTRUCTOR Create;
   (* Destructor. *)
     DESTRUCTOR Destroy; OVERRIDE;
   (* Add a coment line to the output. *)
@@ -57,11 +61,6 @@ TYPE
      It is so simple that it allows weird Z80 statements as "CALL (HL), NZ"
      and such. *)
     PROCEDURE Z80Statement;
-
-
-
-  (* Adds an assembler line. *)
-    PROCEDURE Emit (aLine: STRING); OVERRIDE;
   (* Saves the output. *)
     PROCEDURE SaveToFile (Filename: STRING);
   END;
@@ -70,9 +69,22 @@ TYPE
 
 IMPLEMENTATION
 
+USES
+  sysutils;
+
+
+
 (***************
  * TZ80Encoder *
  ***************)
+
+(* Adds a raw assembler line. *)
+  PROCEDURE TZ80Encoder.Emit (aLine: STRING);
+  BEGIN
+    fOutputStrings.Add (''+^I+aLine);
+  END;
+
+
 
 (* Constructor. *)
   CONSTRUCTOR TZ80Encoder.Create;
@@ -104,14 +116,14 @@ IMPLEMENTATION
 (* Emits program prologue. *)
   PROCEDURE TZ80Encoder.ProgramProlog (ProgramName: STRING);
   BEGIN
-    SELF.AddComment ('> Assembler file created by Z80-Pascal.');
-    SELF.AddComment ('>');
-// TODO    SELF.AddComment ('> File: '+fFileName);
-    SELF.AddComment ('> Program name: '+ProgramName);
-    SELF.Emit ('');
-    SELF.AddComment ('This orig was set staticly.');
-    SELF.Emit ('ORG #F000');
-    SELF.Emit ('');
+    AddComment ('> Assembler file created by Z80-Pascal.');
+    AddComment ('>');
+// TODO    AddComment ('> File: '+fFileName);
+    AddComment ('> Program name: '+ProgramName);
+    Emit ('');
+    AddComment ('This orig was set staticly.');
+    Emit ('ORG #F000');
+    Emit ('');
   END;
 
 
@@ -119,8 +131,8 @@ IMPLEMENTATION
 (* Emits program epilogue. *)
   PROCEDURE TZ80Encoder.ProgramEpilog;
   BEGIN
-    SELF.AddComment ('> Program finishes here.');
-    SELF.Emit ('RET');
+    AddComment ('> Program finishes here.');
+    Emit ('RET');
   END;
 
 
@@ -130,7 +142,8 @@ IMPLEMENTATION
   PROCEDURE TZ80Encoder.ParseASM;
   BEGIN
     IF RefScanner.LastToken <> 'ASM' THEN
-      RAISE CompilationException.Expected ('ASM', RefScanner.LastToken);
+      RAISE CompilationException.Expected (
+	RefScanner.Line, RefScanner.Column, 'ASM', RefScanner.LastToken);
     WHILE RefScanner.GetToken <> 'END' DO
       IF RefScanner.LastToken <> ';' THEN
 	Z80Statement;
@@ -163,8 +176,12 @@ IMPLEMENTATION
     BEGIN
       IF RefScanner.IsAlpha (RefScanner.Lookahead) THEN
 	RESULT := RefScanner.GetIdentifier
-      ELSE IF (RefScanner.Lookahead = '$')
-	   OR RefScanner.IsDigit (RefScanner.Lookahead) THEN
+      ELSE IF RefScanner.Lookahead = '$' THEN
+      BEGIN
+	TmpNum := RefScanner.GetNumber;
+	RESULT := '#' + RightStr (TmpNum, Length (TmpNum) - 1);
+      END
+      ELSE IF RefScanner.IsDigit (RefScanner.Lookahead) THEN
 	RESULT := RefScanner.GetNumber
       ELSE IF RefScanner.Lookahead = '(' THEN
       BEGIN
@@ -184,12 +201,14 @@ IMPLEMENTATION
 	  Tmp := Tmp + '+' + TmpNum;
 	END;
 	IF RefScanner.Lookahead <> ')' THEN
-	  RAISE CompilationException.Expected (')', RefScanner.GetToken);
+	  RAISE CompilationException.Expected (
+	    RefScanner.Line, RefScanner.Column, ')', RefScanner.GetToken);
 	RefScanner.SkipCharacter; { Skips ')' }
         RESULT := '('+Tmp+')';
       END
       ELSE
-	RAISE CompilationException.Expected ('Z80Parameter', RefScanner.GetToken);
+	RAISE CompilationException.Expected (
+	  RefScanner.Line, RefScanner.Column,  'Z80Parameter', RefScanner.GetToken);
     END;
 
 
@@ -210,8 +229,8 @@ IMPLEMENTATION
   BEGIN
   { Z80Statement ::= Z80Instruction [ Z80Parameter [ "," Z80Parameter ] ] . }
     IF FindItem (RefScanner.LastToken, Z80Instruction) < 0 THEN
-      RAISE CompilationException.Expected ('Z80Instruction',
-					   RefScanner.LastToken);
+      RAISE CompilationException.Expected (
+	RefScanner.Line, RefScanner.Column, 'Z80Instruction', RefScanner.LastToken);
     Instruction := RefScanner.LastToken;
     IF RefScanner.Lookahead <> ';' THEN
     BEGIN
@@ -223,14 +242,6 @@ IMPLEMENTATION
       END;
     END;
     SELF.Emit (Instruction);
-  END;
-
-
-
-(* Adds a raw assembler line. *)
-  PROCEDURE TZ80Encoder.Emit (aLine: STRING);
-  BEGIN
-    fOutputStrings.Add (''+^I+aLine);
   END;
 
 

@@ -32,21 +32,26 @@ USES
 
 
 TYPE
-(* The actual compiler. *)
+(* Makes the compiler generate Z-80 Assembler code. *)
   TCompiler = CLASS (TPascalCompiler)
   PRIVATE
+  (* The stream to read from. *)
     fFileName: STRING;
     fInputStream: TFileStream;
   (* Puts the input filename, opening and assigning the input stream. *)
     PROCEDURE PutFileName (aFileName: STRING);
   PROTECTED
-  (* Implements the inform procedure. *)
-    PROCEDURE Inform (aMessage: STRING); OVERRIDE;
+  (* Implements the Verbose procedure. *)
+    PROCEDURE Verbose (aMessage: STRING); OVERRIDE;
   PUBLIC
   (* Constructor. *)
     CONSTRUCTOR Create;
   (* Destructor. *)
     DESTRUCTOR Destroy; OVERRIDE;
+  (* It's called by the Encoder when it finds a comment line.
+     This inserts the comment to the Assembler output if
+     @link(Configuration.ListsComments) is @true. *)
+    PROCEDURE AddComment (Comment: STRING); OVERRIDE;
   (* Saves the result on a file. *)
     PROCEDURE SaveToFile (aFileName: STRING);
 
@@ -78,10 +83,11 @@ USES
 
 
 
-(* Implements the inform procedure. *)
-  PROCEDURE TCompiler.Inform (aMessage: STRING);
+(* Implements the Verbose procedure. *)
+  PROCEDURE TCompiler.Verbose (aMessage: STRING);
   BEGIN
-    WriteLn (aMessage);
+    IF vblWarnings IN Configuration.Verbose THEN
+      WriteLn (aMessage);
   END;
 
 
@@ -101,6 +107,30 @@ USES
     IF fInputStream <> NIL THEN
       fInputStream.Free;
     INHERITED Destroy;
+  END;
+
+
+
+(* It's called by the Encoder when it finds a comment line.
+   This inserts the comment to the Assembler output if
+   @link(Configuration.ListsComments) is @true. *)
+  PROCEDURE TCompiler.AddComment (Comment: STRING);
+  VAR
+    CommentLines: TStringList;
+    Cnt: INTEGER;
+  BEGIN
+    IF Configuration.ListsComments THEN
+    BEGIN
+    { This way if comment has multiple lines it was inserted correctly. }
+      CommentLines := TStringList.Create;
+      TRY
+	CommentLines.Text := Comment;
+	FOR Cnt := 0 TO CommentLines.Count -1 DO
+	  Encoder.AddComment (CommentLines[Cnt]);
+      FINALLY
+	CommentLines.Free;
+      END;
+    END;
   END;
 
 

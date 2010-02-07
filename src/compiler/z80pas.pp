@@ -33,7 +33,7 @@ USES
   PROCEDURE Title;
   BEGIN
     WriteLn ('Z80 Pascal compiler (WIP version)');
-    WriteLn ('(c) 2009 Guillermo Martínez');
+    WriteLn ('(c) 2009, 2010 by Guillermo Martínez');
     WriteLn;
   END;
 
