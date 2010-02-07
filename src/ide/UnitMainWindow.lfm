@@ -5,7 +5,7 @@ object MainWindow: TMainWindow
   Width = 614
   ActiveControl = SynEdit
   Caption = 'Z80-Pascal IDE 0.1.0'
-  ClientHeight = 387
+  ClientHeight = 385
   ClientWidth = 614
   Menu = MainMenu
   OnClose = FormClose
@@ -14,7 +14,7 @@ object MainWindow: TMainWindow
   LCLVersion = '0.9.28.2'
   object SynEdit: TSynEdit
     Left = 0
-    Height = 366
+    Height = 364
     Top = 0
     Width = 614
     Align = alClient
@@ -26,7 +26,6 @@ object MainWindow: TMainWindow
     ParentFont = False
     PopupMenu = SynEditPopupMenu
     TabOrder = 0
-    BookMarkOptions.OnChange = nil
     Gutter.Width = 63
     Gutter.MouseActions = <    
       item
@@ -499,7 +498,6 @@ object MainWindow: TMainWindow
     Lines.Strings = (
       ''
     )
-    Options = [eoAutoIndent, eoGroupUndo, eoScrollPastEol, eoSmartTabs, eoTabsToSpaces, eoTrimTrailingSpaces]
     BracketHighlightStyle = sbhsBoth
     OnChange = SynEditChange
     object TSynGutterPartList
@@ -613,7 +611,7 @@ object MainWindow: TMainWindow
   object StatusBar: TStatusBar
     Left = 0
     Height = 21
-    Top = 366
+    Top = 364
     Width = 614
     Panels = <    
       item
@@ -625,9 +623,10 @@ object MainWindow: TMainWindow
     left = 8
     top = 32
     object MenuItemFile: TMenuItem
-      Caption = 'File'
+      Caption = '&File'
       object MenuItemNew: TMenuItem
         Action = FileNew
+        Caption = '&New'
         OnClick = FileNewExecute
       end
       object MenuItemOpen: TMenuItem
@@ -643,7 +642,7 @@ object MainWindow: TMainWindow
       end
     end
     object MenuItemEdit: TMenuItem
-      Caption = 'Edit'
+      Caption = '&Edit'
       object MenuItemCut: TMenuItem
         Action = EditCut
         OnClick = EditCutExecute

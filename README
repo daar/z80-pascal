@@ -1,23 +1,105 @@
-  Please, visit http://z80-pascal.sourceforge.net/ before to follow.
+                                  Z80-Pascal
+                                  ==========
+
+Version 0.1.0
+
+========
+Contents
+========
+
+ - Introduction
+ - License
+ - Installation
+ - How to use
+ - Contact info
+
+
+
+============
+Introduction
+============
+
+  Z80-Pascal aims to create a Pascal compiler for Z-80 based devices, such as
+  MSX, ZX, Game Boy and many others.
 
   This is the first public release of the compiler.  There are a lot of things
   that just don't work at all.
 
-HOW  TO COMPILE
-===============
+  I'm working on it in my free time, so it evolves sssslooooooowwwwlyyyy.
+  Please, don't ask when it will be finished because I have no idea at all.
 
-  Current version is for Free Pascal and Lazarus only.
 
-  First run the "fix" script to define the platform objective, then run the
-  makefile.
 
-  For the IDE, open the "z80pide.lpr" file at z80-pascal/src/ide with Lazarus,
-  check the project options and the compiler options to be sure the directory
-  paths weren't twisted and compile.
+=======
+License
+=======
 
-Documentation
-=============
+  Copyright (c) 2009, 2010 Guillermo Martínez J.
+
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+    1. The origin of this software must not be misrepresented; you must not
+    claim that you wrote the original software. If you use this software
+    in a product, an acknowledgment in the product documentation would be
+    appreciated but is not required.
+
+    2. Altered source versions must be plainly marked as such, and must not be
+    misrepresented as being the original software.
+
+    3. This notice may not be removed or altered from any source
+    distribution.
+
+
+
+============
+Installation
+============
+
+  If you got the binary version, just unzip the package file.  The executable
+  files are in the "bin" subdirectory.
+
+  If you got the source code version, you must compile it:
+
+  1.- Be sure you have all you need: Free Pascal compiler and/or Lazarus IDE.
+      May be you can use Delphi but I didn't test it.
+
+  2.- Open a console and go to the project directory.  In most cases just use
+      "cd project".
+
+  3.- Execute "fix.bat" on Windows or "./fix.sh" on GNU/Linux and follow the
+    on screen instructions.
+
+  4.- Execute the "make" command.  This should create the compiler executable.
+      Execute "make help" to see all available options.
+
+  5.- For the IDE, open the "z80pide.lpr" file at z80-pascal/src/ide with
+      Lazarus, check the project options and the compiler options to be sure
+      the directory paths weren't twisted and compile.
 
   See the docs/internal directory for several documents about internal
-  definitions, including a brief UML description of the objects (You'll need
+  descriptions, including a brief UML description of the objects (You'll need
   GNU's Dia to load this one).
+
+  If you have problems read the "Contact info" section.
+
+
+
+==========
+How to use
+==========
+
+  You have more detailed documentation at the "docs" directory.
+
+
+
+============
+Contact info
+============
+
+  The project's web is hostes at http://z80-pascal.sourceforge.net/.  Visit it.
