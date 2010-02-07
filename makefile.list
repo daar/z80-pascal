@@ -4,8 +4,12 @@
 # Construye una lista de archivos fuente (FILES) y de archivos objeto (OBJS)
 # a partir del contenido de SRCDIR.
 #
-TEMP = $(wildcard $(SRCDIR)*$(SRCSUF))
+# The main file name.
+MAINSRC = $(SRCDIR)$(BINARY)$(MAINSUF)
+
+TEMP = $(wildcard $(SRCDIR)*.pas)
 ifeq ($(strip $(TEMP)),)
-$(error ERROR: No source code found at $(SRCDIR)*$(SRCSUF) )
+$(error ERROR: No source code found at $(SRCDIR))
 endif
-OBJS = $(SRCDIR)$(BINARY).pp $(TEMP)
+SRCFILES = $(TEMP)
+OBJFILES = $(addprefix $(OBJDIR),$(addsuffix $(OBJSUF), $(basename $(notdir $(TEMP) ) ) ) )

@@ -3,13 +3,14 @@
 # Sets makefile source code for the different platforms
 # Based on fix.sh of Allegro.
 # Modified By Kronoman - In loving memory of my father.
+# Modified By Ñuño Martínez.
 
 
 proc_help()
 {
    echo "Usage: fix platform"
    echo
-   echo "Where platform is one of: djgpp, mingw32 or linux. "
+   echo "Where platform is one of: win32 or linux. "
    echo
    echo
 }
@@ -28,9 +29,8 @@ proc_fix()
 # prepare for the given platform.
 
 case "$1" in
-   "djgpp"   ) proc_fix "DOS"       "DJGPP";;
-   "mingw32" ) proc_fix "Windows" "MINGW32";;
-   "linux"   ) proc_fix "GNU/Linux"       "LINUX";;
+   "win32"   ) proc_fix "Windows (FPC)" "WIN32";;
+   "linux"   ) proc_fix "Linux (FPC)"   "LINUX";;
    "help"    ) proc_help;;
    *         ) proc_help;;
 esac

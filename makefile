@@ -21,20 +21,10 @@ PROJECT = Z80 Pascal
 # Nombre del archivo binario sin extensión
 BINARY = z80pas
 
-# Directorio de las fuentes
-SRCDIR = src/compiler/
-
-# Directorio de los archivos de cabecera
-INCDIR = 
-
-# Sufijo de las fuentes (.c, .cpp, .pas, etc).
-SRCSUF = .pas
-
+# ===============================================
 # ---------------------------------------------
 # -- Elementos dependientes de la plataforma --
 # ---------------------------------------------
-#  Aquí se definirá de qué modo se compilará el proyecto.
-#  En cierto modo está pensado para C/C++.
 
 # ------------------
 # DJGPP/DOS
@@ -55,12 +45,14 @@ endif
 # ------------------
 # MinGW32/Win32
 # ------------------
-ifeq ($(TARGET),MINGW32)
+ifeq ($(TARGET),WIN32)
 	# Nombre de la plataforma.
-	PLATFORM=Win32/MinGW32
+	PLATFORM=Windows
 	# Sufijo del binario
 	BINSUF = .exe
 	OBJSUF = .o
+	# Extra flags.
+	EFLAGS = -WG
 
 	# Manipulación de archivos.
 	DELETE = del
@@ -76,6 +68,8 @@ ifeq ($(TARGET),LINUX)
 	# Sufijo del binario
 	BINSUF = 
 	OBJSUF = .o
+	# Extra flags.
+	EFLAGS = 
 
 	# manipulación de archivos.
 	DELETE = rm -rf
@@ -88,11 +82,17 @@ endif
 # -- No específico de la plataforma --
 # ------------------------------------
 
+# Sufix for main unit.  See "makefile.list" and "makefile.all".
+MAINSUF = .pp
+
+# Directories
+SRCDIR = src/compiler/
 OBJDIR = obj/compiler/
 BINDIR = bin
 
-FLAGS = -g -O- -pg -Mobjfpc
-#FLAGS = -02 -Mobjfpc -Sh
+FLAGS = -Mobjfpc -Nu -O3 -Sh -Si -Xs -XX $(EFLAGS)
+# Use next line instead to activate debug.
+#FLAGS = -Mobjfpc -g -O- -pg -Sh $(EFLAGS)
 
 # -- La lista de archivos fuente --
 include makefile.list
