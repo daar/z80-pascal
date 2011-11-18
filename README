@@ -72,8 +72,8 @@ Installation
   2.- Open a console and go to the project directory.  In most cases just use
       "cd project".
 
-  3.- Execute "fix.bat" on Windows or "./fix.sh" on GNU/Linux and follow the
-    on screen instructions.
+  3.- Execute "fix.bat" on Windows or "./fix.sh" on GNU/Linux and follow the on
+      screen instructions.
 
   4.- Execute the "make" command.  This should create the compiler executable.
       Execute "make help" to see all available options.
