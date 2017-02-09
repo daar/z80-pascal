@@ -27,7 +27,8 @@ INTERFACE
 
 USES
   PasCompiler,
-  Classes;
+  Classes,
+  Configuration;
 
 
 
@@ -42,7 +43,7 @@ TYPE
     PROCEDURE PutFileName (aFileName: STRING);
   PROTECTED
   (* Implements the Verbose procedure. *)
-    PROCEDURE Verbose (aMessage: STRING); OVERRIDE;
+    PROCEDURE Verbose (Level: VERBOSITY_LEVELS; aMessage: STRING); OVERRIDE;
   PUBLIC
   (* Constructor. *)
     CONSTRUCTOR Create;
@@ -59,13 +60,21 @@ TYPE
     PROPERTY FileName: STRING READ fFileName WRITE PutFileName;
   END;
 
+  TVerboseMsg = PROCEDURE(Level: VERBOSITY_LEVELS; aMessage: STRING);
 
+VAR
+  VerboseMsg: TVerboseMsg;
 
 IMPLEMENTATION
 
 USES
-  Z80Encoders, Configuration;
+  Z80Encoders;
 
+PROCEDURE VerboseMsg_(Level: VERBOSITY_LEVELS; aMessage: STRING);
+BEGIN
+  IF Level IN Configuration.Verbose THEN
+    WriteLn(aMessage);
+END;
 
 
 (************
@@ -84,10 +93,9 @@ USES
 
 
 (* Implements the Verbose procedure. *)
-  PROCEDURE TCompiler.Verbose (aMessage: STRING);
+  PROCEDURE TCompiler.Verbose (Level: VERBOSITY_LEVELS; aMessage: STRING);
   BEGIN
-    IF vblWarnings IN Configuration.Verbose THEN
-      WriteLn (aMessage);
+    VerboseMsg(Level, aMessage);
   END;
 
 
@@ -140,5 +148,8 @@ USES
   BEGIN
     (Encoder AS TZ80Encoder).SaveToFile (aFileName);
   END;
+
+INITIALIZATION
+  VerboseMsg := @VerboseMsg_;
 
 END.

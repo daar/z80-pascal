@@ -25,7 +25,7 @@ UNIT PasCompiler;
 INTERFACE
 
 USES
-  Classes, sysutils;
+  Classes, sysutils, Configuration;
 
 
 
@@ -172,7 +172,7 @@ TYPE
   (* This procedure is called by when the compiler needs to inform the user for
      someting that is not an error (i.e.: Warnings, notes,... ).  By default it
      does nothing. *)
-    PROCEDURE Verbose (aMessage: STRING); VIRTUAL;
+    PROCEDURE Verbose (Level: VERBOSITY_LEVELS; aMessage: STRING); VIRTUAL;
   PUBLIC
   (* Constructor.
      @param(aEncoder The encoder to be used by the compiler.  It will be freed
@@ -582,7 +582,7 @@ CONST
 (* This procedure is called by when the compiler needs to inform the user for
    someting that is not an error (i.e.: Warnings, notes,... ).  By default it
    does nothing. *)
-  PROCEDURE TPascalCompiler.Verbose (aMessage: STRING);
+  PROCEDURE TPascalCompiler.Verbose (Level: VERBOSITY_LEVELS; aMessage: STRING);
   BEGIN
     ;
   END;
@@ -655,7 +655,7 @@ CONST
     ProgramIdentifier := fScanner.GetIdentifier; { NewIdent ::= identifier . }
   { TODO: May be it should store the program identifier in a symbol list to
     prevent duplicate definitions. }
-    Verbose ('Program name ''' + ProgramIdentifier + '''');
+    Verbose (vblWarnings, 'Program name ''' + ProgramIdentifier + '''');
     IF fScanner.GetToken <> ';' THEN
       RAISE CompilationException.Expected (
 	fScanner.Line, fScanner.Column, ';', fScanner.LastToken);
