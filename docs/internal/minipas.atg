@@ -1,23 +1,57 @@
-COMPILER minipas
-(* Smaller version of Pascal for Z80-Pascal 1.0
+COMPILER z80pas0
+(* Smaller version of Pascal for Z80-Pascal WIP.
 
-   The idea is to define a Pascal subset so it can be used to build the first
-   functional Z80-Pascal compiler.  Then both language and compiler should be
-   extended to be a full Pascal compiler.
+   The idea is to define a Pascal subset to build the first functional
+   Z80-Pascal compiler.  Then both language and compiler should be extended to
+   be a full Pascal (even Object Pascal) compiler.
 
-   Pascal keywords in uppercase for easy identification.
+   Diferences with J & W Pascal:
+    - No decimal numbers (so no REAL types).
+    - No program external files.
+    - No labels.
+    - No struct types (except ARRAY), so no RECORD, SET OF nor FILE OF.
+    - No enumeration types.
+    - No subrange types.
+    - No PACKED types.
+    - No VAR parameters.
+    - No CASE .. OF statement.
+    - No WITH .. DO statement.
+    - Operators "/" and "DIV" are the same (due to no REAL types support).
 
-   This grammar should be LL(1).
+   Differences with modern Pascal and Object Pascal:
+    - No UNITs.
+    - No LIBRARYes.
+    - No CLASSes nor OBJECTs.
+    - No OUT parameters.
+    - No ARRAY OF CONST parameters.
+    - No dynamic ARRAY.
+    - No ASM blocks.
+
+   Pascal keywords are uppercase for easy identification.
+
+   NOTES:
+
+     Some productions needs to be tested as J & W Pascal define that parts in a
+     different way.  I tried to make it simpler and being LL(1)/LL(0) but may
+     be I failed and complexity is needed.
+      - Constant
+      - UnsignedLiteral
+      - BooleanExpression/Expression (J & W define several aliases)
+      - MulOp (check precedence for SHR and SHL)
+
  *)
 
 IGNORE CASE
 
 CHARACTERS
-  eol      = CHR(13) .
-  letter   = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" .
-  digit    = "0123456789" .
-  hexdigit = digit + "ABCDEFabcdef" .
-  alfanum  = letter + digit .
+  eol       = CHR(13) . // Use also CHR(10) and CHR(13)CHR(10).
+  letter    = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" .
+  digit     = "0123456789" .
+  hexdigit   = digit + "ABCDEFabcdef" .
+  alfanum    = letter + digit .
+  identfirst = letter + "_" .
+  identchar = alfanum + "_" .
+  noQuote   = ANY - "'" - eol .
 
 IGNORE CHR(9) .. CHR(13)
 
@@ -25,19 +59,20 @@ COMMENTS FROM "(*" TO "*)"
 COMMENTS FROM "{" TO "}"
 
 TOKENS
-  identifier  =  letter { alfanum } .
-  integer     =  digit { digit } | digit { digit } .
+  identifier  =  identfirst { identchar } .
+  integer     =  digit { digit } .
   hexinteger  =  "$" hexdigit { hexdigit } .
+  string      = "'" { noQuote | "''" } "'" .
 
 PRODUCTIONS
 
-  minipas      = "PROGRAM" NewIdent ";" Block "." .
+  z80pas0         = "PROGRAM" NewIdent ";" Block "." .
 
-  Block        = Declarations StatementPart .
+  Block           = DeclarationPart StatementPart .
 
-  Declarations = ConstDefinitions
-                 TypeDefinitions VarDeclarations
-                 { ProcDeclarations } .
+  DeclarationPart = ConstDefinitions
+                    TypeDefinitions VarDeclarations
+                    { ProcDeclarations } .
 
 (* -------------------------------------------------------------------- *)
 
@@ -45,7 +80,7 @@ PRODUCTIONS
 
   ConstDef          = NewIdent "=" Constant ";" .
 
-  Constant          = [ "+" | "-" ] UnsignedLiteral .
+  Constant          = [ "+" | "-" ] UnsignedLiteral | String .
 
 (* -------------------------------------------------------------------- *)
 
@@ -53,23 +88,21 @@ PRODUCTIONS
 
   TypeDef         = NewIdent "=" Type ";" .
 
-  Type            = SimpleType | StructType .
+  Type            = SimpleType | StructType | "^" TypeIdent .
 
-  SimpleType      = "BOOLEAN" | "INTEGER" | Identifier .
+  SimpleType      = TypeIdent .
 
-  StructType      = ArrayType | RecordType .
+  StructType      = ArrayType .
 
   ArrayType       = "ARRAY" "[" IndexList "]" "OF" Type .
 
   IndexList       = UnsignedLiteral { "," UnsignedLiteral } .
 
-  RecordType      = "RECORD" FieldList { ";" FieldList } "END" .
-
-  FieldList       = [ IdentList ":" Type ] .
-
 (* -------------------------------------------------------------------- *)
 
-  VarDeclarations = [ "VAR" { IdentList ":" Type ";" } ] .
+  VarDeclarations = [ "VAR" VarDecl { VarDecl } ] .
+
+  VarDecl         = NewIdentList ":" Type ";" .
 
 (* -------------------------------------------------------------------- *)
 
@@ -85,11 +118,11 @@ PRODUCTIONS
 
   FormalParams     = "(" [ FPSection { ";" FPSection } ] ")"  .
 
-  FPSection        = [ "VAR" ] IdentList ":" Type .
+  FPSection        = NewIdentList ":" Type .
 
 (* -------------------------------------------------------------------- *)
 
-  StatementPart     = CompoundStatement | ASMCompoundStatement .
+  StatementPart     = CompoundStatement .
 
   CompoundStatement = "BEGIN" StatementSequence "END" .
 
@@ -97,9 +130,10 @@ PRODUCTIONS
 
   Statement         = [   AssignmentOrCall
                         | CompoundStatement
-                        | ASMCompoundStatement
                         | WhileStatement
-                        | IfStatement ] .
+                        | RepeatStatement
+                        | IfStatement
+                        | ForStatement ] .
 
   AssignmentOrCall  = Designator ( ":=" Expression | [ ActualParams ] ) .
 
@@ -107,8 +141,14 @@ PRODUCTIONS
 
   WhileStatement    = "WHILE" BooleanExpression "DO" Statement .
 
+  RepeatStatement   = "REPEAT" StatementSequence "UNTIL" BooleanExpression .
+
   IfStatement       = "IF" BooleanExpression "THEN" Statement
                       [ "ELSE" Statement ] .
+
+  ForStatement      = "FOR" ControlVariable ":=" Expression { "TO" | "DOWNTO" ) Expression "DO" Statement .
+
+  ControlVariable   = identifier .
 
 (* -------------------------------------------------------------------- *)
 
@@ -124,74 +164,36 @@ PRODUCTIONS
 
   Term              = Factor { MulOp Factor } .
 
-  MulOp             = "*" | "/" | "DIV" | "MOD" | "AND" .
+  MulOp             = "*" | "/" | "DIV" | "MOD" | "AND" | "SHR" | "SHL" .
+// Not sure SHR and SHR should be here though.
 
   Factor            =   Designator [ ActualParams ]
                       | UnsignedLiteral
                       | "(" Expression ")"
                       | "NOT" Factor .
 
-  Designator        = Identifier { "." Identifier | "[" ExpList "]" } .
+  Designator        = Identifier { "[" ExpList "]" } .
 
   ExpList           = Expression { "," Expression } .
 
-  UnsignedLiteral   = UnsignedInt | ConstIdent .
+  UnsignedLiteral   = UnsignedInt | "NIL" | String .
 
 (* -------------------------------------------------------------------- *)
 
-(* This is a simple Z80 Assembler parser.  Note that it allows illegal
-   assembler instructions! *)
+  ConstIdent   = identifier .
 
-(* TODO: Revisit this section. *)
+  NewIdentList = NewIdent { "," NewIdent } .
 
-  ASMCompoundStatement = "ASM" [Z80StatementSequence] "END" .
+  NewIdent     = identifier .
 
-  Z80StatementSequence = Z80Statement { ";" Z80Statement } .
+  TypeIdent    = identifier .
 
-  Z80Statement         = Z80Instruction [ Z80Parameter [ "," Z80Parameter ] ] .
+  Identifier   = identifier .
 
-  Z80Instruction       = "ADC" | "ADD" | "AND" | "BIT" | "CALL" | "CCF" | "CP" | "CPD" | "CPDR" | "CPI" | "CPIR" | "CPL" | "DAA" | "DEC" | "DI" | "DJNZ," | "EI" | "EX" | "EXX" | "HALT" | "IM" | "IN" | "INC" | "IND" | "INDR" | "INI" | "INIR" | "JP" | "JR" | "LD" | "LDD" | "LDDR" | "LDI" | "LDIR" | "NEG" | "NOP" | "OR" | "OTDR" | "OTIR" | "OUT" | "OUTD" | "OUTI" | "POP" | "PUSH" | "RES" | "RET" | "RETI" | "RETN" | "RL" |"RLA" | "RLC" | "RLCA" | "RLD" | "RR" | "RRA" | "RRC" | "RRD" | "RST" | "SCF" | "SET" | "SLA" | "SRA" | "SBC" | "SUB" | "XOR" .
+  IdentList    = identifier { "," identifier } .
 
-  Z80Parameter         =   Z80Integer
-                         | Z80Condition
-                         | Z80Indirection
-                         | Z80Register .
+  UnsignedInt  = integer | hexinteger .
 
-  Z80Integer           =   integer | hexinteger .
-
-  Z80Condition         =  "M" | "NC" | "NP" | "NZ" | "P" | "PE" | "PO" | "Z" . (* Carriage exactly the same than register ("C"). *)
-
-  Z80Indirection       = "[" ( "BC" | "DE" | "HL" | Z80Integer | ( ( "IX" | "IY" ) "+" Z80Integer ) ) "]" .
-
-  Z80Register          =  Z80Register8bit | Z80Register16bit .
-
-  Z80Register8bit      =   "A"
-                         | "H"
-                         | "L"
-                         | "B"
-                         | "C"
-                         | "D"
-                         | "E" .
-
-  Z80Register16bit     =   "AF"
-                         | "BC"
-                         | "HL"
-                         | "DE"
-                         | "IX"
-                         | "IY"
-                         | "SP"
-                         | "PC" .
-
-(* -------------------------------------------------------------------- *)
-
-  ConstIdent  = identifier .
-
-  NewIdent    = identifier .
-
-  Identifier  = identifier .
-
-  IdentList   = identifier { "," identifier } .
-
-  UnsignedInt = integer | hexinteger .
+  String       = string .
 
 END minipas .

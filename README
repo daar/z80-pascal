@@ -1,7 +1,7 @@
                                   Z80-Pascal
                                   ==========
 
-Version 0.1.0
+Version 0.2.0 WIP
 
 ========
 Contents
@@ -35,6 +35,7 @@ License
 =======
 
   Copyright (c) 2009, 2010 Guillermo Martínez J.
+  Copyright (c) 2017 Darius Blaszyk & Guillermo Martínez J.
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -102,4 +103,6 @@ How to use
 Contact info
 ============
 
-  The project's web is hostes at http://z80-pascal.sourceforge.net/.  Visit it.
+  The project's web is hosted at http://z80-pascal.sourceforge.net/.  Visit it.
+
+  There's also a GitHub repository at https://github.com/daar/z80-pascal

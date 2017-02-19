@@ -1,15 +1,1 @@
- - Rename unit "Z80Encoders" to "Z80Encoder".  It will implement a generic
-   Z80 encoder wich would be (or not) used by other encoders (MSXEncoder,
-   Z80Encoder, etc.).  Another generic encoder would be "Z80GBEncoder", as
-   GameBoy's microprocessor is a bit different than Z-80.
-
- - Some Assembler related methods implemented at TZ80Encoder should be moved to
-   TPascalEncoder.  Method "ParseASM" should be /final/.  Add an abstract
-   method named "ASMStatement" and use it as entry point for the Assembler
-   instead of "Z80Statement".
-
- - Plan variable support:  global, local, parameters, VAR parameters,
-   OUT parameters and return value.  Somebody at CEZ forum suggested the use
-   of SP to define procedure frames.
-
- - Implement PROCEDURE and AssignmentOrCall with simple expression.
+ Project is being remade from scratch, so no TODO at the moment.
