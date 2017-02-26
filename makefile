@@ -1,60 +1,56 @@
 # ------------------------------------------------------------------------
-# Archivo makefile genérico
+# Makefile
 # ------------------------------------------------------------------------
-# Este es un archivo "makefile" diseñado para ajustarse a la mayor cantidad de
-# proyectos posibles.  Está basado, principalmente, en el proyecto "almake"
-# según la versión que aparece en el proyecto "KOF91 V1.49".
-# Visite http://almake.sf.net/ para conocer más cosas sobre "almake".
-# Visite http://kof91.sf.net/  para conocer más cosas sobre "KOF91".
+# Based in the Almake project as used in KOF91 V1.49.
+# Visit http://almake.sf.net/ for almake information.
+# Visit http://kof91.sf.net/  for KOF91 information.
 
-# Este archivo define la plataforma de destino, modificado por el guión fix.bat
-# o por fix.sh, según lo indicado como parámetro.
+# This file defines the tarjet platform, and is modified by fix.bat or
+# fix.sh script. See it's sources.
 include target.os
 
-# Sugerido por "GNU Coding Stardards"
+# Suggested by "GNU Coding Stardards"
 SHELL = /bin/sh
 
 # ===============================================
-# Nombre del proyecto
+# Project name
 PROJECT = Z80 Pascal
 
-# Nombre del archivo binario sin extensión
-BINARY = z80pas
-
 # ===============================================
-# ---------------------------------------------
-# -- Elementos dependientes de la plataforma --
-# ---------------------------------------------
+
+# --------------------------------------
+# -- Platform dependent configuration --
+# --------------------------------------
 
 # ------------------
-# DJGPP/DOS
+# DOS
 # ------------------
-ifeq ($(TARGET),DJGPP)
-	# Nombre de la plataforma.
-	PLATFORM=DOS/DJGPP
-	# Sufijo del binario
+ifeq ($(TARGET),DOS)
+	# Platform name
+	PLATFORM=DOS
+	# Binary sufix
 	BINSUF = .exe
-	# Sufijo de los objetos
-	OBJSUF = .o
+	# Extra flags
+	EFLAGS = 
 
-	# Manipulación de archivos.
+	# File management.
 	DELETE = del
 	COPY   = xcopy
 endif
 
 # ------------------
-# MinGW32/Win32
+# Windows
 # ------------------
-ifeq ($(TARGET),WIN32)
-	# Nombre de la plataforma.
+ifeq ($(TARGET),WIN)
+	# Platform name
 	PLATFORM=Windows
-	# Sufijo del binario
+	# Binary sufix
 	BINSUF = .exe
-	OBJSUF = .o
 	# Extra flags.
 	EFLAGS = -WG
 
-	# Manipulación de archivos.
+	# File management
+	# TODO: Detect MSys, Cywing and such...
 	DELETE = del
 	COPY   = copy
 endif
@@ -63,24 +59,54 @@ endif
 # Linux
 # ------------------
 ifeq ($(TARGET),LINUX)
-	# Nombre de la plataforma.
+	# Platform name
 	PLATFORM=GNU/Linux
-	# Sufijo del binario
+	# Binary sufix
 	BINSUF = 
-	OBJSUF = .o
 	# Extra flags.
 	EFLAGS = 
 
-	# manipulación de archivos.
+	# File management
 	DELETE = rm -rf
 	COPY   = cp
 endif
 
 
 
-# ------------------------------------
-# -- No específico de la plataforma --
-# ------------------------------------
+# ----------------------------
+# -- Optimization specifics --
+# ----------------------------
+
+# Optimization options, including "smart linking".
+OPTOPT = -O3 -Xs -XX
+
+# Next can be used to optimize for almost any current 32bit PC with Linux or
+# Windows, doing it pretty well.  Of course, it will prevent your executable to
+# run in anything older than PentiumIII.
+# OPTOPT += -CpPENTIUM3
+
+# Next one can be used to optimize for 64bit PC with Linux or Windows.
+# OPTOPT += -CpATHLON64
+
+
+
+# ---------------------
+# -- Debug specifics --
+# ---------------------
+
+# Debugging opetions.
+# Not only adds GDB information to the executable, but also tells the compiler
+# to show ALL warnings and hints.
+DBGOPT = -O- -gl -vh -vw
+
+
+
+# --------------------------
+# -- No platform specific --
+# --------------------------
+
+# Binary/executable name
+BINARY = z80pas
 
 # Sufix for main unit.  See "makefile.list" and "makefile.all".
 MAINSUF = .pp
@@ -88,15 +114,19 @@ MAINSUF = .pp
 # Directories
 SRCDIR = src/compiler/
 OBJDIR = obj/compiler/
-BINDIR = bin
+BINDIR = bin/
+DOCDIR = docs/src/
 
-FLAGS = -Mobjfpc -Nu -O3 -Sh -Si -Xs -XX $(EFLAGS)
+PFLAGS = -Mobjfpc -Sh -Si
+
+# Optimized compilation
+# FLAGS = $(OPTOPT) $(PFLAGS) $(EFLAGS)
 # Use next line instead to activate debug.
-#FLAGS = -Mobjfpc -g -O- -pg -Sh $(EFLAGS)
+FLAGS = $(DBGOPT) $(PFLAGS) $(EFLAGS)
 
-# -- La lista de archivos fuente --
+# -- Source files list --
 include makefile.list
 
-# -- Las normas para construir el proyecto --
+# -- Build rules  --
 include makefile.all
 

@@ -1,25 +1,31 @@
-# Makefile generico - Reglas de construcción.
+# Makefile generic - build rules
 
-.PHONY: all
+.PHONY: all docs
 
-# Objetivo principal: todo el proyecto.
+# Main objective: the whole project
 all: adbanner $(BINDIR)$(BINARY)$(BINSUF)
-	@echo "Finished $(PROJECT)"
+	@echo "Finished $(PROJECT)."
+	@echo "To create the documentation, run 'make docs'."
 
-# Ejecutable.
+# Executable.
 $(BINDIR)$(BINARY)$(BINSUF) : $(MAINSRC) $(SRCFILES)
-	fpc $(FLAGS) -Fu$(SRCDIR) -FU$(OBJDIR) $< -o$@
-	@echo "$@ is ready!"
+	fpc $(FLAGS) -Fu$(SRCDIR) -Fu$(SRCDIR)* -FU$(OBJDIR) $< -o$@
+	@echo "$@ ready!"
 
-# Devuelve los valores de las variables definidas
+# Documentation.
+docs:
+	pasdoc -T "$(PROJECT)" -O html --cache-dir $(OBJDIR) -E $(DOCDIR) --auto-abstract --include-creation-time --use-tipue-search $(MAINSRC) $(SRCFILES)
+
+# Returns some variables.
 status: adbanner
 	@echo "-----------------"
 	@echo "- Status Report -"
 	@echo "-----------------"
 	@echo "  Project : $(PROJECT)"
 	@echo "  Platform : $(PLATFORM)"
-	@echo "  Compiler options : $(FLAGS)"
-	@echo "  Object files : $(SRCFILES)"
+	@echo "  Compiler options : $(FLAGS) $(EFLAGS)"
+	@echo "  Units : $(SRCFILES)"
+	@echo "  Main source : $(MAINSRC)"
 	@echo "  Binary : $(BINDIR)$(BINARY)$(BINSUF)"
 
 # Cleans everything.
@@ -28,21 +34,20 @@ veryclean: clean
 
 # Clean temporary files.
 clean:
-	$(DELETE) $(OBJDIR)*$(OBJSUF)
-	$(DELETE) $(OBJDIR)*.ppu
+	$(DELETE) $(OBJFILES)
 
-
-# Muestra las opciones disponibles
+# Show all options.
 help: adbanner
-	@echo "---------"
-	@echo "- Ayuda -"
-	@echo "---------"
+	@echo "--------"
+	@echo "- Help -"
+	@echo "--------"
 	@echo "make all            } Builds the compiler."
-	@echo "make clean          } Deletes all intermediate files."
-	@echo "make veryclean      } Deletes all created files."
+	@echo "make docs           } Builds internal documentation."
+	@echo "make clean          } Deletes temporary files."
+	@echo "make veryclean      } Deletes all builded files."
 	@echo "make status         } Shows some configuration variables."
 	@echo "make help           } Shows this help."
 
-#Información adicional
+# Some info.
 adbanner:
 	@echo "$(PROJECT) - http://z80-pascal.sourceforge.net/"

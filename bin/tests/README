@@ -1,0 +1,11 @@
+  This directory should contain files to test the compiler.
+
+  Files may not be "programs" in the sense of "useful and example programs".
+  They should be files to check that compiler works correctly.  That means the
+  files may contain even invalid programs (for example to check if compiler
+  shows the appropiate error messages) and useless programs (for ecample to
+  check if code generator is able to deal with some special cases).
+
+  All files must be commented explaining what are the compiler functions or
+  characteristics to be tested, including the expected results, in the most
+  complete way possible.

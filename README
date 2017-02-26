@@ -20,13 +20,10 @@ Introduction
 ============
 
   Z80-Pascal aims to create a Pascal compiler for Z-80 based devices, such as
-  MSX, ZX, Game Boy and many others.
+  MSX, ZX Spectrum, Game Boy and many others.
 
-  This is the first public release of the compiler.  There are a lot of things
-  that just don't work at all.
-
-  I'm working on it in my free time, so it evolves sssslooooooowwwwlyyyy.
-  Please, don't ask when it will be finished because I have no idea at all.
+  We're working on it in our free time, so it evolves sssslooooooowwwwlyyyy.
+  Please, don't ask when it will be finished because we have no idea at all.
 
 
 
@@ -62,13 +59,10 @@ License
 Installation
 ============
 
-  If you got the binary version, just unzip the package file.  The executable
-  files are in the "bin" subdirectory.
-
-  If you got the source code version, you must compile it:
+  You must compile it:
 
   1.- Be sure you have all you need: Free Pascal compiler and/or Lazarus IDE.
-      May be you can use Delphi but I didn't test it.
+      May be you can use Delphi but we didn't test it yet.
 
   2.- Open a console and go to the project directory.  In most cases just use
       "cd project".
@@ -84,8 +78,7 @@ Installation
       the directory paths weren't twisted and compile.
 
   See the docs/internal directory for several documents about internal
-  descriptions, including a brief UML description of the objects (You'll need
-  GNU's Dia to load this one).
+  descriptions.
 
   If you have problems read the "Contact info" section.
 

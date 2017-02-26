@@ -1,1 +1,28 @@
- Project is being remade from scratch, so no TODO at the moment.
+
+Language definition (BNF)
+=========================
+
+  UnsignedLiteral production is defined as "integer | NIL | String".  This is
+  because it is used at expressions.  The problem is this production is used
+  also to define Constant, wich is "[+|-]UnsignedLiteral | String".  I think it
+  shouldn't be used at Constant as it allows "negative strings" and "negative
+  nulls"!!!
+
+  ------------
+
+  Current definition sets an strict order for declarations and definitions
+  (constants, variables and functions and procedures) so there's no way to
+  (for example) define variables just before the main block after all
+  procedures.  For the sake of legibility may be this should be changed
+  allowing more flexibility in this order.  An alternative BNF may be:
+
+
+  DeclarationPart = { ConstDefinitions
+                      TypeDefinitions VarDeclarations
+                      ProcDeclarations } .
+  ...
+
+  ProcDeclarations = [ ( ProcHeading | FuncHeading ) ";" Body ";" ] .
+
+  This production may work but I feel it is not the best way.  That's why I
+  didn't added it to the minipas.atg file yet.

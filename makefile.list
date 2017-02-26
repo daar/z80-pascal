@@ -1,15 +1,20 @@
 # Makefile generic - Sources
 
 #
-# Construye una lista de archivos fuente (FILES) y de archivos objeto (OBJS)
-# a partir del contenido de SRCDIR.
+# Builds the list of source files and object files for each bynary type.
 #
+
 # The main file name.
 MAINSRC = $(SRCDIR)$(BINARY)$(MAINSUF)
 
-TEMP = $(wildcard $(SRCDIR)*.pas)
-ifeq ($(strip $(TEMP)),)
+# Program files.
+SRCFILES = $(wildcard $(SRCDIR)*.pas)
+ifeq ($(strip $(SRCFILES)),)
 $(error ERROR: No source code found at $(SRCDIR))
 endif
-SRCFILES = $(TEMP)
-OBJFILES = $(addprefix $(OBJDIR),$(addsuffix $(OBJSUF), $(basename $(notdir $(TEMP) ) ) ) )
+
+# Object files et all.
+
+OBJFILES = $(addprefix $(OBJDIR),$(addsuffix .o, $(basename $(notdir $(SRCDIR) ) ) ) )
+OBJFILES += $(addprefix $(OBJDIR),$(addsuffix .ppu, $(basename $(notdir $(SRCDIR) ) ) ) )
+OBJFILES += $(addprefix $(OBJDIR),$(addsuffix .a, $(basename $(notdir $(SRCDIR) ) ) ) )
