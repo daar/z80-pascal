@@ -23,38 +23,14 @@ PROGRAM Z80Pas;
     distribution.
 *)
 USES
-  Compiler, (* THE compiler *)
-  Configuration,
-  sysutils;
+  z80pApplication;
 
-
-
-(* Shows a "banner" with the name and copyright. *)
-  PROCEDURE Title;
-  BEGIN
-    WriteLn ('Z80 Pascal compiler (WIP version)');
-    WriteLn ('(c) 2009, 2010 by Guillermo Martínez');
-    WriteLn;
-  END;
-
-
-VAR
-  PascalCompiler: TCompiler;
 BEGIN
-  TRY
-    Title;
-    Configuration.Load;
-    IF Configuration.InputFileName = '' THEN
-      RAISE Exception.Create ('No input file given...');
-    PascalCompiler := TCompiler.Create;
-    PascalCompiler.FileName := Configuration.InputFileName;
-    PascalCompiler.Compile;
-    WriteLn ('Compilation finished.');
-    PascalCompiler.SaveToFile (Configuration.OutputFileName);
-    WriteLn ('File saved at '''+Configuration.OutputFileName+'''.');
-  EXCEPT
-    ON Error: Exception DO
-      WriteLn (Error.Message);
-  END;
-  Configuration.Unload;
+  WriteLn ('Z80 Pascal compiler ', VERSION_STR);
+  WriteLn ('Copyright (c) 2009, 2010 by Guillermo Martínez');
+  WriteLn ('Copyright ', COPY_STR);
+  WriteLn;
+
+  Application.Initialize;
+  IF NOT Application.Terminated THEN Application.Run
 END.

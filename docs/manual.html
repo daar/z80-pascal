@@ -10,33 +10,17 @@
   <ul>
    <li><a href="#intro">Introduction</a></li>
    <li><a href="#usage">Usage</a></li>
-   <li><a href="#command_line">Command line options</a></li>
    <li><a href="#config_file">Configuration file</a></li>
   </ul>
  <h2 id="intro">Introduction</h2>
   <p>Z80-Pascal is a cross-platform compiler.&nbsp; That means you write and compile the program in a platform different than the objective one.</p>
-  <p>Current version doesn't generate executable or object file, it generates an assembler source file you must assemble with an assembler.&nbsp; I use <a href="http://www.arrakis.es/~ninsesabe/pasmo/">Pasmo</a> but you can use other Z80 assembler with few/no changes.</p>
+  <p>Current version doesn't generate executable or object file.</p>
  <h2 id="usage">Usage</h2>
   <p></p>
   <p class="warning"><strong>Warning:</strong> Read the <a href="../readme.txt"><tt>readme.txt</tt> file</a> to know how to get the compiler executable.</p>
-  <p>Current version works in the form.</p>
-  <pre>z80pas &lt;source_file&gt;</pre>
-  <p>Where <code>source_file</code> is the one with the Pascal program.</p>
-  <p>There are some <a href="#command_line">command line options</a> and a <a href="#config_file">configuration file</a> that allows to change the default behavior of the compiler.</p>
- <h2 id="command_line">Command line options</a></h2>
-  <p>Here you have a list of the available options for the current version of the compiler in alphabetical order.</p>
-  <dl>
-    <dt><code>-a</code></dt><dd>The compiler will insert the comments of the source file in the output file in their counterpart position.</dd>
-    <!-- dt><code>-al</code></dt><dd>The compiler will insert the sourcecode in the output file, in the line before of its equivalent Assembler code.&nbsp; This would be useful for debug or optimize your programs or the compiler itself.</dd -->
-    <dt><code>-cfg</code></dt><dd>Returns the full path to the <a href="#config_file">configuration file</a>.</dd>
-    <dt><code>-oxxx</code></dt><dd>Use <code>xxx</code> as the name of the output file.&nbsp; The output filename can contain a path.</dd>
-    <dt><code>-vxxx</code></dt><dd>Be verbose.&nbsp; <code>xxx</code> is a combination of the following letters:<ul>
-      <li><code>e</code> Show errors.&nbsp; This option is on by default.</li>
-      <li><code>w</code> Show warnings.</li>
-    </ul></dd>
-  </dl>
+  <p>Current version is a console application.&nbsp; Open a console (<tt>command.com</tt>, <tt>bash</tt>, XTerm, ...) and run <tt>z80pas --help</tt> for the command line help.</p>
  <h2 id="config_file">Configuration file</a></h2>
-  <p>Using the configuration file <tt>z80-pas.cfg</tt> is an alternative to <a href="#command_line">command line options</a>.&nbsp; When a configuration file is found, it is read, and the lines in it are treated as if you typed them on the command line.&nbsp; They are treated before the options that you type on the command line.</p>
+  <p>Using the configuration file <tt>z80-pas.cfg</tt> is an alternative to the command line options.&nbsp; When a configuration file is found, it is read, and the lines in it are treated as if you typed them on the command line.&nbsp; They are treated before the options that you type on the command line.</p>
   <p>You can specify comments in the configuration file with the # sign. Everything from the # on will be ignored.</p>
   <p>To know where the compiler will look for the configuration file execute the next command:</p>
   <pre>z80pas -cfg</pre>
