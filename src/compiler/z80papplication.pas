@@ -26,6 +26,7 @@ UNIT z80pApplication;
 INTERFACE
 
   USES
+    z80pScanner,
     CustApp,
     Classes, sysutils;
 
@@ -64,6 +65,8 @@ INTERFACE
        This loads the configuration file and it gets the command line options. *)
       PROCEDURE Initialize;
 
+    (* Input filename. *)
+      PROPERTY InputFilename: STRING READ fInputFilename;
     (* Output filename. *)
       PROPERTY OutputFilename: STRING READ fOutputFilename;
     (* How much verbose the compiler should be. *)
@@ -82,6 +85,9 @@ INTERFACE
     Tz80PascalApplication = CLASS (TCustomApplication)
     PRIVATE
       fConfiguration: Tz80Configuration;
+
+      fInputFile: TStream;
+      fScanner: Tz80PascalScanner;
     PROTECTED
     (* Application execution. *)
       PROCEDURE DoRun; OVERRIDE;
@@ -106,100 +112,6 @@ INTERFACE
     Application: Tz80PascalApplication;
 
 IMPLEMENTATION
-
-(*
- * Tz80PascalApplication
- ****************************************************************************)
-
-(* Application execution. *)
-  PROCEDURE Tz80PascalApplication.DoRun;
-  BEGIN
-    SELF.Trace (etWarning, 'Nothing done');
-    SELF.Terminate
-  END;
-
-
-
-(* Constructor. *)
-  CONSTRUCTOR Tz80PascalApplication.Create (aOwner: TComponent);
-  BEGIN
-    INHERITED Create (aOwner);
-    fConfiguration := Tz80Configuration.Create
-  END;
-
-
-
-(* Destructor. *)
-  DESTRUCTOR Tz80PascalApplication.Destroy;
-  BEGIN
-    fConfiguration.Free;
-    INHERITED Destroy
-  END;
-
-
-
-(* Shows an exception to the user. *)
-  PROCEDURE Tz80PascalApplication.ShowException (E: Exception);
-  BEGIN
-    WriteLn (StringOfChar ('=', 75));
-    WriteLn ('An exception raised:');
-    WriteLn (E.Message);
-    WriteLn (StringOfChar ('=', 75))
-  END;
-
-
-
-(* Write a message to the standard output (verbose). *)
-  PROCEDURE Tz80PascalApplication.Trace (EventType: TEventType; CONST Msg: STRING);
-  VAR
-    FinalMsg: STRING;
-  BEGIN
-  { Only verbose when it is verbose. }
-    IF EventType IN fConfiguration.Verbosity THEN
-    BEGIN
-      CASE EventType OF
-      etCustom, etInfo:
-	BEGIN
-	  FinalMsg := 'Hint: ' + Msg;
-	  IF fConfiguration.StopOnHint THEN SELF.Terminate
-	END;
-      etWarning:
-	BEGIN
-	  FinalMsg := 'Warning: ' + Msg;
-	  IF fConfiguration.StopOnWarning THEN SELF.Terminate
-	END;
-      etError:
-	BEGIN
-	  FinalMsg := 'Error: ' + Msg;
-	  SELF.Terminate { Errors stops compiling always. }
-	END;
-      etDebug:
-	FinalMsg := '[dbg] ' + Msg;
-      END;
-      WriteLn (stdout, FinalMsg)
-    END
-  END;
-
-
-
-(* Initializes application. *)
-  PROCEDURE Tz80PascalApplication.Initialize;
-  BEGIN
-    INHERITED Initialize;
-    TRY
-      SELF.Title := 'z80-Pascal';
-      SELF.StopOnException := TRUE;
-      fConfiguration.Initialize
-    EXCEPT
-      ON lException: Exception DO
-      BEGIN
-	SELF.ShowException (lException);
-	SELF.Terminate
-      END
-    END
-  END;
-
-
 
 (*
  * Tz80Configuration
@@ -336,6 +248,132 @@ IMPLEMENTATION
 	END;
     END
   END;
+
+
+
+(*
+ * Tz80PascalApplication
+ ****************************************************************************)
+
+(* Application execution. *)
+  PROCEDURE Tz80PascalApplication.DoRun;
+  BEGIN
+    fScanner.GetNext;
+    WHILE NOT SELF.Terminated
+    AND NOT fScanner.CheckEOF
+    DO BEGIN
+      WriteLn ('"', fScanner.Symbol, '" - ', fScanner.SymbolName);
+      fScanner.GetNext
+    END;
+    SELF.Terminate
+  END;
+
+
+
+(* Constructor. *)
+  CONSTRUCTOR Tz80PascalApplication.Create (aOwner: TComponent);
+  BEGIN
+    INHERITED Create (aOwner);
+    fConfiguration := Tz80Configuration.Create;
+    fScanner := Tz80PascalScanner.Create
+  END;
+
+
+
+(* Destructor. *)
+  DESTRUCTOR Tz80PascalApplication.Destroy;
+  BEGIN
+    fScanner.Free;
+    fInputFile.Free;
+    fConfiguration.Free;
+    INHERITED Destroy
+  END;
+
+
+
+(* Shows an exception to the user. *)
+  PROCEDURE Tz80PascalApplication.ShowException (E: Exception);
+  BEGIN
+    WriteLn (StringOfChar ('=', 75));
+    WriteLn ('An exception raised:');
+    WriteLn (E.Message);
+    WriteLn (StringOfChar ('=', 75))
+  END;
+
+
+
+(* Write a message to the standard output (verbose). *)
+  PROCEDURE Tz80PascalApplication.Trace (EventType: TEventType; CONST Msg: STRING);
+  VAR
+    FinalMsg: STRING;
+  BEGIN
+  { Only verbose when it is verbose. }
+    IF EventType IN fConfiguration.Verbosity THEN
+    BEGIN
+      CASE EventType OF
+      etCustom, etInfo:
+	BEGIN
+	  FinalMsg := 'Hint: ' + Msg;
+	  IF fConfiguration.StopOnHint THEN SELF.Terminate
+	END;
+      etWarning:
+	BEGIN
+	  FinalMsg := 'Warning: ' + Msg;
+	  IF fConfiguration.StopOnWarning THEN SELF.Terminate
+	END;
+      etError:
+	BEGIN
+	  FinalMsg := 'Error: ' + Msg;
+	  SELF.Terminate { Errors stops compiling always. }
+	END;
+      etDebug:
+	FinalMsg := '[dbg] ' + Msg;
+      END;
+      WriteLn (stdout, FinalMsg)
+    END
+  END;
+
+
+
+(* Initializes application. *)
+  PROCEDURE Tz80PascalApplication.Initialize;
+  BEGIN
+    INHERITED Initialize;
+    TRY
+      SELF.Title := 'z80-Pascal';
+      SELF.StopOnException := TRUE;
+      fConfiguration.Initialize;
+      IF fConfiguration.InputFilename = '' THEN
+      BEGIN
+	SELF.Trace (etError, 'No input file.');
+	WriteLn ('Use command "--help" to see how to use the compiler.');
+	SELF.Terminate;
+	EXIT
+      END;
+      IF NOT FileExists (fConfiguration.InputFilename) THEN
+      BEGIN
+	SELF.Trace (
+	  etError,
+	  Format ('Input file "%s" doesn''t exixst.', [fConfiguration.InputFilename])
+	);
+	WriteLn ('Use command "--help" to see how to use the compiler.');
+	SELF.Terminate;
+	EXIT
+      END;
+    { Opens input file. }
+      fInputFile := TFileStream.Create (fConfiguration.InputFilename, fmOpenRead);
+      fScanner.Source := fInputFile
+    EXCEPT
+      ON lException: Exception DO
+      BEGIN
+	SELF.ShowException (lException);
+	SELF.Terminate
+      END
+    END
+  END;
+
+
+
 
 INITIALIZATION
   Application := Tz80PascalApplication.Create (NIL)
