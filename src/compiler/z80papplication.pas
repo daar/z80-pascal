@@ -257,15 +257,28 @@ IMPLEMENTATION
 
 (* Application execution. *)
   PROCEDURE Tz80PascalApplication.DoRun;
-  BEGIN
-    fScanner.GetNext;
-    WHILE NOT SELF.Terminated
-    AND NOT fScanner.CheckEOF
-    DO BEGIN
-      WriteLn ('"', fScanner.Symbol, '" - ', fScanner.SymbolName);
-      fScanner.GetNext
+
+    PROCEDURE WriteSymbolDescription;
+    BEGIN
+      WriteLn (Format (
+	'"%s" - [%d] %s',
+	[
+	  fScanner.Symbol,
+	  fScanner.SymbolId,
+	  fScanner.GetSymbolName (fScanner.SymbolId)
+	]
+      ))
     END;
-    SELF.Terminate
+
+  BEGIN
+    fScanner.Initialize;
+    WHILE NOT SELF.Terminated DO
+    BEGIN
+      WriteSymbolDescription;
+      fScanner.GetNext;
+      IF fScanner.CheckEOF THEN SELF.Terminate
+    END;
+    WriteSymbolDescription
   END;
 
 
@@ -371,7 +384,6 @@ IMPLEMENTATION
       END
     END
   END;
-
 
 
 

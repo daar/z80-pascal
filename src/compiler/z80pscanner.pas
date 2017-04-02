@@ -35,8 +35,10 @@ INTERFACE
   (* Terminators.  Used to identify symbols.  See file minipas.atg. *)
     TpasTerminators = (
       zptNull = 0,
+      zptComment,
       zptProgram,
       zptSemicolon,
+      zptEnd,
       zptPeriod,
       zptConst,
       zptEql,
@@ -57,7 +59,6 @@ INTERFACE
       zptLParen,
       zptRParen,
       zptBegin,
-      zptEnd,
       zptBecomes,
       zptWhile,
       zptDo,
@@ -101,25 +102,27 @@ INTERFACE
       fOrigin: TStream;
       fSymbolId: TpasTerminators;
       fSymbol: STRING;
-      fCharacter: CHAR;
+      fForwardCharacter, fCharacter: CHAR;
 
-      FUNCTION GetSymbolName: STRING;
+      FUNCTION GetForwardCharacter: CHAR;
+      PROCEDURE GetNextCharacter;
       PROCEDURE LookKeyword;
     PUBLIC
-    (* Initializes the scanner.  Should be called before to start the scan and
-       after assigning a @link(Source) stream. *)
+    (* Initializes the scanner, getting the first symbol from the stream.
+       Should be called before to start the scan and after assigning a
+       @link(Source) stream. *)
       PROCEDURE Initialize;
     (* Gets the next symbol. *)
       PROCEDURE GetNext;
-    (* Check if it is at the end of the program. *)
+    (* Checks if it is at the end of the program. *)
       FUNCTION CheckEOF: BOOLEAN;
+    (* Returns the name of the given symbol. *)
+      FUNCTION GetSymbolName (CONST aSymbolId: TpasTerminators): STRING;
 
     (* Access to the origin stream. *)
       PROPERTY Source: TStream READ fOrigin WRITE fOrigin;
     (* Symbol identifier. *)
       PROPERTY SymbolId: TpasTerminators READ fSymbolId;
-    (* Symbol name. *)
-      PROPERTY SymbolName: STRING READ GetSymbolName;
     (* Symbol. *)
       PROPERTY Symbol: STRING READ fSymbol;
     END;
@@ -132,7 +135,7 @@ IMPLEMENTATION
   CONST
   (* Some lists to help identifying characters. *)
     lLetter     = ['A' .. 'Z', 'a' ..'z'];
-    lDigit      = ['0' .. '0'];
+    lDigit      = ['0' .. '9'];
     lHexDigit   = lDigit + ['A' .. 'F', 'a' .. 'f'];
     lAlfanum    = lLetter + lDigit;
   { Not actually used.  See "Keywords and identifiers.".
@@ -143,66 +146,23 @@ IMPLEMENTATION
  * Tz80PascalScanner
  ***************************************************************************)
 
-  FUNCTION Tz80PascalScanner.GetSymbolName: STRING;
-  CONST
-    Names: ARRAY [0..53] OF STRING = (
-      '<null>',
-      'PROGRAM',
-      ';',
-      '.',
-      'CONST',
-      '=',
-      '+',
-      '-',
-      'TYPE',
-      'Caret ("^")',
-      'ARRAY',
-      '[',
-      ',',
-      ']',
-      'VAR',
-      ':',
-      'PROCEDURE',
-      'FUNCTION',
-      'FORWARD',
-      '(',
-      ')',
-      'BEGIN',
-      'END',
-      'BECOMES',
-      'WHILE',
-      'DO',
-      'REPEAT',
-      'UNTIL',
-      'IF',
-      'THEN',
-      'ELSE',
-      'FOR',
-      'TO',
-      'DOWNTO',
-      '<',
-      '>',
-      '<=',
-      '>=',
-      '<>',
-      'OR',
-      '*',
-      '/',
-      'DIV',
-      'MOD',
-      'AND',
-      'SHR',
-      'SHL',
-      'NOT',
-      'NIL',
-      'identifier',
-      'integer',
-      'integer',
-      'string',
-      '<eof>'
-    );
+  FUNCTION Tz80PascalScanner.GetForwardCharacter: CHAR;
   BEGIN
-    RESULT := Names[ORD (fSymbolId)]
+    IF fForwardCharacter = #0 THEN fOrigin.Read (fForwardCharacter, 1);
+    RESULT := fForwardCharacter
+  END;
+
+
+
+  PROCEDURE Tz80PascalScanner.GetNextCharacter;
+  BEGIN
+    IF fForwardCharacter <> #0 THEN
+    BEGIN
+      fCharacter := fForwardCharacter;
+      fForwardCharacter := #0
+    END
+    ELSE
+      fOrigin.Read (fCharacter, 1)
   END;
 
 
@@ -244,7 +204,8 @@ IMPLEMENTATION
 (* Initializes the scanner. *)
   PROCEDURE Tz80PascalScanner.Initialize;
   BEGIN
-    fCharacter := #0
+    fForwardCharacter := #0; fCharacter := #0;
+    SELF.GetNext
   END;
 
 
@@ -253,6 +214,42 @@ IMPLEMENTATION
   PROCEDURE Tz80PascalScanner.GetNext;
   VAR
     Ndx: INTEGER;
+
+  { Helper procedure to get comments. }
+    PROCEDURE GetComment;
+    BEGIN
+      fSymbolId := zptComment;
+      Ndx := 0;
+      fSymbol := '';
+      IF fCharacter = '{' THEN
+      BEGIN
+	SELF.GetNextCharacter;
+	WHILE fCharacter <> '}' DO
+	BEGIN
+	  fSymbol := fSymbol + fCharacter;
+	  INC (Ndx);
+	  SELF.GetNextCharacter;
+	END;
+	SELF.GetNextCharacter;
+      END
+      ELSE BEGIN
+	SELF.GetNextCharacter;
+	REPEAT
+	  IF fCharacter = '*' THEN
+	  BEGIN
+	    IF SELF.GetForwardCharacter = ')' THEN
+	    BEGIN
+	    { Needs two calls because "end comment" is two characters wide. }
+	      SELF.GetNextCharacter; SELF.GetNextCharacter;
+	      EXIT
+	    END
+	  END;
+	  fSymbol := fSymbol + fCharacter;
+	  INC (Ndx);
+	  SELF.GetNextCharacter
+	UNTIL FALSE
+      END
+    END;
 
   { Helper procedure to get identifiers and keywords. }
     PROCEDURE GetIdentifier;
@@ -264,7 +261,7 @@ IMPLEMENTATION
       BEGIN
 	fSymbol := fSymbol + fCharacter;
 	INC (Ndx);
-	fOrigin.Read (fCharacter, 1)
+	SELF.GetNextCharacter
       END;
       SELF.LookKeyword
     END;
@@ -279,7 +276,7 @@ IMPLEMENTATION
       BEGIN
 	fSymbol := fSymbol + fCharacter;
 	INC (Ndx);
-	fOrigin.Read (fCharacter, 1)
+	SELF.GetNextCharacter
       END
     END;
 
@@ -293,154 +290,156 @@ IMPLEMENTATION
       BEGIN
 	fSymbol := fSymbol + fCharacter;
 	INC (Ndx);
-	fOrigin.Read (fCharacter, 1)
+	SELF.GetNextCharacter
       END
     END;
 
-  { Helper procedure to ignore comments. }
-    PROCEDURE JumpComment;
+  { Helper procedure to get string values. }
+    PROCEDURE GetString;
     BEGIN
-      IF fCharacter  = '{' THEN
-      BEGIN
-	REPEAT
-	  fOrigin.Read (fCharacter, 1);
-	UNTIL fCharacter = '}';
-	EXIT
-      END;
-    { This algorithm is adapted from Mr. Wirth's book. }
-      WHILE TRUE DO
-      BEGIN
-	WHILE TRUE DO
+      fSymbolId := zptString;
+      Ndx := 0;
+      fSymbol := '';
+      SELF.GetNextCharacter;
+      REPEAT
+	IF fCharacter = '''' THEN
 	BEGIN
-	  WHILE fCharacter = '(' DO
+	  IF SELF.GetForwardCharacter <> '''' THEN
 	  BEGIN
-	    fOrigin.Read (fCharacter, 1);
-	    IF fCharacter = '*' THEN JumpComment
+	    SELF.GetNextCharacter;
+	    EXIT
 	  END;
-	  IF fCharacter = '*' THEN BREAK;
-	  IF SELF.CheckEOF THEN BREAK;
-	  fOrigin.Read (fCharacter, 1)
+	{ The "quote" character is two characters wide ("''"), so we need to
+	  skip one of them. }
+	  SELF.GetNextCharacter;
 	END;
-	IF fCharacter = ')' THEN
-	BEGIN
-	  fOrigin.Read (fCharacter, 1);
-	  BREAK
-	END;
-	IF SELF.CheckEOF THEN RAISE Exception.Create ('Unexpected end of file.');
-      END
+	fSymbol := fSymbol + fCharacter;
+	INC (Ndx);
+	SELF.GetNextCharacter
+      UNTIL FALSE
     END;
 
   BEGIN
   { Ignore spaces. }
     WHILE (fOrigin.Position < fOrigin.Size) AND (fCharacter <= ' ') DO
-      fOrigin.Read (fCharacter, 1);
+      SELF.GetNextCharacter;
+  { End of the file. }
+    IF fOrigin.Position >= fOrigin.Size THEN
+    BEGIN
+      fSymbolId := zptEof;
+      EXIT
+    END;
   { Detect and extract the token. }
     fSymbol := fCharacter;
     CASE fCharacter OF
   { Keywords and identifiers. }
     'A' .. 'Z', 'a' .. 'z', '_' :
       GetIdentifier;
-  { Numbers. }
+  { Constants. }
     '0' .. '9':
       GetNumber;
-  { Hexagesimal. }
     '$':
       BEGIN
-	fOrigin.Read (fCharacter, 1);
+	SELF.GetNextCharacter;
 	GetHexNumber
       END;
+    '''':
+      GetString;
   { Operators. }
     '=' :
       BEGIN
-	fSymbolId := zptEql; fOrigin.Read (fCharacter, 1)
+	fSymbolId := zptEql; SELF.GetNextCharacter
       END;
     '<' :
       BEGIN
-	fSymbolId := zptLess; fOrigin.Read (fCharacter, 1);
+	fSymbolId := zptLess; SELF.GetNextCharacter;
 	IF fCharacter = '=' THEN
 	BEGIN
-	  fSymbolId := zptLEql; fOrigin.Read (fCharacter, 1)
+	  fSymbol := fSymbol + fCharacter;
+	  fSymbolId := zptLEql; SELF.GetNextCharacter
 	END
       END;
     '>' :
       BEGIN
-	fSymbolId := zptGreat; fOrigin.Read (fCharacter, 1);
+	fSymbolId := zptGreat; SELF.GetNextCharacter;
 	IF fCharacter = '=' THEN
 	BEGIN
-	  fSymbolId := zptGEql; fOrigin.Read (fCharacter, 1)
+	  fSymbol := fSymbol + fCharacter;
+	  fSymbolId := zptGEql; SELF.GetNextCharacter
 	END
       END;
     '+' :
       BEGIN
-	fSymbolId := zptPlus; fOrigin.Read (fCharacter, 1)
+	fSymbolId := zptPlus; SELF.GetNextCharacter
       END;
     '-' :
       BEGIN
-	fSymbolId := zptMinus; fOrigin.Read (fCharacter, 1)
+	fSymbolId := zptMinus; SELF.GetNextCharacter
       END;
     '*' :
       BEGIN
-	fSymbolId := zptTimes; fOrigin.Read (fCharacter, 1)
+	fSymbolId := zptTimes; SELF.GetNextCharacter
       END;
     '/' :
       BEGIN
-	fSymbolId := zptDivide; fOrigin.Read (fCharacter, 1)
+	fSymbolId := zptDivide; SELF.GetNextCharacter
       END;
   { Separators and other symbols. }
     ';':
       BEGIN
-	fSymbolId := zptSemiColon; fOrigin.Read (fCharacter, 1)
+	fSymbolId := zptSemiColon; SELF.GetNextCharacter
       END;
     '.':
       BEGIN
-	fSymbolId := zptPeriod; fOrigin.Read (fCharacter, 1)
+	fSymbolId := zptPeriod; SELF.GetNextCharacter
       END;
     '{':
-        JumpComment;
+      GetComment;
     '(':
       BEGIN
-	fSymbolId := zptLParen; fOrigin.Read (fCharacter, 1);
-	IF fCharacter = '*' THEN JumpComment
+	IF SELF.GetForwardCharacter = '*' THEN
+	BEGIN
+	  SELF.GetNextCharacter;
+	  GetComment
+	END
+	ELSE BEGIN
+	  fSymbolId := zptLParen; SELF.GetNextCharacter;
+	END
       END;
     ')':
       BEGIN
-	fSymbolId := zptRParen; fOrigin.Read (fCharacter, 1)
+	fSymbolId := zptRParen; SELF.GetNextCharacter
       END;
     ':' :
       BEGIN
-	fSymbolId := zptColon; fOrigin.Read (fCharacter, 1);
-        IF fCharacter = '=' THEN
-        BEGIN
-         fSymbolId := zptBecomes; fOrigin.Read (fCharacter, 1)
+	fSymbolId := zptColon; SELF.GetNextCharacter;
+	IF fCharacter = '=' THEN
+	BEGIN
+	  fSymbol := fSymbol + fCharacter;
+	  fSymbolId := zptBecomes; SELF.GetNextCharacter
         END
       END;
     ',':
       BEGIN
-	fSymbolId := zptComma; fOrigin.Read (fCharacter, 1)
+	fSymbolId := zptComma; SELF.GetNextCharacter
       END;
     '[':
       BEGIN
-	fSymbolId := zptLBrak; fOrigin.Read (fCharacter, 1)
+	fSymbolId := zptLBrak; SELF.GetNextCharacter
       END;
     ']':
       BEGIN
-	fSymbolId := zptRBrak; fOrigin.Read (fCharacter, 1)
+	fSymbolId := zptRBrak; SELF.GetNextCharacter
       END;
     '^':
       BEGIN
-	fSymbolId := zptCaret; fOrigin.Read (fCharacter, 1)
+	fSymbolId := zptCaret; SELF.GetNextCharacter
       END;
     ELSE
       BEGIN
-	fSymbolId := zptNull; fOrigin.Read (fCharacter, 1);
+	fSymbolId := zptNull; SELF.GetNextCharacter;
       END
-    END;
-  {
-    WriteLn (Format (
-      'Siguiente => "%s" = [%d] %s.', [
-      fSimbolo, fSymbolId, TomaNombreIdSimbolo
-    ]));
-  }
+    END
   END;
 
 
@@ -448,8 +447,75 @@ IMPLEMENTATION
 (* Checks if it is at the end of the program. *)
   FUNCTION Tz80PascalScanner.CheckEOF: BOOLEAN;
   BEGIN
-    RESULT := fOrigin.Position >= fOrigin.Size
+    RESULT := SELF.fSymbolId = zptEof
   END;
 
+
+
+(* Returns the symbol name. *)
+  FUNCTION Tz80PascalScanner.GetSymbolName
+    (CONST aSymbolId: TpasTerminators): STRING;
+  CONST
+    Names: ARRAY [0..55] OF STRING = (
+      '<null>',
+      'comment',
+      'PROGRAM',
+      ';',
+      'END',
+      '.',
+      'CONST',
+      '=',
+      '+',
+      '-',
+      'TYPE',
+      'caret ("^")',
+      'ARRAY',
+      '[',
+      ',',
+      ']',
+      'OF',
+      'VAR',
+      ':',
+      'PROCEDURE',
+      'FUNCTION',
+      'FORWARD',
+      '(',
+      ')',
+      'BEGIN',
+      ':=',
+      'WHILE',
+      'DO',
+      'REPEAT',
+      'UNTIL',
+      'IF',
+      'THEN',
+      'ELSE',
+      'FOR',
+      'TO',
+      'DOWNTO',
+      '<',
+      '>',
+      '<=',
+      '>=',
+      '<>',
+      'OR',
+      '*',
+      '/',
+      'DIV',
+      'MOD',
+      'AND',
+      'SHR',
+      'SHL',
+      'NOT',
+      'NIL',
+      'identifier',
+      'integer',
+      'hexagesimal integer',
+      'string',
+      '<eof>'
+    );
+  BEGIN
+    RESULT := Names[ORD (aSymbolId)]
+  END;
 
 END.

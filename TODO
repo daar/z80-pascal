@@ -1,3 +1,11 @@
+Scanner
+=======
+
+  Helper procedures to get tokens (GetComment, GetIdentifier, etc) don't deal
+  with EOF and they should.  Not sure the best way to do that yet (that's why I
+  didn't added it yet).
+
+
 
 Language definition (BNF)
 =========================

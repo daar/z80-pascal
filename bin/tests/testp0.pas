@@ -1,30 +1,19 @@
 PROGRAM testp0;
-(* File to test the parser and the scanner, and even the code generator.
+(* File to test the parser and the scanner.
 
    This file contains most language stuff defined in docs/internal/minipas.atg
    so it doesn't contains all Pascal language.
 
-   The file should be parser without errors and it may generate an executable
+   The file should be parsed without errors and it may generate an executable
    result (once the compiler is complete).
 
    This file isn't complete (it doesn't contains all productions) so feel free
    to modify and add anything that would help to complete it.
  *)
 
-{ This is to test alternative syntax for comments. }
+{ This is to test alternative syntax for comments.
 
-{
-  Not sure how this comment should be managed.  As for ISO it looks that it
-  should be managed as if the comment starts and finishes with same comment
-  marker (need to read it again though).
-*)
-
-(*
-  Anyway, I add this other comment.  Note that this may be identified as a
-  "nested comment" and so it may be managed as an error.
-}
-
-{ In any case, note there are not any ugly C++ style comment. ;) }
+  In any case, note there are not any ugly C++ style comment. ;) }
 
 (* Test constant definitions (ConstDefinitions). *)
   CONST
@@ -37,14 +26,14 @@ PROGRAM testp0;
 (* Test type definitions (TypeDefinitions). *)
   TYPE
     SimpleType = INTEGER;
-    ArrayType = ARRAY [0..10] OF INTEGER;
-    OtherArrType  = ARRAY [0..NumericConstant, 10..100] OF SimpleType;
+    ArrayType = ARRAY [10] OF INTEGER;
+    OtherArrType  = ARRAY [NumericConstant, 100] OF SimpleType;
 
 (* Test variable definitions (VarDeclarations). *)
   VAR
     Variable: INTEGER;
-    ArrayVariable1: Array [0..10] OF INTEGER;
-    ArrayVariable2: Array [AnotherNumeric..0] OF ArrayType;
+    ArrayVariable1: Array [10] OF INTEGER;
+    ArrayVariable2: Array [$F] OF ArrayType;
 
 (* Test forwarded procedure. *)
   PROCEDURE ForwardedProcedure; FORWARD;
@@ -128,7 +117,7 @@ PROGRAM testp0;
                             just to be sure it works properly. }
   :	BOOLEAN  ; BEGIN
   { MUST return something allways.  This also tests alternative return value
-    assignation (Should we add "RESULT" too?). }
+    assignation (TODO: Should we add "RESULT" too?). }
     ForwardedFunction
 :=
 		CompleteFunction
@@ -142,4 +131,4 @@ BEGIN
   IF NOT ForwardedFunction THEN WriteLn ('Hello, World!')
 END.
 
-Any text before the "dot" should be ignored by compiler.
+Any text before "END." should be ignored by compiler.
