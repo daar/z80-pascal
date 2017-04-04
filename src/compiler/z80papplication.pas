@@ -26,7 +26,7 @@ UNIT z80pApplication;
 INTERFACE
 
   USES
-    z80pScanner,
+    Scanner,
     CustApp,
     Classes, sysutils;
 
@@ -87,7 +87,7 @@ INTERFACE
       fConfiguration: Tz80Configuration;
 
       fInputFile: TStream;
-      fScanner: Tz80PascalScanner;
+      fScanner: TPascalScanner;
     PROTECTED
     (* Application execution. *)
       PROCEDURE DoRun; OVERRIDE;
@@ -277,8 +277,7 @@ IMPLEMENTATION
       WriteSymbolDescription;
       fScanner.GetNext;
       IF fScanner.CheckEOF THEN SELF.Terminate
-    END;
-    WriteSymbolDescription
+    END
   END;
 
 
@@ -288,7 +287,7 @@ IMPLEMENTATION
   BEGIN
     INHERITED Create (aOwner);
     fConfiguration := Tz80Configuration.Create;
-    fScanner := Tz80PascalScanner.Create
+    fScanner := TPascalScanner.Create
   END;
 
 
@@ -367,7 +366,7 @@ IMPLEMENTATION
       BEGIN
 	SELF.Trace (
 	  etError,
-	  Format ('Input file "%s" doesn''t exixst.', [fConfiguration.InputFilename])
+	  Format ('Input file "%s" doesn''t exist.', [fConfiguration.InputFilename])
 	);
 	WriteLn ('Use command "--help" to see how to use the compiler.');
 	SELF.Terminate;
