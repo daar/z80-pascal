@@ -31,14 +31,11 @@ COMPILER z80pas0
 
    NOTES:
 
-     Some productions needs to be tested as J & W Pascal define that parts in a
+     Some productions need to be tested as J & W Pascal define that parts in a
      different way.  I tried to make it simpler and being LL(1)/LL(0) but may
      be I failed and complexity is needed.
-      - Constant
-      - UnsignedLiteral
       - BooleanExpression/Expression (J & W define several aliases)
       - MulOp (check precedence for SHR and SHL)
-
  *)
 
 IGNORE CASE
@@ -70,9 +67,9 @@ PRODUCTIONS
 
   Block           = DeclarationPart StatementPart .
 
-  DeclarationPart = ConstDefinitions
-                    TypeDefinitions VarDeclarations
-                    { ProcDeclarations } .
+  DeclarationPart = { ConstDefinitions
+                      TypeDefinitions VarDeclarations
+                      ProcDeclarations } .
 
 (* -------------------------------------------------------------------- *)
 
@@ -80,7 +77,7 @@ PRODUCTIONS
 
   ConstDef          = NewIdent "=" Constant ";" .
 
-  Constant          = [ "+" | "-" ] UnsignedLiteral | String .
+  Constant          = [ "+" | "-" ] UnsignedLiteral .
 
 (* -------------------------------------------------------------------- *)
 
@@ -106,7 +103,7 @@ PRODUCTIONS
 
 (* -------------------------------------------------------------------- *)
 
-  ProcDeclarations = ( ProcHeading | FuncHeading ) ";" Body ";" .
+  ProcDeclarations = [ ( ProcHeading | FuncHeading ) ";" Body ";" . ]
 
   ProcHeading      = "PROCEDURE" NewIdent [ FormalParams ] .
 
@@ -164,8 +161,8 @@ PRODUCTIONS
 
   Term              = Factor { MulOp Factor } .
 
-  MulOp             = "*" | "/" | "DIV" | "MOD" | "AND" | "SHR" | "SHL" .
 // Not sure SHR and SHR should be here though.
+  MulOp             = "*" | "/" | "DIV" | "MOD" | "AND" | "SHR" | "SHL" .
 
   Factor            =   Designator [ ActualParams ]
                       | UnsignedLiteral

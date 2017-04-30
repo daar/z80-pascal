@@ -10,6 +10,12 @@ Scanner
 Language definition (BNF)
 =========================
 
+  minipas.atg applies some changes to my original description to fix the next
+  problems with definition.  First compiler version should test if they're best
+  solutions:
+
+
+
   UnsignedLiteral production is defined as "integer | NIL | String".  This is
   because it is used at expressions.  The problem is this production is used
   also to define Constant, wich is "[+|-]UnsignedLiteral | String".  I think it
