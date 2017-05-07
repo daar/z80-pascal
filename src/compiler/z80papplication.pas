@@ -26,7 +26,7 @@ UNIT z80pApplication;
 INTERFACE
 
   USES
-    Scanner,
+    PasCompiler,
     CustApp,
     Classes, sysutils;
 

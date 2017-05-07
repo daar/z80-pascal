@@ -12,9 +12,3 @@ SRCFILES = $(wildcard $(SRCDIR)*.pas)
 ifeq ($(strip $(SRCFILES)),)
 $(error ERROR: No source code found at $(SRCDIR))
 endif
-
-# Object files et all.
-
-OBJFILES = $(addprefix $(OBJDIR),$(addsuffix .o, $(basename $(notdir $(SRCDIR) ) ) ) )
-OBJFILES += $(addprefix $(OBJDIR),$(addsuffix .ppu, $(basename $(notdir $(SRCDIR) ) ) ) )
-OBJFILES += $(addprefix $(OBJDIR),$(addsuffix .a, $(basename $(notdir $(SRCDIR) ) ) ) )

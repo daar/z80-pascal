@@ -34,7 +34,10 @@ veryclean: clean
 
 # Clean temporary files.
 clean:
-	$(DELETE) $(OBJFILES)
+	$(DELETE) $(OBJDIR)*.o
+	$(DELETE) $(OBJDIR)*.rsj
+	$(DELETE) $(OBJDIR)*.ppu
+	$(DELETE) $(OBJDIR)*.pduc
 
 # Show all options.
 help: adbanner

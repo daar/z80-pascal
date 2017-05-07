@@ -3,7 +3,7 @@
   Files may not be "programs" in the sense of "useful and example programs".
   They should be files to check that compiler works correctly.  That means the
   files may contain even invalid programs (for example to check if compiler
-  shows the appropiate error messages) and useless programs (for ecample to
+  shows the appropiate error messages) and useless programs (for example to
   check if code generator is able to deal with some special cases).
 
   All files must be commented explaining what are the compiler functions or

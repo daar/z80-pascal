@@ -24,19 +24,5 @@ Language definition (BNF)
 
   ------------
 
-  Current definition sets an strict order for declarations and definitions
-  (constants, variables and functions and procedures) so there's no way to
-  (for example) define variables just before the main block after all
-  procedures.  For the sake of legibility may be this should be changed
-  allowing more flexibility in this order.  An alternative BNF may be:
-
-
-  DeclarationPart = { ConstDefinitions
-                      TypeDefinitions VarDeclarations
-                      ProcDeclarations } .
-  ...
-
-  ProcDeclarations = [ ( ProcHeading | FuncHeading ) ";" Body ";" ] .
-
-  This production may work but I feel it is not the best way.  That's why I
-  didn't added it to the minipas.atg file yet.
+  Test declarations and definitions order (constants, variables and functions
+  and procedures).  Current production at minipas.atg may not work.
