@@ -1,0 +1,239 @@
+COMPILER z80pas6
+// Smaller version of Pascal for Z80-Pascal WIP.
+//
+// The idea is to define a more complete Pascal (still subset) to evolve to the
+// final complete Z80-Pascal compiler.
+
+IGNORE CASE
+
+CHARACTERS
+  eol       = CHR(13) . // Use also CHR(10) and CHR(13)CHR(10).
+  letter    = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" .
+  digit     = "0123456789" .
+  hexdigit   = digit + "ABCDEFabcdef" .
+  noQuote   = ANY - "'" - eol .
+
+IGNORE CHR(9) .. CHR(13)
+
+COMMENTS FROM "(*" TO "*)"
+COMMENTS FROM "{" TO "}"
+
+TOKENS
+  identifier  = ( letter | "_") { letter | "_" | digit } .
+  integer     = digit { digit } .
+  hexinteger  = "$" hexdigit { hexdigit } .
+  real        = digit { digit } "." digit { digit } .
+  string      = "'" { noQuote | "''" } "'" .
+
+PRODUCTIONS
+
+  Z80Pascal       = PascalProgram | PascalUnit .
+
+  PascalProgram   = "PROGRAM" Identifier ";" UsesList Block "." .
+
+  PascalUnit      = "UNIT" Identifier ";" "INTERFACE" UsesList DeclarationPart
+                    "IMPLEMENTATION" UsesList DeclarationPart "END" "." .
+
+  UsesList        = [ "USES" IdentList ";" ] .
+
+  Block           = DeclarationPart CompoundStatement .
+
+  DeclarationPart = { ConstDefinitions | TypeDefinitions | VarDeclarations
+                      | ProcDeclarations } .
+
+//////////////////////////////////////////////////////////////////////////
+
+  ConstDefinitions = [ "CONST" ConstDef { ConstDef } ] .
+
+  ConstDef         = Identifier "=" Constant ";" .
+
+  Constant         = [ "+" | "-" ] ( UnsignedNumber | Identifier ) | String .
+
+//////////////////////////////////////////////////////////////////////////
+
+  TypeDefinitions  = [ "TYPE" TypeDef { TypeDef } ] .
+
+  TypeDef          = Identifier "=" Type ";" .
+
+  Type             = SimpleType | StructType | "^" Identifier .
+
+  SimpleType       = Identifier | EnumerationType | SubrangeType .
+
+  EnumerationType  = "(" IdentList ")" .
+
+  StructType       = ArrayType | RecordType | SetType .
+
+  ArrayType        = "ARRAY" "[" IndexList "]" "OF" Type .
+
+  IndexList        = SimpleType { "," SimpleType } .
+
+  RecordType       = "RECORD" FieldList "END" .
+
+  FieldList        = FieldDeclaration { FieldDeclaration } .
+
+  FieldDeclaration = [ IdentList ":" Type ";" ] .
+
+  SubrangeType     = Constant ".." Constant .
+
+  SetType          = "SET" "OF" SimpleType .
+
+//////////////////////////////////////////////////////////////////////////
+
+  VarDeclarations = [ "VAR" VarDecl { VarDecl } ] .
+
+  VarDecl         = IdentList ":" Type ";" .
+
+//////////////////////////////////////////////////////////////////////////
+
+  ProcDeclarations = [ ( ProcHeading | FuncHeading ) ";" [ CallConv ";" ]
+                       Body ";" . ]
+
+  ProcHeading      = "PROCEDURE" NewIdent [ FormalParams ] .
+
+  FuncHeading      = "FUNCTION" NewIdent [ FormalParams ] ":" Type .
+
+  CallConv         = "PASCAL" | "BASIC" | "CDECL" .
+
+  Body             = "FORWARD" | Block .
+
+  FormalParams     = "(" [ FPSection { ";" FPSection } ] ")"  .
+
+  FPSection        = IdentList ":" Type .
+
+//////////////////////////////////////////////////////////////////////////
+
+  CompoundStatement = "BEGIN" StatementSequence "END" .
+
+  StatementSequence = Statement { ";" Statement } .
+
+  Statement         = [   AssignmentOrCall
+                        | CompoundStatement
+                        | WhileStatement
+                        | RepeatStatement
+                        | ForStatement
+                        | IfStatement
+                        | CaseStatement
+                        | WithStatement
+                        | Asmblock ] .
+
+  AssignmentOrCall  = Designator ( ":=" Expression | [ ActualParams ] ) .
+
+  ActualParams      = "(" Expression { "," Expression } ")" .
+
+  WhileStatement    = "WHILE" BooleanExpression "DO" Statement .
+
+  RepeatStatement   = "REPEAT" StatementSequence "UNTIL" BooleanExpression .
+
+  ForStatement      = "FOR" Identifier ":=" SimpleExpression
+                      ( "TO" | "DOWNTO" ) SimpleExpression "DO" Statement .
+
+  IfStatement       = "IF" BooleanExpression "THEN" Statement
+                      [ "ELSE" Statement ] .
+
+  CaseStatement     = "CASE" Expression "OF" CaseList "END" .
+
+  CaseList          = OneCase { ";" OneCase } [ ";" ] .
+
+  OneCase           = ( CaseLabelList ":" | "ELSE" ) Statement .
+
+  CaseLabelList     = CaseLabel { "," CaseLabel } .
+
+  CaseLabel         = Constant .
+
+  WithStatement     = "WITH" RecVarList "DO" Statement .
+
+  RecVarList        = Designator { ", " Designator } .
+
+//////////////////////////////////////////////////////////////////////////
+
+  AsmBlock             = "ASM" AsmStatementSequence "END" .
+
+  AsmStatementSequence = Z80Statement { ";" Z80Statement } .
+
+// Note this Assembler parser allows illegal assembler instructions.
+
+  Z80Statement         = Z80Instruction [ Z80Parameter [ "," Z80Parameter ] ] .
+
+  Z80Instruction       = "ADC" | "ADD" | "AND" | "BIT" | "CALL" | "CCF" | "CP" | "CPD" | "CPDR" | "CPI" | "CPIR" | "CPL" | "DAA" | "DEC" | "DI" | "DJNZ," | "EI" | "EX" | "EXX" | "HALT" | "IM" | "IN" | "INC" | "IND" | "INDR" | "INI" | "INIR" | "JP" | "JR" | "LD" | "LDD" | "LDDR" | "LDI" | "LDIR" | "NEG" | "NOP" | "OR" | "OTDR" | "OTIR" | "OUT" | "OUTD" | "OUTI" | "POP" | "PUSH" | "RES" | "RET" | "RETI" | "RETN" | "RL" |"RLA" | "RLC" | "RLCA" | "RLD" | "RR" | "RRA" | "RRC" | "RRD" | "RST" | "SCF" | "SET" | "SLA" | "SRA" | "SBC" | "SUB" | "XOR" .
+
+  Z80Parameter         =   Z80Integer
+                         | Z80Condition
+                         | Z80Indirection
+                         | Z80Register
+                         | Indirection .
+
+  Z80Integer           =   UnsignedInt .
+
+  Z80Condition         =  "M" | "NC" | "NP" | "NZ" | "P" | "PE" | "PO" | "Z" . (* Carriage exactly the same than register ("C"). *)
+
+  Z80Indirection       = "[" ( "BC" | "DE" | "HL" | Z80Integer | ( ( "IX" | "IY" ) "+" Z80Integer ) ) "]" .
+
+  Z80Register          =  Z80Register8bit | Z80Register16bit .
+
+  Z80Register8bit      =   "A"
+                         | "H"
+                         | "L"
+                         | "B"
+                         | "C"
+                         | "D"
+                         | "E" .
+
+  Z80Register16bit     =   "AF"
+                         | "BC"
+                         | "HL"
+                         | "DE"
+                         | "IX"
+                         | "IY"
+                         | "SP"
+                         | "PC" .
+
+//////////////////////////////////////////////////////////////////////////
+
+  BooleanExpression = Expression .
+
+  Expression        = SimpleExpression [ RelOp SimpleExpression ] .
+
+  RelOp             = "=" | "<" | ">" | "<=" | ">=" | "<>" | "IN" .
+
+  SimpleExpression  = ( "+" Term | "-" Term | Term ) { AddOp Term } .
+
+  AddOp             = "+" | "-" | "OR" .
+
+  Term              = Factor { MulOp Factor } .
+
+  MulOp             = "*" | "/" | "DIV" | "MOD" | "AND" | "SHL" | "SHR" .
+
+  Factor            =   Designator [ ActualParams ]
+                      | Indirection
+                      | UnsignedLiteral
+                      | SetConstructor
+                      | "(" Expression ")"
+                      | "NOT" Factor .
+
+  Designator        = Identifier { "." Identifier | "[" ExpList "]" | "^" } .
+
+  ExpList           = Expression { "," Expression } .
+
+  UnsignedLiteral   = UnsignedNumber | "NIL" | String .
+
+  SetConstructor    = "[" Member { "," Member } "]" .
+
+  Member            = Expression [ ".." Expression ] .
+
+//////////////////////////////////////////////////////////////////////////
+
+  Indirection       = "@" Designator .
+
+  IdentList      = Identifier { "," Identifier } .
+
+  Identifier     = identifier .
+
+  UnsignedNumber = UnsignedInt | UnsignedReal .
+
+  UnsignedInt    = integer | hexinteger .
+
+  UnsignedReal   = real .
+
+  String         = string .
+
+END z80pas6 .

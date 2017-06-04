@@ -1,30 +1,25 @@
 COMPILER Z80Pascal
-(* Z80-Pascal compiler description.
-
-   This grammar is not LL(1) !!  See the TODO lines at CaseStatement.
-
-   Pascal keywords in uppercase to easy identification.
-
-   Note that this Pascal description is an adaptation, not strict Pascal.  Some
-   of the differences are:
-
-   - Not input/output files at "PROGRAM".
-   - Not label and "GOTO" allowed.
-   - ASM..END for Z80 assembler added.
-
- *)
+// Z80-Pascal compiler description.
+//
+// This grammar is not LL(1) !!  See the TODO lines at CaseStatement.
+//
+// Pascal keywords in uppercase to easy identification.
+//
+// Note that this Pascal description is an adaptation, not strict Pascal.  Some
+// of the differences are:
+//
+// - Not input/output files at "PROGRAM".
+// - Not label and "GOTO" allowed.
+// - ASM..END for Z80 assembler added.
 
 IGNORE CASE
 
 CHARACTERS
-  eol       = CHR(13) .
+  eol       = CHR(13) . // Use also CHR(10) and CHR(13)CHR(10).
   letter    = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" .
   digit     = "0123456789" .
-  hexdigit  = digit + "ABCDEFabcdef" .
-  alfanum   = letter + digit .
-  firstiden = letter + "_" .
-  identchar = alfanum + "_" .
-  noQuote1  = ANY - "'" - eol .
+  hexdigit   = digit + "ABCDEFabcdef" .
+  noQuote   = ANY - "'" - eol .
 
 IGNORE CHR(9) .. CHR(13)
 
@@ -32,11 +27,11 @@ COMMENTS FROM "(*" TO "*)"
 COMMENTS FROM "{" TO "}"
 
 TOKENS
-  identifier  =  firstiden { identchar } .
-  integer     =  digit { digit } | digit { digit }  CONTEXT ("..") .
+  identifier  = ( letter | "_") { letter | "_" | digit } .
+  integer     = digit { digit } | digit { digit }  CONTEXT ("..") .
   hexinteger  =  "$" hexdigit { hexdigit } .
   real        =  digit { digit } "." digit { digit } .
-  string      = "'" { noQuote1 | "''" } "'" .
+  string      = "'" { noQuote | "''" } "'" .
 
 PRODUCTIONS
 
@@ -61,17 +56,17 @@ PRODUCTIONS
 
   UnitDefinitions  = [ "USES" IdentList ";" ] .
 
-(* -------------------------------------------------------------------- *)
+//////////////////////////////////////////////////////////////////////////
 
-  ConstDefinitions  = [ "CONST" ConstDef { ConstDef } ] .
+  ConstDefinitions = [ "CONST" ConstDef { ConstDef } ] .
 
-  ConstDef          = NewIdent "=" Constant ";" .
+  ConstDef         = Identifier "=" Constant ";" .
 
-  Constant          = [ "+" | "-" ] ( UnsignedNumber | ConstIdent ) | String .
+  Constant         = [ "+" | "-" ] ( UnsignedNumber | ConstIdent ) | String .
 
-  UnsignedNumber    = UnsignedInt | UnsignedReal .
+  UnsignedNumber   = UnsignedInt | UnsignedReal .
 
-(* -------------------------------------------------------------------- *)
+//////////////////////////////////////////////////////////////////////////
 
   TypeDefinitions = [ "TYPE" TypeDef { TypeDef } ] .
 
@@ -101,11 +96,13 @@ PRODUCTIONS
 
   FieldList       = [ IdentList ":" Type ] .
 
-(* -------------------------------------------------------------------- *)
+//////////////////////////////////////////////////////////////////////////
 
-  VarDeclarations = [ "VAR" { IdentList ":" Type ";" } ] .
+  VarDeclarations = [ "VAR" VarDecl { VarDecl } ] .
 
-(* -------------------------------------------------------------------- *)
+  VarDecl         = IdentList ":" Type ";" .
+
+//////////////////////////////////////////////////////////////////////////
 
   ProcDeclarations = ( ProcHeading | FuncHeading ) ";" Body ";" .
 
@@ -121,7 +118,7 @@ PRODUCTIONS
 
   FPSection        = [ "VAR" ] IdentList ":" Type .
 
-(* -------------------------------------------------------------------- *)
+//////////////////////////////////////////////////////////////////////////
 
   StatementPart     = CompoundStatement | ASMCompoundStatement .
 
@@ -175,7 +172,7 @@ PRODUCTIONS
 
   RecVarList        = Designator { "," Designator } .
 
-(* -------------------------------------------------------------------- *)
+//////////////////////////////////////////////////////////////////////////
 
   IntegerExpression = Expression .
 
@@ -211,7 +208,7 @@ PRODUCTIONS
 
   Member            = Expression [ ".." Expression ] .
 
-(* -------------------------------------------------------------------- *)
+//////////////////////////////////////////////////////////////////////////
 
 (* This is a simple Z80 Assembler parser.  Note that it allows illegal
    assembler instructions! *)
@@ -256,7 +253,7 @@ PRODUCTIONS
                          | "SP"
                          | "PC" .
 
-(* -------------------------------------------------------------------- *)
+//////////////////////////////////////////////////////////////////////////
 
   ConstIdent   = identifier .
 
